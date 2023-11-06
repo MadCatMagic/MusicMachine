@@ -70,12 +70,16 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +94,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -104,6 +109,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +124,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,7 +134,57 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="MusicMachine.cpp" />
+    <ClCompile Include="src\App\App.cpp" />
+    <ClCompile Include="src\Engine\Console.cpp" />
+    <ClCompile Include="src\Engine\Engine.cpp" />
+    <ClCompile Include="src\Engine\Input.cpp" />
+    <ClCompile Include="src\Engine\Mesh\Material.cpp" />
+    <ClCompile Include="src\Engine\Mesh\QuadRenderer.cpp" />
+    <ClCompile Include="src\Engine\Mesh\Shader.cpp" />
+    <ClCompile Include="src\Engine\Mesh\VertexArray.cpp" />
+    <ClCompile Include="src\Engine\Mesh\VertexBuffer.cpp" />
+    <ClCompile Include="src\Engine\PixelTexture2D.cpp" />
+    <ClCompile Include="src\Engine\Renderer.cpp" />
+    <ClCompile Include="src\Engine\SpriteRenderer.cpp" />
+    <ClCompile Include="src\Engine\Texture\Image.cpp" />
+    <ClCompile Include="src\Engine\Texture\ImageLoader.cpp" />
+    <ClCompile Include="src\Engine\Texture\RenderTexture.cpp" />
+    <ClCompile Include="src\Engine\Texture\Texture.cpp" />
+    <ClCompile Include="src\Engine\Texture\Texture2D.cpp" />
+    <ClCompile Include="src\Maths\Matrix4x4.cpp" />
+    <ClCompile Include="src\Maths\Quaternion.cpp" />
+    <ClCompile Include="src\Maths\Random.cpp" />
+    <ClCompile Include="src\Maths\Vector2.cpp" />
+    <ClCompile Include="src\Maths\Vector2i.cpp" />
+    <ClCompile Include="src\Maths\Vector3.cpp" />
+    <ClCompile Include="src\Maths\Vector3i.cpp" />
+    <ClCompile Include="src\Maths\Vector4.cpp" />
+    <ClCompile Include="src\Maths\Vector4i.cpp" />
+    <ClCompile Include="src\MusicMachine.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\App\App.h" />
+    <ClInclude Include="include\Engine.h" />
+    <ClInclude Include="include\Engine\Console.h" />
+    <ClInclude Include="include\Engine\Input.h" />
+    <ClInclude Include="include\Engine\Mesh\Material.h" />
+    <ClInclude Include="include\Engine\Mesh\QuadRenderer.h" />
+    <ClInclude Include="include\Engine\Mesh\Shader.h" />
+    <ClInclude Include="include\Engine\Mesh\VertexArray.h" />
+    <ClInclude Include="include\Engine\Mesh\VertexBuffer.h" />
+    <ClInclude Include="include\Engine\PixelTexture2D.h" />
+    <ClInclude Include="include\Engine\Renderer.h" />
+    <ClInclude Include="include\Engine\SpriteRenderer.h" />
+    <ClInclude Include="include\Engine\Texture.h" />
+    <ClInclude Include="include\Engine\Texture\Image.h" />
+    <ClInclude Include="include\Engine\Texture\ImageLoader.h" />
+    <ClInclude Include="include\Engine\Texture\RenderTexture.h" />
+    <ClInclude Include="include\Engine\Texture\Texture.h" />
+    <ClInclude Include="include\Engine\Texture\Texture2D.h" />
+    <ClInclude Include="include\Matrix.h" />
+    <ClInclude Include="include\Quaternion.h" />
+    <ClInclude Include="include\Random.h" />
+    <ClInclude Include="include\Vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
