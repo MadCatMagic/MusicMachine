@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MusicMachine", "MusicMachine.vcxproj", "{B795981E-D414-484B-9542-65F31C02BBDD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B795981E-D414-484B-9542-65F31C02BBDD}.Debug|x64.ActiveCfg = Debug|x64
+		{B795981E-D414-484B-9542-65F31C02BBDD}.Debug|x64.Build.0 = Debug|x64
+		{B795981E-D414-484B-9542-65F31C02BBDD}.Debug|x86.ActiveCfg = Debug|Win32
+		{B795981E-D414-484B-9542-65F31C02BBDD}.Debug|x86.Build.0 = Debug|Win32
+		{B795981E-D414-484B-9542-65F31C02BBDD}.Release|x64.ActiveCfg = Release|x64
+		{B795981E-D414-484B-9542-65F31C02BBDD}.Release|x64.Build.0 = Release|x64
+		{B795981E-D414-484B-9542-65F31C02BBDD}.Release|x86.ActiveCfg = Release|Win32
+		{B795981E-D414-484B-9542-65F31C02BBDD}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B2727CB2-A5AF-4F6C-A9F0-030E422641ED}
+	EndGlobalSection
+EndGlobal
