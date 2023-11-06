@@ -9,10 +9,12 @@
 class Canvas
 {
 public:
-	Canvas();
+	Canvas(const v2& screensize);
 
-	v2 CanvasToScreen(const v2& pos);
-	v2 ScreenToCanvas(const v2& pos);
+	v2 CanvasToScreen(const v2& pos) const;
+	v2 ScreenToCanvas(const v2& pos) const;
+
+	v2 screenSize = v2::one;
 	
 private:
 	v2 position = v2::zero;
