@@ -164,6 +164,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App\App.h" />
+    <ClInclude Include="include\App\Canvas.h" />
+    <ClInclude Include="include\App\Node.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Engine\Console.h" />
     <ClInclude Include="include\Engine\Input.h" />

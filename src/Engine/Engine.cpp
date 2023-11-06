@@ -93,6 +93,7 @@ void Engine::Initialize()
     ImGui::CreateContext();
     io = &ImGui::GetIO();
     io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     Input::EnableInput(window, io);
 
@@ -123,7 +124,7 @@ void Engine::Update()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     
-    app.UI();
+    app.UI(io);
     console.GUI();
     ImGui::ShowDemoWindow();
 

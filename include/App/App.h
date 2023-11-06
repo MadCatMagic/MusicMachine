@@ -7,7 +7,7 @@ public:
 	void Initialize();
 
 	void Update();
-	void UI();
+	void UI(struct ImGuiIO* io);
 
 	void Release();
 

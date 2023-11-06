@@ -7,6 +7,8 @@ typedef void (*ConsoleCommandCallback)(std::vector<std::string> arguments);
 class Console
 {
 public:
+	friend class App;
+	
 	Console();
 
 	static void Log(const std::string& data);

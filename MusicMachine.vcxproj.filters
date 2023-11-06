@@ -164,5 +164,11 @@
     <ClInclude Include="include\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\App\Canvas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\Node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
