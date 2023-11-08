@@ -25,6 +25,13 @@ v2::v2(v2i i)
 	this->y = (float)i.y;
 }
 
+#include "imgui.h"
+v2::v2(const ImVec2& v)
+{
+	x = v.x;
+	y = v.y;
+}
+
 v2 v2::Scale(const v2& a, const v2& b)
 {
 	return v2(a.x * b.x, a.y * b.y);

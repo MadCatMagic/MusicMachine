@@ -17,6 +17,7 @@ struct v2
 	v2(float a);
 	v2(float x, float y);
 	v2(v2i i);
+	v2(const struct ImVec2& v);
 
 	static v2 Scale(const v2& a, const v2& b);
 

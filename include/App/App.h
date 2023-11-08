@@ -1,4 +1,5 @@
 #pragma once
+#include "Canvas.h"
 
 class App
 {
@@ -12,5 +13,5 @@ public:
 	void Release();
 
 private:
-
+	Canvas c;
 };

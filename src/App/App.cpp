@@ -31,6 +31,8 @@ void App::UI(struct ImGuiIO* io)
 
 
 	ImGui::End();
+
+    c.CreateWindow();
 }
 
 void App::Release()

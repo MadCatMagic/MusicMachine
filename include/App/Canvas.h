@@ -6,10 +6,14 @@
 // as well as all of the maths for scaling and moving around and such
 // but all node interactions happen elsewhere
 
+// CreateWindow renders everything, including all the nodes that are passed to it.
+
 class Canvas
 {
 public:
-	Canvas(const v2& screensize);
+	Canvas(float screensize = 5.0f);
+
+	void CreateWindow();
 
 	v2 CanvasToScreen(const v2& pos) const;
 	v2 ScreenToCanvas(const v2& pos) const;
@@ -17,6 +21,7 @@ public:
 	v2 screenSize = v2::one;
 	
 private:
+	int scalingLevel = 7;
 	v2 position = v2::zero;
 	v2 scale = v2::one;
 };
