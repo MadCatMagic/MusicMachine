@@ -32,7 +32,10 @@ void App::UI(struct ImGuiIO* io)
 
 	ImGui::End();
 
-    c.CreateWindow();
+    NodeNetwork n;
+    n.AddNodeFromName("Node");
+
+    c.CreateWindow(&n);
 }
 
 void App::Release()

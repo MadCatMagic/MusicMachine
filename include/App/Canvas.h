@@ -13,12 +13,15 @@ class Canvas
 public:
 	inline Canvas() {}
 
-	void CreateWindow();
+	void CreateWindow(class NodeNetwork* nodes);
 
 	v2 ScreenToCanvas(const v2& pos) const;
 	v2 CanvasToScreen(const v2& pos) const;
 	v2 CanvasToPosition(const v2& pos) const;
 	v2 PositionToCanvas(const v2& pos) const;
+
+	// shortcut
+	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
 	
 private:
 	int scalingLevel = 7;

@@ -134,6 +134,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Node.cpp" />
+    <ClCompile Include="src\App\NodeNetwork.cpp" />
     <ClCompile Include="src\App\Canvas.cpp" />
     <ClCompile Include="src\App\App.cpp" />
     <ClCompile Include="src\Engine\Console.cpp" />
@@ -167,6 +169,7 @@
     <ClInclude Include="include\App\App.h" />
     <ClInclude Include="include\App\Canvas.h" />
     <ClInclude Include="include\App\Node.h" />
+    <ClInclude Include="include\App\NodeNetwork.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Engine\Console.h" />
     <ClInclude Include="include\Engine\Input.h" />

@@ -1,9 +1,10 @@
 #include "App/Canvas.h"
+#include "App/NodeNetwork.h"
 #include "imgui.h"
 
 
 // a lot of this code is taken from the ImGui canvas example
-void Canvas::CreateWindow()
+void Canvas::CreateWindow(NodeNetwork* nodes)
 {
     ImGui::Begin("Canvas");
     ImGui::Text("Mouse Left: drag to add lines,\nMouse Right: drag to scroll, click for context menu.");
@@ -20,9 +21,9 @@ void Canvas::CreateWindow()
 
     // Draw border and background color
     ImGuiIO& io = ImGui::GetIO();
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->AddRectFilled(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), IM_COL32(50, 50, 50, 255));
-    draw_list->AddRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), IM_COL32(255, 255, 255, 255));
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    drawList->AddRectFilled(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), IM_COL32(50, 50, 50, 255));
+    drawList->AddRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), IM_COL32(255, 255, 255, 255));
 
     // This will catch our interactions
     ImGui::InvisibleButton("canvas", canvasPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
@@ -31,7 +32,7 @@ void Canvas::CreateWindow()
     const v2 mouseCanvasPos = ScreenToCanvas((v2)io.MousePos);
     const v2 mousePos = CanvasToPosition(mouseCanvasPos);
 
-    // Pan (we use a zero mouse threshold when there's no context menu)
+    // Pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
     {
         position.x += io.MouseDelta.x * scale.x;
@@ -69,13 +70,15 @@ void Canvas::CreateWindow()
     }*/
 
     // Draw grid + all lines in the canvas
-    draw_list->PushClipRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), true);
+    drawList->PushClipRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), true);
     const v2 gridStep = v2::Reciprocal(scale) * 32.0f;
     for (float x = fmodf(position.x / scale.x, gridStep.x); x < canvasPixelSize.x; x += gridStep.x)
-        draw_list->AddLine(ImVec2(canvasPixelPos.x + x, canvasPixelPos.y), ImVec2(canvasPixelPos.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
+        drawList->AddLine(ImVec2(canvasPixelPos.x + x, canvasPixelPos.y), ImVec2(canvasPixelPos.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
     for (float y = fmodf(position.y / scale.y, gridStep.x); y < canvasPixelSize.y; y += gridStep.x)
-        draw_list->AddLine(ImVec2(canvasPixelPos.x, canvasPixelPos.y + y), ImVec2(canvasBottomRight.x, canvasPixelPos.y + y), IM_COL32(200, 200, 200, 40));
-    draw_list->PopClipRect();
+        drawList->AddLine(ImVec2(canvasPixelPos.x, canvasPixelPos.y + y), ImVec2(canvasBottomRight.x, canvasPixelPos.y + y), IM_COL32(200, 200, 200, 40));
+
+    nodes->Draw(drawList, this);
+    drawList->PopClipRect();
 
     ImGui::End();
 }
@@ -87,7 +90,7 @@ v2 Canvas::ScreenToCanvas(const v2& pos) const
 
 v2 Canvas::CanvasToScreen(const v2& pos) const
 {
-    return pos + canvasPixelPos;
+    return canvasPixelPos - pos;
 }
 
 v2 Canvas::CanvasToPosition(const v2& pos) const
@@ -97,5 +100,5 @@ v2 Canvas::CanvasToPosition(const v2& pos) const
 
 v2 Canvas::PositionToCanvas(const v2& pos) const
 {
-    return v2::Scale(pos - position, v2::Reciprocal(pos));
+    return v2::Scale(pos - position, v2::Reciprocal(scale));
 }
