@@ -14,5 +14,6 @@ public:
 	void Release();
 
 private:
+	NodeNetwork* n;
 	Canvas c;
 };

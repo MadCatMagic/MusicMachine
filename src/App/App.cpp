@@ -5,6 +5,8 @@
 
 void App::Initialize()
 {
+    n = new NodeNetwork();
+    n->AddNodeFromName("Node");
 }
 
 void App::Update()
@@ -32,12 +34,11 @@ void App::UI(struct ImGuiIO* io)
 
 	ImGui::End();
 
-    NodeNetwork n;
-    n.AddNodeFromName("Node");
-
-    c.CreateWindow(&n);
+    c.CreateWindow(n);
 }
 
 void App::Release()
 {
+    if (n != nullptr)
+        delete n;
 }

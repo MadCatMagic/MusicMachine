@@ -28,6 +28,8 @@ struct v2
 	static float Distance(const v2& a, const v2& b);
 	static v2 Normalize(const v2& a);
 	static v2 Reciprocal(const v2& a);
+
+	bool InBox(const v2& bottomLeft, const v2& topRight) const;
 	
 	v2 operator+(const v2& a) const;
 	v2 operator-() const;

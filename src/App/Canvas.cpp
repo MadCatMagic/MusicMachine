@@ -2,7 +2,7 @@
 #include "App/NodeNetwork.h"
 #include "imgui.h"
 
-
+#include "Engine/Console.h"
 // a lot of this code is taken from the ImGui canvas example
 void Canvas::CreateWindow(NodeNetwork* nodes)
 {
@@ -32,11 +32,40 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     const v2 mouseCanvasPos = ScreenToCanvas((v2)io.MousePos);
     const v2 mousePos = CanvasToPosition(mouseCanvasPos);
 
+    static bool somethingSelected = false;
+    static Node* selectedNode = nullptr;
+
     // Pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
     {
         position.x += io.MouseDelta.x * scale.x;
         position.y += io.MouseDelta.y * scale.y;
+    }
+    // select thing to drag around
+    else if (isActive && !somethingSelected && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+    {
+        Node* node = nodes->GetNodeAtPosition(mousePos);
+        if (node != nullptr)
+        {
+            somethingSelected = true;
+            selectedNode = node;
+        }
+    }
+
+    if (somethingSelected)
+    {
+        // move thing being dragged
+        if (isActive)
+        {
+            selectedNode->position.x -= io.MouseDelta.x * scale.x;
+            selectedNode->position.y -= io.MouseDelta.y * scale.y;
+        }
+        // else deselect thing being dragged
+        else
+        {
+            somethingSelected = false;
+            selectedNode = nullptr;
+        }
     }
 
     // taken from LevelEditor\...\Editor.cpp
@@ -83,22 +112,22 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     ImGui::End();
 }
 
-v2 Canvas::ScreenToCanvas(const v2& pos) const
-{
-    return pos - canvasPixelPos;
-}
-
-v2 Canvas::CanvasToScreen(const v2& pos) const
+v2 Canvas::ScreenToCanvas(const v2& pos) const // c = s + p
 {
     return canvasPixelPos - pos;
 }
 
-v2 Canvas::CanvasToPosition(const v2& pos) const
+v2 Canvas::CanvasToScreen(const v2& pos) const // s = c - p
+{
+    return canvasPixelPos - pos;
+}
+
+v2 Canvas::CanvasToPosition(const v2& pos) const // position = canvas * scale + offset
 {
     return v2::Scale(pos, scale) + position;
 }
 
-v2 Canvas::PositionToCanvas(const v2& pos) const
+v2 Canvas::PositionToCanvas(const v2& pos) const // canvas = (canvas - offset) / scale
 {
     return v2::Scale(pos - position, v2::Reciprocal(scale));
 }

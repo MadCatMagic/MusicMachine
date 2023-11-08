@@ -11,6 +11,8 @@ struct Node
 {
 	friend class NodeNetwork;
 
+	v2 position = v2::zero;
+
 protected:
 	virtual inline void InitializeUI() { }
 
@@ -49,6 +51,4 @@ private:
 	
 	void Draw(class NodeNetwork* network);
 	v2 GetBounds() const;
-
-	v2 position = v2::zero;
 };

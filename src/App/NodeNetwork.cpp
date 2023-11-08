@@ -22,6 +22,17 @@ void NodeNetwork::AddNodeFromName(const std::string& type)
 		nodes.push_back(n);
 }
 
+Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
+{
+	if (currentSelection == nullptr)
+	{
+		for (Node* node : nodes)
+			if (pos.InBox(node->position, node->position + node->GetBounds()))
+				return node;
+	}
+	return nullptr;
+}
+
 void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 {
 	currentList = drawList;

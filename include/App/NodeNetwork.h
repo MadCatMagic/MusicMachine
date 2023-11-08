@@ -12,6 +12,8 @@ public:
 
 	void AddNodeFromName(const std::string& type);
 
+	Node* GetNodeAtPosition(const v2& pos, Node* currentSelection = nullptr);
+
 private:
 	ImDrawList* currentList = nullptr;
 
