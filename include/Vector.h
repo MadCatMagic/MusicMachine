@@ -19,6 +19,8 @@ struct v2
 	v2(v2i i);
 	v2(const struct ImVec2& v);
 
+	ImVec2 ImGui() const;
+
 	static v2 Scale(const v2& a, const v2& b);
 
 	static float Dot(const v2& a, const v2& b);

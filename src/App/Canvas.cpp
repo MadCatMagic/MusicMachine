@@ -1,10 +1,6 @@
 #include "App/Canvas.h"
 #include "imgui.h"
 
-Canvas::Canvas(float screensize)
-    : screenSize(v2(screensize, screensize))
-{
-}
 
 // a lot of this code is taken from the ImGui canvas example
 void Canvas::CreateWindow()
@@ -16,24 +12,24 @@ void Canvas::CreateWindow()
     // Using InvisibleButton() as a convenience 
     // 1) it will advance the layout cursor and 
     // 2) allows us to use IsItemHovered()/IsItemActive()
-    ImVec2 canvasTopLeft = ImGui::GetCursorScreenPos();
-    ImVec2 canvasSize = ImGui::GetContentRegionAvail();
-    if (canvasSize.x < 50.0f) canvasSize.x = 50.0f;
-    if (canvasSize.y < 50.0f) canvasSize.y = 50.0f;
-    ImVec2 canvasBottomRight = ImVec2(canvasTopLeft.x + canvasSize.x, canvasTopLeft.y + canvasSize.y);
+    canvasPixelPos = (v2)ImGui::GetCursorScreenPos();
+    canvasPixelSize = ImGui::GetContentRegionAvail();
+    if (canvasPixelSize.x < 50.0f) canvasPixelSize.x = 50.0f;
+    if (canvasPixelSize.y < 50.0f) canvasPixelSize.y = 50.0f;
+    v2 canvasBottomRight = canvasPixelPos + canvasPixelSize;
 
     // Draw border and background color
     ImGuiIO& io = ImGui::GetIO();
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->AddRectFilled(canvasTopLeft, canvasBottomRight, IM_COL32(50, 50, 50, 255));
-    draw_list->AddRect(canvasTopLeft, canvasBottomRight, IM_COL32(255, 255, 255, 255));
+    draw_list->AddRectFilled(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), IM_COL32(50, 50, 50, 255));
+    draw_list->AddRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), IM_COL32(255, 255, 255, 255));
 
     // This will catch our interactions
-    ImGui::InvisibleButton("canvas", canvasSize, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
+    ImGui::InvisibleButton("canvas", canvasPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
     const bool isHovered = ImGui::IsItemHovered(); // Hovered
     const bool isActive = ImGui::IsItemActive();   // Held
-    const v2 canvasPosition = (v2)io.MousePos - (v2)canvasTopLeft;
-    const v2 mouseCanvasPos = v2::Scale(canvasPosition, scale) + position;
+    const v2 mouseCanvasPos = ScreenToCanvas((v2)io.MousePos);
+    const v2 mousePos = CanvasToPosition(mouseCanvasPos);
 
     // Pan (we use a zero mouse threshold when there's no context menu)
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
@@ -55,7 +51,7 @@ void Canvas::CreateWindow()
     scale = z;
     // position + (mousePosBefore = canvasPos * scaleBefore + position) - (mousePosAfter = canvasPos * scaleAfter + position)
     // position + canvasPos * (scaleBefore - scaleAfter)
-    position += v2::Scale(canvasPosition, prevScale - scale);
+    position += v2::Scale(mouseCanvasPos, scale - prevScale);
 
     /*
     // Context menu (under default mouse threshold)
@@ -73,26 +69,33 @@ void Canvas::CreateWindow()
     }*/
 
     // Draw grid + all lines in the canvas
-    draw_list->PushClipRect(canvasTopLeft, canvasBottomRight, true);
+    draw_list->PushClipRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), true);
     const v2 gridStep = v2::Reciprocal(scale) * 32.0f;
-    for (float x = fmodf(position.x / scale.x, gridStep.x); x < canvasSize.x; x += gridStep.x)
-        draw_list->AddLine(ImVec2(canvasTopLeft.x + x, canvasTopLeft.y), ImVec2(canvasTopLeft.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
-    for (float y = fmodf(position.y / scale.y, gridStep.x); y < canvasSize.y; y += gridStep.x)
-        draw_list->AddLine(ImVec2(canvasTopLeft.x, canvasTopLeft.y + y), ImVec2(canvasBottomRight.x, canvasTopLeft.y + y), IM_COL32(200, 200, 200, 40));
+    for (float x = fmodf(position.x / scale.x, gridStep.x); x < canvasPixelSize.x; x += gridStep.x)
+        draw_list->AddLine(ImVec2(canvasPixelPos.x + x, canvasPixelPos.y), ImVec2(canvasPixelPos.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
+    for (float y = fmodf(position.y / scale.y, gridStep.x); y < canvasPixelSize.y; y += gridStep.x)
+        draw_list->AddLine(ImVec2(canvasPixelPos.x, canvasPixelPos.y + y), ImVec2(canvasBottomRight.x, canvasPixelPos.y + y), IM_COL32(200, 200, 200, 40));
     draw_list->PopClipRect();
 
     ImGui::End();
 }
 
-v2 Canvas::CanvasToScreen(const v2& pos) const
-{
-    // first translate it to 0,0 and then scale to fit the screen
-    v2 translated = pos - position;
-    v2 scaled = v2::Scale(translated, scale);
-    return v2(); // todo
-}
-
 v2 Canvas::ScreenToCanvas(const v2& pos) const
 {
-    return v2();
+    return pos - canvasPixelPos;
+}
+
+v2 Canvas::CanvasToScreen(const v2& pos) const
+{
+    return pos + canvasPixelPos;
+}
+
+v2 Canvas::CanvasToPosition(const v2& pos) const
+{
+    return v2::Scale(pos, scale) + position;
+}
+
+v2 Canvas::PositionToCanvas(const v2& pos) const
+{
+    return v2::Scale(pos - position, v2::Reciprocal(pos));
 }

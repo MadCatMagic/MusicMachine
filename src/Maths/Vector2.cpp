@@ -32,6 +32,11 @@ v2::v2(const ImVec2& v)
 	y = v.y;
 }
 
+ImVec2 v2::ImGui() const
+{
+	return ImVec2(x, y);
+}
+
 v2 v2::Scale(const v2& a, const v2& b)
 {
 	return v2(a.x * b.x, a.y * b.y);

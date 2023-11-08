@@ -11,17 +11,20 @@
 class Canvas
 {
 public:
-	Canvas(float screensize = 5.0f);
+	inline Canvas() {}
 
 	void CreateWindow();
 
-	v2 CanvasToScreen(const v2& pos) const;
 	v2 ScreenToCanvas(const v2& pos) const;
-
-	v2 screenSize = v2::one;
+	v2 CanvasToScreen(const v2& pos) const;
+	v2 CanvasToPosition(const v2& pos) const;
+	v2 PositionToCanvas(const v2& pos) const;
 	
 private:
 	int scalingLevel = 7;
 	v2 position = v2::zero;
 	v2 scale = v2::one;
+
+	v2 canvasPixelPos;
+	v2 canvasPixelSize;
 };
