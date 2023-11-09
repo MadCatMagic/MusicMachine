@@ -24,7 +24,7 @@ public:
 	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
 	
 private:
-	int scalingLevel = 7;
+	int scalingLevel = 15;
 	v2 position = v2::zero;
 	v2 scale = v2::one;
 

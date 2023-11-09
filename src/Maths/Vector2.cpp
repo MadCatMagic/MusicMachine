@@ -72,10 +72,15 @@ v2 v2::Reciprocal(const v2& a)
 	return v2(1.0f / a.x, 1.0f / a.y);
 }
 
-bool v2::InBox(const v2& bottomLeft, const v2& topRight) const
+bool v2::inBox(const v2& bottomLeft, const v2& topRight) const
 {
 	return bottomLeft.x <= x && bottomLeft.y <= y
 		&& topRight.x >= x && topRight.y >= y;
+}
+
+v2 v2::reciprocal() const
+{
+	return v2::Reciprocal(*this);
 }
 
 v2 v2::operator+(const v2& a) const

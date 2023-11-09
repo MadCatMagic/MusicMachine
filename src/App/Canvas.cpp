@@ -71,17 +71,17 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     // taken from LevelEditor\...\Editor.cpp
     if (isHovered && io.MouseWheel != 0.0f)
         scalingLevel -= (int)io.MouseWheel;
-    // clamp(zoomLevel, 0, 15) inclusive
-    scalingLevel = scalingLevel >= 0 ? (scalingLevel < 16 ? scalingLevel : 15) : 0;
-    // 1.1 ^ -7
-    float z = 0.51315811823f;
+    // clamp(zoomLevel, 0, 31) inclusive
+    scalingLevel = scalingLevel >= 0 ? (scalingLevel < 32 ? scalingLevel : 31) : 0;
+    // 1.1 ^ -15
+    float z = 0.23939204f;
     for (int i = 0; i < scalingLevel; i++)
         z *= 1.1f;
     v2 prevScale = scale;
     scale = z;
     // position + (mousePosBefore = canvasPos * scaleBefore + position) - (mousePosAfter = canvasPos * scaleAfter + position)
     // position + canvasPos * (scaleBefore - scaleAfter)
-    position += v2::Scale(mouseCanvasPos, scale - prevScale);
+    position += v2::Scale(mouseCanvasPos, prevScale - scale);
 
     /*
     // Context menu (under default mouse threshold)
@@ -100,12 +100,26 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
 
     // Draw grid + all lines in the canvas
     drawList->PushClipRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), true);
-    const v2 gridStep = v2::Reciprocal(scale) * 32.0f;
+    const v2 gridStep = scale.reciprocal() * 16.0f;
+    const v2 gridStepSmall = scale.reciprocal() * 4.0f;
     for (float x = fmodf(position.x / scale.x, gridStep.x); x < canvasPixelSize.x; x += gridStep.x)
+    {
         drawList->AddLine(ImVec2(canvasPixelPos.x + x, canvasPixelPos.y), ImVec2(canvasPixelPos.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
+        if (scalingLevel < 18)
+            for (int dx = 1; dx < 4; dx++)
+                drawList->AddLine(
+                    ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasPixelPos.y), 
+                    ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasBottomRight.y), IM_COL32(200, 200, 200, 20));
+    }
     for (float y = fmodf(position.y / scale.y, gridStep.x); y < canvasPixelSize.y; y += gridStep.x)
+    {
         drawList->AddLine(ImVec2(canvasPixelPos.x, canvasPixelPos.y + y), ImVec2(canvasBottomRight.x, canvasPixelPos.y + y), IM_COL32(200, 200, 200, 40));
-
+        if (scalingLevel < 18)
+            for (int dy = 1; dy < 4; dy++)
+                drawList->AddLine(
+                    ImVec2(canvasPixelPos.x, canvasPixelPos.y + y + dy * gridStepSmall.y),
+                    ImVec2(canvasBottomRight.x, canvasPixelPos.y + y + dy * gridStepSmall.y), IM_COL32(200, 200, 200, 20));
+    }
     nodes->Draw(drawList, this);
     drawList->PopClipRect();
 

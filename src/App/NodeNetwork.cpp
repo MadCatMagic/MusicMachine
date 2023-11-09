@@ -27,7 +27,7 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
 	if (currentSelection == nullptr)
 	{
 		for (Node* node : nodes)
-			if (pos.InBox(node->position, node->position + node->GetBounds()))
+			if (pos.inBox(node->position, node->position + node->GetBounds()))
 				return node;
 	}
 	return nullptr;
