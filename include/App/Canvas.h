@@ -20,6 +20,8 @@ public:
 	v2 CanvasToPosition(const v2& pos) const;
 	v2 PositionToCanvas(const v2& pos) const;
 
+	inline v2 GetSF() const { return scale; }
+
 	// shortcut
 	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
 	

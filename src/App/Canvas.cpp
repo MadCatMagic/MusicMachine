@@ -99,7 +99,7 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     }*/
 
     // Draw grid + all lines in the canvas
-    drawList->PushClipRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), true);
+    drawList->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
     const v2 gridStep = scale.reciprocal() * 16.0f;
     const v2 gridStepSmall = scale.reciprocal() * 4.0f;
     for (float x = fmodf(position.x / scale.x, gridStep.x); x < canvasPixelSize.x; x += gridStep.x)

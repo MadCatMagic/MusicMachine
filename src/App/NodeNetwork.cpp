@@ -27,7 +27,7 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
 	if (currentSelection == nullptr)
 	{
 		for (Node* node : nodes)
-			if (pos.inBox(node->position, node->position + node->GetBounds()))
+			if (pos.inBox(node->position, node->position + node->size))
 				return node;
 	}
 	return nullptr;
@@ -38,17 +38,25 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 	currentList = drawList;
 	for (Node* node : nodes)
 	{
+		// make sure to add the correct node connections to the buffer
+		node->ResetTouchedStatus();
+		node->UI();
+		node->CheckTouchedStatus();
+		// automatically sets the size
+		node->Draw(this);
+
 		// draw node body
 		v2 topLeft = canvas->ptcts(node->position);
-		v2 bottomRight = canvas->ptcts(node->position + node->GetBounds());
+		v2 bottomRight = canvas->ptcts(node->position + node->size);
 		
+		// rounded to 4 pixels - a single grid tile.
 		drawList->AddRectFilled(
 			bottomRight.ImGui(),
 			topLeft.ImGui(),
-			ImColor(120, 120, 120, 255)
+			ImColor(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg)),
+			4.0f / canvas->GetSF().x,
+			ImDrawFlags_RoundCornersAll
 		);
-
-		node->Draw(this);
 	}
 
 	currentList = nullptr;

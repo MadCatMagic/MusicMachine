@@ -12,11 +12,15 @@ struct Node
 	friend class NodeNetwork;
 
 	v2 position = v2::zero;
+	// please don't set me! thanks xx
+	v2 size = v2::zero;
 
 protected:
-	virtual inline void InitializeUI() { }
+	virtual void Init();
+	virtual void UI();
 
 	std::string name = "Node";
+	v2 minSpace = v2(20, 20);
 
 	// to be called in InitializeUI()
 	bool IntInput(const std::string& name, int* target);
@@ -30,15 +34,6 @@ private:
 		Int32, Float
 	};
 
-	struct NodeInput
-	{
-		std::string name;
-		void* target;
-		NodeType type;
-
-		struct NodeOutput* source = nullptr;
-	};
-
 	struct NodeOutput
 	{
 		std::string name;
@@ -46,9 +41,23 @@ private:
 		NodeType type;
 	};
 
+	struct NodeInput
+	{
+		std::string name;
+		void* target;
+		NodeType type;
+
+		Node* source = nullptr;
+		std::string sourceName = "";
+		bool touchedThisFrame = false;
+	};
+
 	std::vector<NodeInput> inputs;
 	std::vector<NodeOutput> outputs;
+
+	void TransferInput(const NodeInput& i);
+	void ResetTouchedStatus();
+	void CheckTouchedStatus();
 	
 	void Draw(class NodeNetwork* network);
-	v2 GetBounds() const;
 };
