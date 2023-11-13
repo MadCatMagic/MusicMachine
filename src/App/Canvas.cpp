@@ -56,8 +56,8 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
         // move thing being dragged
         if (isActive)
         {
-            selectedNode->position.x -= io.MouseDelta.x * scale.x;
-            selectedNode->position.y -= io.MouseDelta.y * scale.y;
+            selectedNode->position.x += io.MouseDelta.x * scale.x;
+            selectedNode->position.y += io.MouseDelta.y * scale.y;
         }
         // else deselect thing being dragged
         else
@@ -140,12 +140,12 @@ v2 Canvas::CanvasToScreen(const v2& pos) const // s = c - p
     return canvasPixelPos - pos;
 }
 
-v2 Canvas::CanvasToPosition(const v2& pos) const // position = canvas * scale + offset
+v2 Canvas::CanvasToPosition(const v2& pos) const // position = offset - canvas * scale
 {
-    return v2::Scale(pos, scale) - position;
+    return position - v2::Scale(pos, scale);
 }
 
-v2 Canvas::PositionToCanvas(const v2& pos) const // canvas = (canvas - offset) / scale
+v2 Canvas::PositionToCanvas(const v2& pos) const // canvas = (offset - position) / scale
 {
     return v2::Scale(position - pos, v2::Reciprocal(scale));
 }
