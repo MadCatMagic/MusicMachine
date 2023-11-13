@@ -69,34 +69,28 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
 
     // taken from LevelEditor\...\Editor.cpp
     if (isHovered && io.MouseWheel != 0.0f)
+    {
         scalingLevel -= (int)io.MouseWheel;
-    // clamp(zoomLevel, 0, 31) inclusive
-    scalingLevel = scalingLevel >= 0 ? (scalingLevel < 32 ? scalingLevel : 31) : 0;
-    // 1.1 ^ -15
-    float z = MIN_SCALE;
-    for (int i = 0; i < scalingLevel; i++)
-        z *= 1.1f;
-    v2 prevScale = scale;
-    scale = z;
-    // position + (mousePosBefore = canvasPos * scaleBefore + position) - (mousePosAfter = canvasPos * scaleAfter + position)
-    // position + canvasPos * (scaleBefore - scaleAfter)
-    // somehow it has to be negative... I hate you linear algebra!!!
-    position -= v2::Scale(mouseCanvasPos, prevScale - scale);
+        // clamp(zoomLevel, 0, 31) inclusive
+        scalingLevel = scalingLevel >= 0 ? (scalingLevel < NUM_SCALING_LEVELS ? scalingLevel : NUM_SCALING_LEVELS - 1) : 0;
+        // 1.1 ^ -15
+        v2 prevScale = scale;
+        scale = GetSFFromScalingLevel(scalingLevel);
+        // position + (mousePosBefore = canvasPos * scaleBefore + position) - (mousePosAfter = canvasPos * scaleAfter + position)
+        // position + canvasPos * (scaleBefore - scaleAfter)
+        // somehow it has to be negative... I hate you linear algebra!!!
+        position -= v2::Scale(mouseCanvasPos, prevScale - scale);
+    }
 
-    /*
     // Context menu (under default mouse threshold)
     ImVec2 drag_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
     if (drag_delta.x == 0.0f && drag_delta.y == 0.0f)
         ImGui::OpenPopupOnItemClick("context", ImGuiPopupFlags_MouseButtonRight);
     if (ImGui::BeginPopup("context"))
     {
-        if (adding_line)
-            points.resize(points.size() - 2);
-        adding_line = false;
-        if (ImGui::MenuItem("Remove one", NULL, false, points.Size > 0)) { points.resize(points.size() - 2); }
-        if (ImGui::MenuItem("Remove all", NULL, false, points.Size > 0)) { points.clear(); }
+        nodes->DrawContextMenu();
         ImGui::EndPopup();
-    }*/
+    }
 
     // Draw grid + all lines in the canvas
     drawList->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
@@ -105,7 +99,7 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     for (float x = fmodf(-position.x / scale.x, gridStep.x); x < canvasPixelSize.x; x += gridStep.x)
     {
         drawList->AddLine(ImVec2(canvasPixelPos.x + x, canvasPixelPos.y), ImVec2(canvasPixelPos.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
-        if (scalingLevel < 18)
+        if (scalingLevel < 15)
             for (int dx = 1; dx < 4; dx++)
                 drawList->AddLine(
                     ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasPixelPos.y), 
@@ -114,16 +108,26 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     for (float y = fmodf(-position.y / scale.y, gridStep.x); y < canvasPixelSize.y; y += gridStep.x)
     {
         drawList->AddLine(ImVec2(canvasPixelPos.x, canvasPixelPos.y + y), ImVec2(canvasBottomRight.x, canvasPixelPos.y + y), IM_COL32(200, 200, 200, 40));
-        if (scalingLevel < 18)
+        if (scalingLevel < 15)
             for (int dy = 1; dy < 4; dy++)
                 drawList->AddLine(
                     ImVec2(canvasPixelPos.x, canvasPixelPos.y + y + dy * gridStepSmall.y),
                     ImVec2(canvasBottomRight.x, canvasPixelPos.y + y + dy * gridStepSmall.y), IM_COL32(200, 200, 200, 20));
     }
+    ImGui::PushFont(textLODs[scalingLevel]);
     nodes->Draw(drawList, this);
+    ImGui::PopFont();
     drawList->PopClipRect();
 
     ImGui::End();
+}
+
+float Canvas::GetSFFromScalingLevel(int scaling)
+{
+    float z = MIN_SCALE;
+    for (int i = 0; i < scaling; i++)
+        z *= 1.1f;
+    return z;
 }
 
 v2 Canvas::ScreenToCanvas(const v2& pos) const // c = s + p
@@ -148,5 +152,9 @@ v2 Canvas::PositionToCanvas(const v2& pos) const // canvas = (canvas - offset) /
 
 void Canvas::GenerateAllTextLODs()
 {
-    // todo
+    // Init
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontDefault();
+    for (int i = 0; i < NUM_SCALING_LEVELS; i++)
+        textLODs[i] = io.Fonts->AddFontFromFileTTF("res/fonts/Cousine-Regular.ttf", 12.0f / GetSFFromScalingLevel(i));
 }

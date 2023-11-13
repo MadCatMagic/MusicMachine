@@ -89,10 +89,13 @@ void Node::Draw(NodeNetwork* network)
 {
 	v2 cursor = position;
 	cursor.y += minSpace.y;
+	float maxXOff = 0.0f;
 	for (const NodeInput& input : inputs)
 	{
-		cursor.y += 12.0f;
-		network->DrawInput(cursor, input.name, input.type);
-		cursor.y += 12.0f;
+		cursor.y += 8.0f;
+		maxXOff = std::max(network->DrawInput(cursor, input.name, input.type), maxXOff);
+		cursor.y += 8.0f;
 	}
+	maxXOff = std::max(minSpace.x, maxXOff);
+	size = v2(maxXOff, minSpace.y + inputs.size() * 16.0f);
 }

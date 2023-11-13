@@ -7,6 +7,7 @@ void App::Initialize()
 {
     n = new NodeNetwork();
     n->AddNodeFromName("Node");
+    c.GenerateAllTextLODs();
 }
 
 void App::Update()

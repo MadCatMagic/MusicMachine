@@ -7,6 +7,8 @@
 // but all node interactions happen elsewhere
 
 // CreateWindow renders everything, including all the nodes that are passed to it.
+#define NUM_SCALING_LEVELS 32
+#define MIN_SCALE 0.23939204f
 
 class Canvas
 {
@@ -21,12 +23,16 @@ public:
 	v2 PositionToCanvas(const v2& pos) const;
 
 	inline v2 GetSF() const { return scale; }
+	float GetSFFromScalingLevel(int scaling);
 
 	// shortcut
 	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
+
+	void GenerateAllTextLODs();
 	
 private:
-	void GenerateAllTextLODs();
+	// text stuff
+	struct ImFont* textLODs[NUM_SCALING_LEVELS]{};
 
 	int scalingLevel = 15;
 	v2 position = v2::zero;
@@ -34,6 +40,4 @@ private:
 
 	v2 canvasPixelPos;
 	v2 canvasPixelSize;
-
-	const float MIN_SCALE = 0.23939204f;
 };
