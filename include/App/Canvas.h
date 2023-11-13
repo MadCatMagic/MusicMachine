@@ -26,10 +26,14 @@ public:
 	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
 	
 private:
+	void GenerateAllTextLODs();
+
 	int scalingLevel = 15;
 	v2 position = v2::zero;
 	v2 scale = v2::one;
 
 	v2 canvasPixelPos;
 	v2 canvasPixelSize;
+
+	const float MIN_SCALE = 0.23939204f;
 };

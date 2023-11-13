@@ -7,28 +7,28 @@ void Node::Init()
 
 void Node::UI()
 {
-	IntInput("An integer input", nullptr);
+	BoolInput("A boolean input", nullptr);
 	FloatInput("floating input", nullptr);
-	IntOutput("An int out", nullptr);
+	BoolOutput("A bool out", nullptr);
 	FloatOutput("and out we go", nullptr);
 }
 
-bool Node::IntInput(const std::string& name, int* target)
+bool Node::BoolInput(const std::string& name, bool* target)
 {
 	NodeInput o;
 	o.name = name;
 	o.target = target;
-	o.type = NodeType::Int32;
+	o.type = NodeType::Bool;
 	TransferInput(o);
 	return false;
 }
 
-bool Node::IntOutput(const std::string& name, int* target)
+bool Node::BoolOutput(const std::string& name, bool* target)
 {
 	NodeOutput o;
 	o.name = name;
 	o.data = target;
-	o.type = NodeType::Int32;
+	o.type = NodeType::Bool;
 	outputs.push_back(o);
 	return false;
 }
@@ -68,6 +68,7 @@ void Node::TransferInput(const NodeInput& i)
 			return;
 		}
 	inputs.push_back(i);
+	inputs[inputs.size() - 1].touchedThisFrame = true;
 }
 
 void Node::ResetTouchedStatus()
@@ -86,5 +87,12 @@ void Node::CheckTouchedStatus()
 
 void Node::Draw(NodeNetwork* network)
 {
-	
+	v2 cursor = position;
+	cursor.y += minSpace.y;
+	for (const NodeInput& input : inputs)
+	{
+		cursor.y += 12.0f;
+		network->DrawInput(cursor, input.name, input.type);
+		cursor.y += 12.0f;
+	}
 }

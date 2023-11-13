@@ -7,7 +7,6 @@
 void Canvas::CreateWindow(NodeNetwork* nodes)
 {
     ImGui::Begin("Canvas");
-    ImGui::Text("Mouse Left: drag to add lines,\nMouse Right: drag to scroll, click for context menu.");
     ImGui::InputFloat2("position", &position.x);
 
     // Using InvisibleButton() as a convenience 
@@ -38,8 +37,8 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     // Pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
     {
-        position.x += io.MouseDelta.x * scale.x;
-        position.y += io.MouseDelta.y * scale.y;
+        position.x -= io.MouseDelta.x * scale.x;
+        position.y -= io.MouseDelta.y * scale.y;
     }
     // select thing to drag around
     else if (isActive && !somethingSelected && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -74,14 +73,15 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     // clamp(zoomLevel, 0, 31) inclusive
     scalingLevel = scalingLevel >= 0 ? (scalingLevel < 32 ? scalingLevel : 31) : 0;
     // 1.1 ^ -15
-    float z = 0.23939204f;
+    float z = MIN_SCALE;
     for (int i = 0; i < scalingLevel; i++)
         z *= 1.1f;
     v2 prevScale = scale;
     scale = z;
     // position + (mousePosBefore = canvasPos * scaleBefore + position) - (mousePosAfter = canvasPos * scaleAfter + position)
     // position + canvasPos * (scaleBefore - scaleAfter)
-    position += v2::Scale(mouseCanvasPos, prevScale - scale);
+    // somehow it has to be negative... I hate you linear algebra!!!
+    position -= v2::Scale(mouseCanvasPos, prevScale - scale);
 
     /*
     // Context menu (under default mouse threshold)
@@ -102,7 +102,7 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
     drawList->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
     const v2 gridStep = scale.reciprocal() * 16.0f;
     const v2 gridStepSmall = scale.reciprocal() * 4.0f;
-    for (float x = fmodf(position.x / scale.x, gridStep.x); x < canvasPixelSize.x; x += gridStep.x)
+    for (float x = fmodf(-position.x / scale.x, gridStep.x); x < canvasPixelSize.x; x += gridStep.x)
     {
         drawList->AddLine(ImVec2(canvasPixelPos.x + x, canvasPixelPos.y), ImVec2(canvasPixelPos.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
         if (scalingLevel < 18)
@@ -111,7 +111,7 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
                     ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasPixelPos.y), 
                     ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasBottomRight.y), IM_COL32(200, 200, 200, 20));
     }
-    for (float y = fmodf(position.y / scale.y, gridStep.x); y < canvasPixelSize.y; y += gridStep.x)
+    for (float y = fmodf(-position.y / scale.y, gridStep.x); y < canvasPixelSize.y; y += gridStep.x)
     {
         drawList->AddLine(ImVec2(canvasPixelPos.x, canvasPixelPos.y + y), ImVec2(canvasBottomRight.x, canvasPixelPos.y + y), IM_COL32(200, 200, 200, 40));
         if (scalingLevel < 18)
@@ -138,10 +138,15 @@ v2 Canvas::CanvasToScreen(const v2& pos) const // s = c - p
 
 v2 Canvas::CanvasToPosition(const v2& pos) const // position = canvas * scale + offset
 {
-    return v2::Scale(pos, scale) + position;
+    return v2::Scale(pos, scale) - position;
 }
 
 v2 Canvas::PositionToCanvas(const v2& pos) const // canvas = (canvas - offset) / scale
 {
-    return v2::Scale(pos - position, v2::Reciprocal(scale));
+    return v2::Scale(position - pos, v2::Reciprocal(scale));
+}
+
+void Canvas::GenerateAllTextLODs()
+{
+    // todo
 }

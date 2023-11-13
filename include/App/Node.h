@@ -9,6 +9,10 @@
 
 struct Node
 {
+	enum NodeType {
+		Bool, Float
+	};
+
 	friend class NodeNetwork;
 
 	v2 position = v2::zero;
@@ -23,16 +27,13 @@ protected:
 	v2 minSpace = v2(20, 20);
 
 	// to be called in InitializeUI()
-	bool IntInput(const std::string& name, int* target);
-	bool IntOutput(const std::string& name, int* target);
+	bool BoolInput(const std::string& name, bool* target);
+	bool BoolOutput(const std::string& name, bool* target);
 
 	bool FloatInput(const std::string& name, float* target);
 	bool FloatOutput(const std::string& name, float* target);
 
 private:
-	enum NodeType {
-		Int32, Float
-	};
 
 	struct NodeOutput
 	{

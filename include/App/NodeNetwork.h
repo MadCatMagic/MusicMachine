@@ -14,8 +14,11 @@ public:
 
 	Node* GetNodeAtPosition(const v2& pos, Node* currentSelection = nullptr);
 
+	void DrawInput(const v2& cursor, const std::string& name, Node::NodeType type);
+
 private:
 	ImDrawList* currentList = nullptr;
+	Canvas* currentCanvas = nullptr;
 
 	std::vector<Node*> nodes;
 };

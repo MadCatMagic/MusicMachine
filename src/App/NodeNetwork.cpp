@@ -33,9 +33,23 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
 	return nullptr;
 }
 
+void NodeNetwork::DrawInput(const v2& cursor, const std::string& name, Node::NodeType type)
+{
+	v3 colour = 0.2f;
+	if (type == Node::NodeType::Bool)
+		colour = v3(1.0f, 0.2f, 0.6f);
+	else if (type == Node::NodeType::Float)
+		colour = v3(0.4f, 0.6f, 0.9f);
+	v2 pos = currentCanvas->ptcts(cursor);
+	currentList->AddCircleFilled(pos.ImGui(), 5.0f / currentCanvas->GetSF().x, ImColor(colour.x, colour.y, colour.z));
+	pos = currentCanvas->ptcts(cursor + v2(8.0f, -6.0f));
+	currentList->AddText(pos.ImGui(), ImColor(ImGui::GetStyleColorVec4(ImGuiCol_Text)), name.c_str());
+}
+
 void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 {
 	currentList = drawList;
+	currentCanvas = canvas;
 	for (Node* node : nodes)
 	{
 		// make sure to add the correct node connections to the buffer
@@ -60,4 +74,5 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 	}
 
 	currentList = nullptr;
+	currentCanvas = nullptr;
 }
