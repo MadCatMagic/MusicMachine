@@ -19,7 +19,7 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 	{
 		// make sure to add the correct node connections to the buffer
 		node->ResetTouchedStatus();
-		node->UI();
+		node->IO();
 		node->CheckTouchedStatus();
 		// automatically sets the size
 		node->Draw(this);
@@ -52,18 +52,27 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 	drawList->ChannelsMerge();
 
 	currentList = nullptr;
-	currentCanvas = nullptr;
 }
 
-void NodeNetwork::AddNodeFromName(const std::string& type)
+#include "App/NodeTypes.h"
+void NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCursor)
 {
 	Node* n = nullptr;
 
 	if (type == "Node")
 		n = new Node();
 
-	if (n != nullptr)
-		nodes.push_back(n);
+	if (type == "Maths")
+		n = new MathsNode();
+
+	if (n == nullptr)
+		return;
+
+	n->Init();
+	n->UpdateDimensions();
+	if (positionFromCursor)
+		n->position = currentCanvas->CanvasToPosition(currentCanvas->ScreenToCanvas(ImGui::GetMousePos())) - n->size * 0.5f;
+	nodes.push_back(n);
 }
 
 Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
@@ -103,13 +112,6 @@ void NodeNetwork::DrawOutput(const v2& cursor, float xOffset, const std::string&
 	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), name.c_str());
 }
 
-float NodeNetwork::IOWidth(const std::string& text)
-{
-	// return length
-	// text space + 8px padding either side
-	return 6.0f * (float)(text.size() + 1) + 16.0f;
-}
-
 void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini)
 {
 	v2 topLeft = currentCanvas->ptcts(cursor + 1.0f);
@@ -143,6 +145,17 @@ void NodeNetwork::DrawContextMenu()
 	{
 		for (int i = 0; i < NUM_COLOURS; i++)
 			ImGui::ColorEdit4(colours[i].name.c_str(), &colours[i].col.Value.x, ImGuiColorEditFlags_NoInputs);
+		ImGui::EndMenu();
+	}
+	if (ImGui::BeginMenu("Nodes"))
+	{
+		const std::string nodeNames[] {
+			"Node",
+			"Maths"
+		};
+		for (const std::string& name : nodeNames)
+			if (ImGui::MenuItem(name.c_str()))
+				AddNodeFromName(name, true);
 		ImGui::EndMenu();
 	}
 }

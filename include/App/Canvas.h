@@ -14,8 +14,9 @@ class Canvas
 {
 public:
 	inline Canvas() {}
+	~Canvas();
 
-	void CreateWindow(class NodeNetwork* nodes);
+	void CreateWindow();
 
 	v2 ScreenToCanvas(const v2& pos) const;
 	v2 CanvasToScreen(const v2& pos) const;
@@ -29,6 +30,8 @@ public:
 	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
 
 	void GenerateAllTextLODs();
+
+	class NodeNetwork* nodes = nullptr;
 	
 private:
 	// text stuff

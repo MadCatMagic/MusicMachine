@@ -16,7 +16,7 @@ void Node::Init()
 {
 }
 
-void Node::UI()
+void Node::IO()
 {
 	BoolInput("A boolean input", nullptr);
 	FloatInput("floating input", nullptr);
@@ -99,13 +99,7 @@ void Node::CheckTouchedStatus()
 void Node::Draw(NodeNetwork* network)
 {
 	v2 cursor = position;
-	// calculate node width
-	float maxXOff = 0.0f;
-	for (const NodeInput& input : inputs)
-		maxXOff = std::max(network->IOWidth(input.name), maxXOff);
-	for (const NodeOutput& output : outputs)
-		maxXOff = std::max(network->IOWidth(output.name), maxXOff);
-	maxXOff = std::max(minSpace.x, maxXOff);
+	UpdateDimensions();
 
 	if (!mini)
 	{
@@ -124,22 +118,41 @@ void Node::Draw(NodeNetwork* network)
 
 		cursor = position;
 		// draw node header
-		network->DrawHeader(cursor, name, maxXOff, headerHeight, mini);
+		network->DrawHeader(cursor, name, size.x, headerHeight, mini);
 		cursor.y += headerHeight + 4.0f;
 
 		// draw outputs
 		for (const NodeOutput& output : outputs)
 		{
 			cursor.y += 8.0f;
-			network->DrawOutput(cursor, maxXOff, output.name, output.type);
+			network->DrawOutput(cursor, size.x, output.name, output.type);
 			cursor.y += 8.0f;
 		}
-
-		size = v2(maxXOff, headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f);
 	}
 	else 
-	{
-		network->DrawHeader(cursor, name, maxXOff, headerHeight, mini);
+		network->DrawHeader(cursor, name, size.x, headerHeight, mini);
+}
+
+void Node::UpdateDimensions()
+{
+	// calculate node width
+	float maxXOff = 0.0f;
+	for (const NodeInput& input : inputs)
+		maxXOff = std::max(IOWidth(input.name), maxXOff);
+	for (const NodeOutput& output : outputs)
+		maxXOff = std::max(IOWidth(output.name), maxXOff);
+	maxXOff = std::max(minSpace.x, maxXOff);
+	maxXOff = std::max(IOWidth(name) + 6.0f, maxXOff);
+
+	if (mini)
 		size = v2(maxXOff, headerHeight);
-	}
+	else
+		size = v2(maxXOff, headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f);
+}
+
+float Node::IOWidth(const std::string& text)
+{
+	// return length
+	// text space + 8px padding either side
+	return 6.0f * (float)(text.size() + 1) + 16.0f;
 }

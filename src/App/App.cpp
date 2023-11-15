@@ -8,6 +8,7 @@ void App::Initialize()
     n = new NodeNetwork();
     n->AddNodeFromName("Node");
     c.GenerateAllTextLODs();
+    c.nodes = n;
 }
 
 void App::Update()
@@ -35,7 +36,7 @@ void App::UI(struct ImGuiIO* io)
 
 	ImGui::End();
 
-    c.CreateWindow(n);
+    c.CreateWindow();
 }
 
 void App::Release()

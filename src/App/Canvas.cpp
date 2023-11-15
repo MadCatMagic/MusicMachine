@@ -3,8 +3,15 @@
 #include "imgui.h"
 
 #include "Engine/Console.h"
+
+Canvas::~Canvas()
+{
+    if (nodes != nullptr)
+        nodes->UnassignCanvas();
+}
+
 // a lot of this code is taken from the ImGui canvas example
-void Canvas::CreateWindow(NodeNetwork* nodes)
+void Canvas::CreateWindow()
 {
     ImGui::Begin("Canvas");
     ImGui::InputFloat2("position", &position.x);

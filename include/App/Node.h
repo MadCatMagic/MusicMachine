@@ -23,7 +23,8 @@ struct Node
 
 protected:
 	virtual void Init();
-	virtual void UI();
+	virtual void IO();
+	inline virtual void Work() { }
 
 	std::string name = "Node";
 	v2 minSpace = v2(20, 20);
@@ -66,4 +67,6 @@ private:
 	void CheckTouchedStatus();
 	
 	void Draw(class NodeNetwork* network);
+	void UpdateDimensions();
+	float IOWidth(const std::string& text);
 };
