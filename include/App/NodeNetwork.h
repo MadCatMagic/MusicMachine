@@ -16,19 +16,24 @@ public:
 
 	Node* GetNodeAtPosition(const v2& pos, Node* currentSelection = nullptr);
 
-	float DrawInput(const v2& cursor, const std::string& name, Node::NodeType type);
+	void DrawInput(const v2& cursor, const std::string& name, Node::NodeType type);
+	void DrawOutput(const v2& cursor, float xOffset, const std::string& name, Node::NodeType type);
+	float IOWidth(const std::string& text);
+	void DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini);
 
 	void DrawContextMenu();
 
 private:
+	const float NODE_ROUNDING = 4.0f;
 	// allows for colour scheming
-	const int NUM_COLOURS = 8;
+	const int NUM_COLOURS = 10;
 	enum NodeCol {
-		BGFill, BGOutline,
+		BGFill, BGOutline, BGHeader,
 		IOBool, IOFloat,
 		IO, IOSelected,
 		Connector,
-		Text
+		Text,
+		SelectedOutline
 	};
 	struct NodeColourData
 	{
@@ -37,6 +42,7 @@ private:
 	};
 	std::vector<NodeColourData> colours;
 	ImColor GetCol(NodeCol colour);
+	ImColor GetCol(Node::NodeType type);
 	void InitColours();
 
 	ImDrawList* currentList = nullptr;

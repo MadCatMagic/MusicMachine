@@ -19,6 +19,8 @@ struct Node
 	// please don't set me! thanks xx
 	v2 size = v2::zero;
 
+	bool HandleClick(const v2& nodePos);
+
 protected:
 	virtual void Init();
 	virtual void UI();
@@ -34,6 +36,9 @@ protected:
 	bool FloatOutput(const std::string& name, float* target);
 
 private:
+	bool selected = false;
+	bool mini = false;
+	const float headerHeight = 20.0f;
 
 	struct NodeOutput
 	{

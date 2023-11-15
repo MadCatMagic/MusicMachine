@@ -27,14 +27,24 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 		// draw node body
 		v2 topLeft = canvas->ptcts(node->position);
 		v2 bottomRight = canvas->ptcts(node->position + node->size);
+		v2 tlO = canvas->ptcts(node->position - 1.0f);
+		v2 brO = canvas->ptcts(node->position + node->size + 1.0f);
 
+		ImColor outline = GetCol(node->selected ? NodeCol::SelectedOutline : NodeCol::BGOutline);
 		// rounded to 4 pixels - a single grid tile.
 		drawList->ChannelsSetCurrent(0);
+		drawList->AddRectFilled(
+			tlO.ImGui(),
+			brO.ImGui(),
+			ImColor(outline),
+			NODE_ROUNDING / canvas->GetSF().x,
+			ImDrawFlags_RoundCornersAll
+		);
 		drawList->AddRectFilled(
 			topLeft.ImGui(),
 			bottomRight.ImGui(),
 			ImColor(GetCol(NodeCol::BGFill)),
-			4.0f / canvas->GetSF().x,
+			NODE_ROUNDING / canvas->GetSF().x,
 			ImDrawFlags_RoundCornersAll
 		);
 		drawList->ChannelsSetCurrent(1);
@@ -67,22 +77,64 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
 	return nullptr;
 }
 
-float NodeNetwork::DrawInput(const v2& cursor, const std::string& name, Node::NodeType type)
+void NodeNetwork::DrawInput(const v2& cursor, const std::string& name, Node::NodeType type)
 {
-	ImColor colour = ImColor(1.0f, 1.0f, 1.0f, 1.0f);
-	if (type == Node::NodeType::Bool)
-		colour = GetCol(NodeCol::IOBool);
-	else if (type == Node::NodeType::Float)
-		colour = GetCol(NodeCol::IOFloat);
+	ImColor colour = GetCol(type);
 	v2 pos = currentCanvas->ptcts(cursor);
 	float sf = currentCanvas->GetSF().x;
+	// input circle thingy
 	currentList->AddCircleFilled(pos.ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
 	currentList->AddCircleFilled(pos.ImGui(), 3.0f / sf, colour);
+	// text
 	pos = currentCanvas->ptcts(cursor + v2(8.0f, -6.0f));
 	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), name.c_str());
-	
+}
+
+void NodeNetwork::DrawOutput(const v2& cursor, float xOffset, const std::string& name, Node::NodeType type)
+{
+	ImColor colour = GetCol(type);
+	v2 pos = currentCanvas->ptcts(cursor + v2(xOffset, 0.0f));
+	float sf = currentCanvas->GetSF().x;
+	// draw on right side of node
+	currentList->AddCircleFilled(pos.ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
+	currentList->AddCircleFilled(pos.ImGui(), 3.0f / sf, colour);
+	// text
+	pos = currentCanvas->ptcts(cursor + v2(xOffset - (name.size() + 1) * 6.0f, 0.0f) + v2(-8.0f, -6.0f));
+	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), name.c_str());
+}
+
+float NodeNetwork::IOWidth(const std::string& text)
+{
 	// return length
-	return 12.0f * (float)name.size() + 12.0f;
+	// text space + 8px padding either side
+	return 6.0f * (float)(text.size() + 1) + 16.0f;
+}
+
+void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini)
+{
+	v2 topLeft = currentCanvas->ptcts(cursor + 1.0f);
+	v2 bottomRight = currentCanvas->ptcts(cursor + v2(width, height) - 1.0f);
+	v2 textPos = currentCanvas->ptcts(v2(cursor.x + 8.0f, cursor.y + height * 0.5f - 6.0f));
+	ImDrawFlags flags = ImDrawFlags_RoundCornersAll;
+	currentList->AddRectFilled(topLeft.ImGui(), bottomRight.ImGui(), GetCol(NodeCol::BGHeader), NODE_ROUNDING / currentCanvas->GetSF().x, flags);
+	currentList->AddText(textPos.ImGui(), GetCol(NodeCol::Text), name.c_str());
+
+	// minimized triangle thing
+	v2 triCentre = cursor + v2(width - 8.0f, height * 0.5f);
+	if (mini)
+	{
+		v2 a = currentCanvas->ptcts(triCentre + v2(3.0f, 0.0f));
+		v2 b = currentCanvas->ptcts(triCentre + v2(-3.0f, -3.0f));
+		v2 c = currentCanvas->ptcts(triCentre + v2(-3.0f, 3.0f));
+		currentList->AddTriangleFilled(a.ImGui(), b.ImGui(), c.ImGui(), GetCol(NodeCol::Text));
+	}
+	else
+	{
+		v2 b = currentCanvas->ptcts(triCentre + v2(0.0f, 3.0f));
+		v2 a = currentCanvas->ptcts(triCentre + v2(-3.0f, -3.0f));
+		v2 c = currentCanvas->ptcts(triCentre + v2(3.0f, -3.0f));
+		currentList->AddTriangleFilled(a.ImGui(), b.ImGui(), c.ImGui(), GetCol(NodeCol::Text));
+	}
 }
 
 void NodeNetwork::DrawContextMenu()
@@ -100,15 +152,20 @@ ImColor NodeNetwork::GetCol(NodeCol colour)
 	return colours[(int)colour].col;
 }
 
+ImColor NodeNetwork::GetCol(Node::NodeType type)
+{
+	ImColor colour = ImColor(1.0f, 1.0f, 1.0f, 1.0f);
+	if (type == Node::NodeType::Bool)
+		colour = GetCol(NodeCol::IOBool);
+	else if (type == Node::NodeType::Float)
+		colour = GetCol(NodeCol::IOFloat);
+	return colour;
+}
+
 void NodeNetwork::InitColours()
 {
 	for (int i = 0; i < NUM_COLOURS; i++)
 	{
-		/*BGFill, BGOutline,
-		IOBool, IOFloat,
-		IO, IOSelected,
-		Connector,
-		Text*/
 		NodeColourData c;
 		switch ((NodeCol)i)
 		{
@@ -119,7 +176,12 @@ void NodeNetwork::InitColours()
 
 		case NodeCol::BGOutline:
 			c.name = "BGOutline";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Border);
+			c.col = ImColor(0.0f, 0.0f, 0.4f, 0.8f);
+			break;
+
+		case NodeCol::BGHeader:
+			c.name = "BGHeader";
+			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Header);
 			break;
 
 		case NodeCol::IOBool:
@@ -150,6 +212,11 @@ void NodeNetwork::InitColours()
 		case NodeCol::Text:
 			c.name = "Text";
 			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+			break;
+
+		case NodeCol::SelectedOutline:
+			c.name = "SelectedOutline";
+			c.col = ImColor(0.2f, 0.6f, 1.0f, 0.8f);
 			break;
 		}
 		colours.push_back(c);

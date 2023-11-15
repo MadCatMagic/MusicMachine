@@ -41,10 +41,10 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
         position.y -= io.MouseDelta.y * scale.y;
     }
     // select thing to drag around
-    else if (isActive && !somethingSelected && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+    else if (isActive && !somethingSelected && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     {
-        Node* node = nodes->GetNodeAtPosition(mousePos);
-        if (node != nullptr)
+        Node* node = nodes->GetNodeAtPosition(mousePos, selectedNode);
+        if (node != nullptr && !node->HandleClick(mousePos - node->position) && !somethingSelected)
         {
             somethingSelected = true;
             selectedNode = node;
@@ -66,6 +66,7 @@ void Canvas::CreateWindow(NodeNetwork* nodes)
             selectedNode = nullptr;
         }
     }
+
 
     // taken from LevelEditor\...\Editor.cpp
     if (isHovered && io.MouseWheel != 0.0f)

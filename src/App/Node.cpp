@@ -1,6 +1,17 @@
 #include "App/Node.h"
 #include "App/NodeNetwork.h"
 
+bool Node::HandleClick(const v2& nodePos)
+{
+	v2 centre = v2(size.x - 8.0f, headerHeight * 0.5f);
+	if (v2::Distance(nodePos, centre) <= 6.0f)
+	{
+		mini = !mini;
+		return true;
+	}
+	return false;
+}
+
 void Node::Init()
 {
 }
@@ -88,14 +99,47 @@ void Node::CheckTouchedStatus()
 void Node::Draw(NodeNetwork* network)
 {
 	v2 cursor = position;
-	cursor.y += minSpace.y;
+	// calculate node width
 	float maxXOff = 0.0f;
 	for (const NodeInput& input : inputs)
-	{
-		cursor.y += 8.0f;
-		maxXOff = std::max(network->DrawInput(cursor, input.name, input.type), maxXOff);
-		cursor.y += 8.0f;
-	}
+		maxXOff = std::max(network->IOWidth(input.name), maxXOff);
+	for (const NodeOutput& output : outputs)
+		maxXOff = std::max(network->IOWidth(output.name), maxXOff);
 	maxXOff = std::max(minSpace.x, maxXOff);
-	size = v2(maxXOff, minSpace.y + inputs.size() * 16.0f);
+
+	if (!mini)
+	{
+		// leave spaces
+		cursor.y += 24.0f;
+		cursor.y += 16.0f * outputs.size();
+		cursor.y += minSpace.y;
+
+		// draw inputs
+		for (const NodeInput& input : inputs)
+		{
+			cursor.y += 8.0f;
+			network->DrawInput(cursor, input.name, input.type);
+			cursor.y += 8.0f;
+		}
+
+		cursor = position;
+		// draw node header
+		network->DrawHeader(cursor, name, maxXOff, headerHeight, mini);
+		cursor.y += headerHeight + 4.0f;
+
+		// draw outputs
+		for (const NodeOutput& output : outputs)
+		{
+			cursor.y += 8.0f;
+			network->DrawOutput(cursor, maxXOff, output.name, output.type);
+			cursor.y += 8.0f;
+		}
+
+		size = v2(maxXOff, headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f);
+	}
+	else 
+	{
+		network->DrawHeader(cursor, name, maxXOff, headerHeight, mini);
+		size = v2(maxXOff, headerHeight);
+	}
 }
