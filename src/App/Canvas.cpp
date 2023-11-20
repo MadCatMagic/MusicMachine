@@ -41,6 +41,10 @@ void Canvas::CreateWindow()
     static bool somethingSelected = false;
     static Node* selectedNode = nullptr;
 
+    static bool draggingConnection = false;
+    static std::string connectionOriginName = "";
+    static Node* connectionOrigin = nullptr;
+
     // Pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
     {
@@ -48,13 +52,25 @@ void Canvas::CreateWindow()
         position.y -= io.MouseDelta.y * scale.y;
     }
     // select thing to drag around
-    else if (isActive && !somethingSelected && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+    else if (isActive && !somethingSelected && !draggingConnection && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     {
         Node* node = nodes->GetNodeAtPosition(mousePos, selectedNode);
-        if (node != nullptr && !node->HandleClick(mousePos - node->position) && !somethingSelected)
+        if (node != nullptr)
         {
-            somethingSelected = true;
-            selectedNode = node;
+            NodeClickResponse r = node->HandleClick(mousePos - node->position);
+            // dragging a node
+            if (!r.handled && !somethingSelected)
+            {
+                somethingSelected = true;
+                selectedNode = node;
+            }
+            // dragging a connection
+            if (r.handled && r.type == NodeClickResponseType::BeginConnection)
+            {
+                draggingConnection = true;
+                connectionOrigin = r.origin;
+                connectionOriginName = r.originName;
+            }
         }
     }
 
@@ -73,7 +89,6 @@ void Canvas::CreateWindow()
             selectedNode = nullptr;
         }
     }
-
 
     // taken from LevelEditor\...\Editor.cpp
     if (isHovered && io.MouseWheel != 0.0f)
@@ -124,6 +139,19 @@ void Canvas::CreateWindow()
     }
     ImGui::PushFont(textLODs[scalingLevel]);
     nodes->Draw(drawList, this);
+    // draw dragged connection
+    if (draggingConnection)
+    {
+        if (isActive)
+            nodes->DrawConnection(connectionOrigin->GetOutputPos(connectionOriginName), mousePos, connectionOrigin->GetOutputType(connectionOriginName));
+        else
+        {
+            nodes->TryEndConnection(connectionOrigin, connectionOriginName, mousePos);
+            connectionOrigin = nullptr;
+            connectionOriginName = "";
+            draggingConnection = false;
+        }
+    }
     ImGui::PopFont();
     drawList->PopClipRect();
 

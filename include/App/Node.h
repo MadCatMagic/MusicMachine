@@ -2,10 +2,23 @@
 #include "Vector.h"
 #include <vector>
 
+struct Node;
+
 // underlying node structure
 // contains all of the actual info about the node
 // but has no rendering information, only the layout of how the information should be expressed
 // inside UI it should call functions similar to ImGui to be able to display that info
+
+enum NodeClickResponseType {
+	None, Minimise, BeginConnection
+};
+struct NodeClickResponse
+{
+	bool handled = false;
+	NodeClickResponseType type = NodeClickResponseType::None;
+	std::string originName = "";
+	Node* origin = nullptr;
+};
 
 struct Node
 {
@@ -14,16 +27,24 @@ struct Node
 	};
 
 	friend class NodeNetwork;
+	virtual void IO();
 
 	v2 position = v2::zero;
 	// please don't set me! thanks xx
 	v2 size = v2::zero;
 
-	bool HandleClick(const v2& nodePos);
+	NodeClickResponse HandleClick(const v2& nodePos);
+
+	bool Connect(size_t inputIndex, Node* origin, size_t originIndex);
+	void Disconnect(size_t inputIndex);
+
+	v2 GetInputPos(const std::string& name) const;
+	v2 GetOutputPos(const std::string& name) const;
+	NodeType GetOutputType(const std::string& name) const;
 
 protected:
 	virtual void Init();
-	virtual void IO();
+	//virtual void IO();
 	inline virtual void Work() { }
 
 	std::string name = "Node";
@@ -46,6 +67,7 @@ private:
 		std::string name;
 		void* data;
 		NodeType type;
+		int connections = 0;
 	};
 
 	struct NodeInput
@@ -65,7 +87,12 @@ private:
 	void TransferInput(const NodeInput& i);
 	void ResetTouchedStatus();
 	void CheckTouchedStatus();
+
+	bool TryConnect(Node* origin, const std::string& originName, const v2& pos);
 	
+	v2 GetInputPos(size_t index) const;
+	v2 GetOutputPos(size_t index) const;
+	size_t GetOutputIndex(const std::string& name) const;
 	void Draw(class NodeNetwork* network);
 	void UpdateDimensions();
 	float IOWidth(const std::string& text);

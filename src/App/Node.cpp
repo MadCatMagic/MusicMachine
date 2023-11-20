@@ -1,15 +1,72 @@
 #include "App/Node.h"
 #include "App/NodeNetwork.h"
 
-bool Node::HandleClick(const v2& nodePos)
+NodeClickResponse Node::HandleClick(const v2& nodePos)
 {
+	NodeClickResponse r;
 	v2 centre = v2(size.x - 8.0f, headerHeight * 0.5f);
 	if (v2::Distance(nodePos, centre) <= 6.0f)
 	{
 		mini = !mini;
-		return true;
+		r.handled = true;
+		r.type = NodeClickResponseType::Minimise;
+		return r;
 	}
-	return false;
+
+	v2 firstOutput = GetOutputPos(0);
+	for (size_t i = 0; i < outputs.size(); i++)
+		if (v2::Distance(firstOutput + v2(0.0f, 16.0f * i), nodePos) <= 6.0f)
+		{
+			r.handled = true;
+			r.type = NodeClickResponseType::BeginConnection;
+			r.originName = outputs[i].name;
+			r.origin = this;
+			return r;
+		}
+
+	v2 firstInput = GetInputPos(0);
+	for (size_t i = 0; i < inputs.size(); i++)
+		if (v2::Distance(firstInput + v2(0.0f, 16.0f * i), nodePos) <= 6.0f)
+		{
+			if (inputs[i].source != nullptr)
+			{
+				r.handled = true;
+				r.type = NodeClickResponseType::BeginConnection;
+				r.originName = inputs[i].sourceName;
+				r.origin = inputs[i].source;
+				Disconnect(i);
+				return r;
+			}
+		}
+
+	return r;
+}
+
+bool Node::Connect(size_t inputIndex, Node* origin, size_t originIndex)
+{
+	if (inputs.size() <= inputIndex || origin->outputs.size() <= originIndex)
+		return false;
+	inputs[inputIndex].source = origin;
+	inputs[inputIndex].sourceName = origin->outputs[originIndex].name;
+	inputs[inputIndex].target = origin->outputs[originIndex].data;
+	origin->outputs[originIndex].connections++;
+	return true;
+}
+
+void Node::Disconnect(size_t inputIndex)
+{
+	if (inputs.size() <= inputIndex)
+		return;
+	NodeInput& i = inputs[inputIndex];
+	for (size_t k = 0; k < i.source->outputs.size(); k++)
+		if (i.source->outputs[k].name == i.sourceName)
+		{
+			i.source->outputs[k].connections--;
+			break;
+		}
+	i.source = nullptr;
+	i.sourceName = "";
+	i.target = nullptr;
 }
 
 void Node::Init()
@@ -71,7 +128,7 @@ void Node::TransferInput(const NodeInput& i)
 		if (inputs[j].name == i.name && inputs[j].type == i.type)
 		{
 			Node* source = inputs[j].source;
-			const std::string& sourceName = inputs[j].sourceName;
+			std::string sourceName = inputs[j].sourceName;
 			inputs[j] = i;
 			inputs[j].source = source;
 			inputs[j].sourceName = sourceName;
@@ -96,6 +153,75 @@ void Node::CheckTouchedStatus()
 			inputs.erase(inputs.begin() + i);
 }
 
+bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos)
+{
+	v2 firstInput = GetInputPos(0);
+	for (size_t i = 0; i < inputs.size(); i++)
+		if (v2::Distance(firstInput + v2(0.0f, 16.0f * i), pos) <= 6.0f && origin->GetOutputType(originName) == inputs[i].type)
+		{
+			Connect(i, origin, origin->GetOutputIndex(originName));
+			return true;
+		}
+
+	return false;
+}
+
+v2 Node::GetInputPos(size_t index) const
+{
+	if (!mini)
+	{
+		return position + v2(0.0f, headerHeight + 4.0f + 16.0f * outputs.size() + minSpace.y + 16.0f * index + 8.0f);
+	}
+	else
+		return position + v2(0.0f, headerHeight * 0.5f);
+}
+
+v2 Node::GetInputPos(const std::string& name) const
+{
+	int n = -1;
+	for (size_t i = 0; i < inputs.size(); i++)
+		if (inputs[i].name == name)
+			n = (int)i;
+	if (n == -1)
+		return v2::zero;
+	return GetInputPos(n);
+}
+
+v2 Node::GetOutputPos(size_t index) const
+{
+	if (!mini)
+	{
+		return position + v2(size.x, headerHeight + 4.0f + 16.0f * index + 8.0f);
+	}
+	else
+		return position + v2(size.x, headerHeight * 0.5f);
+}
+
+size_t Node::GetOutputIndex(const std::string& name) const
+{
+	for (size_t i = 0; i < outputs.size(); i++)
+		if (outputs[i].name == name)
+			return i;
+	return -1;
+}
+
+v2 Node::GetOutputPos(const std::string& name) const
+{
+	size_t n = GetOutputIndex(name);
+	if (n == -1)
+		return v2::zero;
+	return GetOutputPos(n);
+}
+
+Node::NodeType Node::GetOutputType(const std::string& name) const
+{
+	int n = -1;
+	for (size_t i = 0; i < outputs.size(); i++)
+		if (outputs[i].name == name)
+			return outputs[i].type;
+	return NodeType::Bool;
+}
+
 void Node::Draw(NodeNetwork* network)
 {
 	v2 cursor = position;
@@ -104,7 +230,7 @@ void Node::Draw(NodeNetwork* network)
 	if (!mini)
 	{
 		// leave spaces
-		cursor.y += 24.0f;
+		cursor.y += headerHeight + 4.0f;
 		cursor.y += 16.0f * outputs.size();
 		cursor.y += minSpace.y;
 
@@ -131,6 +257,15 @@ void Node::Draw(NodeNetwork* network)
 	}
 	else 
 		network->DrawHeader(cursor, name, size.x, headerHeight, mini);
+
+	// draw connections
+	for (const NodeInput& inp : inputs)
+	{
+		if (inp.source != nullptr)
+		{
+			network->DrawConnection(GetInputPos(inp.name), inp.source->GetOutputPos(inp.sourceName), inp.type);
+		}
+	}
 }
 
 void Node::UpdateDimensions()

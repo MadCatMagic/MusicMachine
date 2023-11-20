@@ -55,7 +55,7 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 }
 
 #include "App/NodeTypes.h"
-void NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCursor)
+Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCursor)
 {
 	Node* n = nullptr;
 
@@ -66,13 +66,14 @@ void NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCurs
 		n = new MathsNode();
 
 	if (n == nullptr)
-		return;
+		return nullptr;
 
 	n->Init();
 	n->UpdateDimensions();
 	if (positionFromCursor)
 		n->position = currentCanvas->CanvasToPosition(currentCanvas->ScreenToCanvas(ImGui::GetMousePos())) - n->size * 0.5f;
 	nodes.push_back(n);
+	return n;
 }
 
 Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
@@ -80,10 +81,17 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
 	if (currentSelection == nullptr)
 	{
 		for (Node* node : nodes)
-			if (pos.inBox(node->position, node->position + node->size))
+			if (pos.inBox(node->position - v2(4.0f), node->position + node->size + v2(4.0f)))
 				return node;
 	}
 	return nullptr;
+}
+
+void NodeNetwork::TryEndConnection(Node* origin, const std::string& originName, const v2& pos)
+{
+	for (Node* n : nodes)
+		if (n != origin && n->TryConnect(origin, originName, pos))
+			return;
 }
 
 void NodeNetwork::DrawInput(const v2& cursor, const std::string& name, Node::NodeType type)
@@ -137,6 +145,19 @@ void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float wi
 		v2 c = currentCanvas->ptcts(triCentre + v2(3.0f, -3.0f));
 		currentList->AddTriangleFilled(a.ImGui(), b.ImGui(), c.ImGui(), GetCol(NodeCol::Text));
 	}
+}
+
+void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeType type)
+{
+	float width = 10.0f + fabsf(target.y - origin.y) * 0.4f;
+	currentList->AddBezierCubic(
+		currentCanvas->ptcts(origin).ImGui(),
+		currentCanvas->ptcts(origin + v2(width, 0.0f)).ImGui(),
+		currentCanvas->ptcts(target - v2(width, 0.0f)).ImGui(),
+		currentCanvas->ptcts(target).ImGui(),
+		GetCol(type),
+		1.5f / currentCanvas->GetSF().x
+	);
 }
 
 void NodeNetwork::DrawContextMenu()
