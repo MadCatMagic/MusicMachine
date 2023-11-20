@@ -10,7 +10,7 @@ struct Node;
 // inside UI it should call functions similar to ImGui to be able to display that info
 
 enum NodeClickResponseType {
-	None, Minimise, BeginConnection
+	None, Minimise, BeginConnection, BeginConnectionReversed
 };
 struct NodeClickResponse
 {
@@ -40,6 +40,7 @@ struct Node
 
 	v2 GetInputPos(const std::string& name) const;
 	v2 GetOutputPos(const std::string& name) const;
+	NodeType GetInputType(const std::string& name) const;
 	NodeType GetOutputType(const std::string& name) const;
 
 protected:
@@ -88,10 +89,11 @@ private:
 	void ResetTouchedStatus();
 	void CheckTouchedStatus();
 
-	bool TryConnect(Node* origin, const std::string& originName, const v2& pos);
+	bool TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 	
 	v2 GetInputPos(size_t index) const;
 	v2 GetOutputPos(size_t index) const;
+	size_t GetInputIndex(const std::string& name) const;
 	size_t GetOutputIndex(const std::string& name) const;
 	void Draw(class NodeNetwork* network);
 	void UpdateDimensions();

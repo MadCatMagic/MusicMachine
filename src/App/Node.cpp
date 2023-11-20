@@ -13,9 +13,13 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		return r;
 	}
 
+	if (mini)
+		return r;
+	
+	v2 worldPos = nodePos + position;
 	v2 firstOutput = GetOutputPos(0);
 	for (size_t i = 0; i < outputs.size(); i++)
-		if (v2::Distance(firstOutput + v2(0.0f, 16.0f * i), nodePos) <= 6.0f)
+		if (v2::Distance(firstOutput + v2(0.0f, 16.0f * i), worldPos) <= 8.0f)
 		{
 			r.handled = true;
 			r.type = NodeClickResponseType::BeginConnection;
@@ -26,26 +30,32 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 
 	v2 firstInput = GetInputPos(0);
 	for (size_t i = 0; i < inputs.size(); i++)
-		if (v2::Distance(firstInput + v2(0.0f, 16.0f * i), nodePos) <= 6.0f)
+		if (v2::Distance(firstInput + v2(0.0f, 16.0f * i), worldPos) <= 8.0f)
 		{
+			r.handled = true;
 			if (inputs[i].source != nullptr)
 			{
-				r.handled = true;
 				r.type = NodeClickResponseType::BeginConnection;
 				r.originName = inputs[i].sourceName;
 				r.origin = inputs[i].source;
 				Disconnect(i);
-				return r;
 			}
+			else 
+			{
+				r.type = NodeClickResponseType::BeginConnectionReversed;
+				r.originName = inputs[i].name;
+				r.origin = this;
+			}
+			return r;
 		}
-
-	return r;
 }
 
 bool Node::Connect(size_t inputIndex, Node* origin, size_t originIndex)
 {
 	if (inputs.size() <= inputIndex || origin->outputs.size() <= originIndex)
 		return false;
+	if (inputs[inputIndex].source != nullptr)
+		Disconnect(inputIndex);
 	inputs[inputIndex].source = origin;
 	inputs[inputIndex].sourceName = origin->outputs[originIndex].name;
 	inputs[inputIndex].target = origin->outputs[originIndex].data;
@@ -153,15 +163,28 @@ void Node::CheckTouchedStatus()
 			inputs.erase(inputs.begin() + i);
 }
 
-bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos)
+bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed)
 {
-	v2 firstInput = GetInputPos(0);
-	for (size_t i = 0; i < inputs.size(); i++)
-		if (v2::Distance(firstInput + v2(0.0f, 16.0f * i), pos) <= 6.0f && origin->GetOutputType(originName) == inputs[i].type)
-		{
-			Connect(i, origin, origin->GetOutputIndex(originName));
-			return true;
-		}
+	if (connectionReversed)
+	{
+		v2 firstOutput = GetOutputPos(0);
+		for (size_t i = 0; i < outputs.size(); i++)
+			if (v2::Distance(firstOutput + v2(0.0f, 16.0f * i), pos) <= 6.0f && origin->GetInputType(originName) == outputs[i].type)
+			{
+				origin->Connect(origin->GetInputIndex(originName), this, i);
+				return true;
+			}
+	}
+	else
+	{
+		v2 firstInput = GetInputPos(0);
+		for (size_t i = 0; i < inputs.size(); i++)
+			if (v2::Distance(firstInput + v2(0.0f, 16.0f * i), pos) <= 6.0f && origin->GetOutputType(originName) == inputs[i].type)
+			{
+				Connect(i, origin, origin->GetOutputIndex(originName));
+				return true;
+			}
+	}
 
 	return false;
 }
@@ -178,10 +201,7 @@ v2 Node::GetInputPos(size_t index) const
 
 v2 Node::GetInputPos(const std::string& name) const
 {
-	int n = -1;
-	for (size_t i = 0; i < inputs.size(); i++)
-		if (inputs[i].name == name)
-			n = (int)i;
+	int n = GetInputIndex(name);
 	if (n == -1)
 		return v2::zero;
 	return GetInputPos(n);
@@ -195,6 +215,14 @@ v2 Node::GetOutputPos(size_t index) const
 	}
 	else
 		return position + v2(size.x, headerHeight * 0.5f);
+}
+
+size_t Node::GetInputIndex(const std::string& name) const
+{
+	for (size_t i = 0; i < inputs.size(); i++)
+		if (inputs[i].name == name)
+			return i;
+	return -1;
 }
 
 size_t Node::GetOutputIndex(const std::string& name) const
@@ -213,12 +241,19 @@ v2 Node::GetOutputPos(const std::string& name) const
 	return GetOutputPos(n);
 }
 
+Node::NodeType Node::GetInputType(const std::string& name) const
+{
+	int n = GetInputIndex(name);
+	if (n != -1)
+		return inputs[n].type;
+	return NodeType::Bool;
+}
+
 Node::NodeType Node::GetOutputType(const std::string& name) const
 {
-	int n = -1;
-	for (size_t i = 0; i < outputs.size(); i++)
-		if (outputs[i].name == name)
-			return outputs[i].type;
+	int n = GetOutputIndex(name);
+	if (n != -1)
+		return outputs[n].type;
 	return NodeType::Bool;
 }
 

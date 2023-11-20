@@ -50,8 +50,6 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 		drawList->ChannelsSetCurrent(1);
 	}
 	drawList->ChannelsMerge();
-
-	currentList = nullptr;
 }
 
 #include "App/NodeTypes.h"
@@ -87,10 +85,10 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
 	return nullptr;
 }
 
-void NodeNetwork::TryEndConnection(Node* origin, const std::string& originName, const v2& pos)
+void NodeNetwork::TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed)
 {
 	for (Node* n : nodes)
-		if (n != origin && n->TryConnect(origin, originName, pos))
+		if (n != origin && n->TryConnect(origin, originName, pos, connectionReversed))
 			return;
 }
 
@@ -149,7 +147,7 @@ void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float wi
 
 void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeType type)
 {
-	float width = 10.0f + fabsf(target.y - origin.y) * 0.4f;
+	float width = 12.0f + fabsf(target.x - origin.x) * 0.3f + fabsf(target.y - origin.y) * 0.1f;
 	currentList->AddBezierCubic(
 		currentCanvas->ptcts(origin).ImGui(),
 		currentCanvas->ptcts(origin + v2(width, 0.0f)).ImGui(),

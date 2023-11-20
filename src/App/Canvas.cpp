@@ -42,6 +42,7 @@ void Canvas::CreateWindow()
     static Node* selectedNode = nullptr;
 
     static bool draggingConnection = false;
+    static bool connectionReversed = false;
     static std::string connectionOriginName = "";
     static Node* connectionOrigin = nullptr;
 
@@ -65,11 +66,12 @@ void Canvas::CreateWindow()
                 selectedNode = node;
             }
             // dragging a connection
-            if (r.handled && r.type == NodeClickResponseType::BeginConnection)
+            if (r.handled && (r.type == NodeClickResponseType::BeginConnection || r.type == NodeClickResponseType::BeginConnectionReversed))
             {
                 draggingConnection = true;
                 connectionOrigin = r.origin;
                 connectionOriginName = r.originName;
+                connectionReversed = r.type == NodeClickResponseType::BeginConnectionReversed;
             }
         }
     }
@@ -143,15 +145,29 @@ void Canvas::CreateWindow()
     if (draggingConnection)
     {
         if (isActive)
-            nodes->DrawConnection(connectionOrigin->GetOutputPos(connectionOriginName), mousePos, connectionOrigin->GetOutputType(connectionOriginName));
+        {
+            if (connectionReversed)
+                nodes->DrawConnection(
+                    connectionOrigin->GetInputPos(connectionOriginName),
+                    mousePos,
+                    connectionOrigin->GetInputType(connectionOriginName)
+                );
+            else
+                nodes->DrawConnection(
+                    mousePos,
+                    connectionOrigin->GetOutputPos(connectionOriginName),
+                    connectionOrigin->GetOutputType(connectionOriginName)
+                );
+        }
         else
         {
-            nodes->TryEndConnection(connectionOrigin, connectionOriginName, mousePos);
+            nodes->TryEndConnection(connectionOrigin, connectionOriginName, mousePos, connectionReversed);
             connectionOrigin = nullptr;
             connectionOriginName = "";
             draggingConnection = false;
         }
     }
+    nodes->ClearDrawList();
     ImGui::PopFont();
     drawList->PopClipRect();
 

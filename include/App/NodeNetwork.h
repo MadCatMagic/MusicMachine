@@ -16,7 +16,7 @@ public:
 	Node* AddNodeFromName(const std::string& type, bool positionFromCursor = false);
 	Node* GetNodeAtPosition(const v2& pos, Node* currentSelection = nullptr);
 
-	void TryEndConnection(Node* origin, const std::string& originName, const v2& pos);
+	void TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 
 	void DrawInput(const v2& cursor, const std::string& name, Node::NodeType type);
 	void DrawOutput(const v2& cursor, float xOffset, const std::string& name, Node::NodeType type);
@@ -24,6 +24,8 @@ public:
 	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type);
 
 	void DrawContextMenu();
+
+	inline void ClearDrawList() { currentList = nullptr; }
 
 private:
 	const float NODE_ROUNDING = 4.0f;
