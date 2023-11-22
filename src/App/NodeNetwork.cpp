@@ -2,6 +2,8 @@
 #include "App/Canvas.h"
 #include "imgui.h"
 
+#include "BBox.h"
+
 NodeNetwork::~NodeNetwork()
 {
 	for (Node* n : nodes)
@@ -83,6 +85,16 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
 				return node;
 	}
 	return nullptr;
+}
+
+std::vector<Node*> NodeNetwork::FindNodesInArea(const v2& p1, const v2& p2)
+{
+	std::vector<Node*> v = std::vector<Node*>();
+	bbox2 bb = bbox2(p1, p2);
+	for (Node* n : nodes)
+		if (bb.overlaps(bbox2(n->position, n->position + n->size)))
+			v.push_back(n);
+	return v;
 }
 
 void NodeNetwork::TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed)
@@ -249,6 +261,18 @@ void NodeNetwork::InitColours()
 		case NodeCol::SelectedOutline:
 			c.name = "SelectedOutline";
 			c.col = ImColor(0.2f, 0.6f, 1.0f, 0.8f);
+			break;
+		case NodeCol::TopSelectedOutline:
+			c.name = "TopSelectedOutline";
+			c.col = ImColor(0.5f, 0.8f, 1.0f, 0.8f);
+			break;
+		case NodeCol::SelectionOutline:
+			c.name = "SelectionOutline";
+			c.col = ImColor(1.0f, 0.8f, 0.2f, 0.8f);
+			break;
+		case NodeCol::SelectionFill:
+			c.name = "SelectionFill";
+			c.col = ImColor(1.0f, 0.8f, 0.2f, 0.2f);
 			break;
 		}
 		colours.push_back(c);

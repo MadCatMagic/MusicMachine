@@ -48,6 +48,8 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 			}
 			return r;
 		}
+
+	return r;
 }
 
 bool Node::Connect(size_t inputIndex, Node* origin, size_t originIndex)

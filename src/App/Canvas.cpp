@@ -3,6 +3,7 @@
 #include "imgui.h"
 
 #include "Engine/Console.h"
+#include "BBox.h"
 
 Canvas::~Canvas()
 {
@@ -38,8 +39,10 @@ void Canvas::CreateWindow()
     const v2 mouseCanvasPos = ScreenToCanvas((v2)io.MousePos);
     const v2 mousePos = CanvasToPosition(mouseCanvasPos);
 
-    static bool somethingSelected = false;
-    static Node* selectedNode = nullptr;
+    // always the top element is the selected item
+    static std::vector<Node*> selectedStack = std::vector<Node*>();
+    static bool selectingArea = false;
+    static v2 selectionStart = v2::zero;
 
     static bool draggingConnection = false;
     static bool connectionReversed = false;
@@ -53,17 +56,22 @@ void Canvas::CreateWindow()
         position.y -= io.MouseDelta.y * scale.y;
     }
     // select thing to drag around
-    else if (isActive && !somethingSelected && !draggingConnection && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+    else if (isActive && !selectingArea && !draggingConnection && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     {
-        Node* node = nodes->GetNodeAtPosition(mousePos, selectedNode);
+        Node* node = nodes->GetNodeAtPosition(mousePos, nullptr);
         if (node != nullptr)
         {
             NodeClickResponse r = node->HandleClick(mousePos - node->position);
             // dragging a node
-            if (!r.handled && !somethingSelected)
+            if (!r.handled && !selectingArea)
             {
-                somethingSelected = true;
-                selectedNode = node;
+                // put straight onto stack
+                if (io.KeyShift)
+                    selectedStack.clear();
+                auto i = std::find(selectedStack.begin(), selectedStack.end(), node);
+                if (i != selectedStack.end())
+                    selectedStack.erase(i);
+                selectedStack.push_back(node);
             }
             // dragging a connection
             if (r.handled && (r.type == NodeClickResponseType::BeginConnection || r.type == NodeClickResponseType::BeginConnectionReversed))
@@ -74,21 +82,30 @@ void Canvas::CreateWindow()
                 connectionReversed = r.type == NodeClickResponseType::BeginConnectionReversed;
             }
         }
+        else if (!selectingArea)
+        {
+            selectingArea = true;
+            selectionStart = mousePos;
+        }
     }
 
-    if (somethingSelected)
+    // handle selection area
+    if (selectingArea && !isActive)
     {
-        // move thing being dragged
-        if (isActive)
+        selectingArea = false;
+        std::vector<Node*> nodesToAdd = nodes->FindNodesInArea(selectionStart, mousePos);
+        if (selectedStack.size() > 0)
         {
-            selectedNode->position.x += io.MouseDelta.x * scale.x;
-            selectedNode->position.y += io.MouseDelta.y * scale.y;
-        }
-        // else deselect thing being dragged
-        else
-        {
-            somethingSelected = false;
-            selectedNode = nullptr;
+            Node* last = selectedStack[selectedStack.size() - 1];
+            selectedStack.pop_back();
+            for (Node* k : nodesToAdd)
+            {
+                auto i = std::find(selectedStack.begin(), selectedStack.end(), k);
+                if (i != selectedStack.end())
+                    selectedStack.erase(i);
+                selectedStack.push_back(k);
+            }
+            selectedStack.push_back(last);
         }
     }
 
@@ -139,8 +156,10 @@ void Canvas::CreateWindow()
                     ImVec2(canvasPixelPos.x, canvasPixelPos.y + y + dy * gridStepSmall.y),
                     ImVec2(canvasBottomRight.x, canvasPixelPos.y + y + dy * gridStepSmall.y), IM_COL32(200, 200, 200, 20));
     }
+
     ImGui::PushFont(textLODs[scalingLevel]);
     nodes->Draw(drawList, this);
+
     // draw dragged connection
     if (draggingConnection)
     {
@@ -168,6 +187,15 @@ void Canvas::CreateWindow()
         }
     }
     nodes->ClearDrawList();
+    
+    // draw selection box
+    if (selectingArea)
+    {
+        bbox2 box = bbox2(mousePos, selectionStart);
+        drawList->AddRectFilled(ptcts(box.a).ImGui(), ptcts(box.b).ImGui(), nodes->GetCol(NodeNetwork::SelectionFill));
+        drawList->AddRect(ptcts(box.a).ImGui(), ptcts(box.b).ImGui(), nodes->GetCol(NodeNetwork::SelectionOutline));
+    }
+
     ImGui::PopFont();
     drawList->PopClipRect();
 

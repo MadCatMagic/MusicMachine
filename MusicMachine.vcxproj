@@ -155,6 +155,7 @@
     <ClCompile Include="src\Engine\Texture\RenderTexture.cpp" />
     <ClCompile Include="src\Engine\Texture\Texture.cpp" />
     <ClCompile Include="src\Engine\Texture\Texture2D.cpp" />
+    <ClCompile Include="src\Maths\BBox.cpp" />
     <ClCompile Include="src\Maths\Matrix4x4.cpp" />
     <ClCompile Include="src\Maths\Quaternion.cpp" />
     <ClCompile Include="src\Maths\Random.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="include\App\Node.h" />
     <ClInclude Include="include\App\NodeNetwork.h" />
     <ClInclude Include="include\App\NodeTypes.h" />
+    <ClInclude Include="include\BBox.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Engine\Console.h" />
     <ClInclude Include="include\Engine\Input.h" />
