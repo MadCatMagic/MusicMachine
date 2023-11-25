@@ -59,7 +59,6 @@ protected:
 	bool FloatOutput(const std::string& name, float* target);
 
 private:
-	bool selected = false;
 	bool mini = false;
 	const float headerHeight = 20.0f;
 

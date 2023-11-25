@@ -11,10 +11,11 @@ NodeNetwork::~NodeNetwork()
 	nodes.clear();
 }
 
-void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
+void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>& selected)
 {
-	drawList->ChannelsSplit(2);
-	drawList->ChannelsSetCurrent(1);
+	drawList->ChannelsSplit(2 * nodes.size());
+	int currentChannel = 1;
+	drawList->ChannelsSetCurrent(currentChannel);
 	currentList = drawList;
 	currentCanvas = canvas;
 	for (Node* node : nodes)
@@ -32,24 +33,33 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas)
 		v2 tlO = canvas->ptcts(node->position - 1.0f);
 		v2 brO = canvas->ptcts(node->position + node->size + 1.0f);
 
-		ImColor outline = GetCol(node->selected ? NodeCol::SelectedOutline : NodeCol::BGOutline);
+		bool isSelected = std::find(selected.begin(), selected.end(), node) != selected.end();
+		bool isSelectedTop = selected.size() > 0 && selected[selected.size() - 1] == node;
+
+		ImColor outline = GetCol(isSelected ? (NodeCol::SelectedOutline) : NodeCol::BGOutline);
+		outline = isSelectedTop ? GetCol(NodeCol::TopSelectedOutline) : outline;
+		ImColor fill = GetCol(isSelected ? NodeCol::SelectedFill : NodeCol::BGFill);
+		
 		// rounded to 4 pixels - a single grid tile.
-		drawList->ChannelsSetCurrent(0);
+		currentChannel--;
+		drawList->ChannelsSetCurrent(currentChannel);
 		drawList->AddRectFilled(
 			tlO.ImGui(),
 			brO.ImGui(),
-			ImColor(outline),
+			outline,
 			NODE_ROUNDING / canvas->GetSF().x,
 			ImDrawFlags_RoundCornersAll
 		);
 		drawList->AddRectFilled(
 			topLeft.ImGui(),
 			bottomRight.ImGui(),
-			ImColor(GetCol(NodeCol::BGFill)),
+			fill,
 			NODE_ROUNDING / canvas->GetSF().x,
 			ImDrawFlags_RoundCornersAll
 		);
-		drawList->ChannelsSetCurrent(1);
+
+		currentChannel += 2;
+		drawList->ChannelsSetCurrent(currentChannel);
 	}
 	drawList->ChannelsMerge();
 }
@@ -76,13 +86,23 @@ Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCur
 	return n;
 }
 
-Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection)
+Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection, size_t offset)
 {
 	if (currentSelection == nullptr)
 	{
 		for (Node* node : nodes)
 			if (pos.inBox(node->position - v2(4.0f), node->position + node->size + v2(4.0f)))
 				return node;
+	}
+	else
+	{
+		size_t index = std::find(nodes.begin(), nodes.end(), currentSelection) - nodes.begin() + offset;
+		for (size_t i = index; i < nodes.size() + index; i++)
+		{
+			Node* n = nodes[i % nodes.size()];
+			if (pos.inBox(n->position - v2(4.0f), n->position + n->size + v2(4.0f)))
+				return n;
+		}
 	}
 	return nullptr;
 }
@@ -95,6 +115,16 @@ std::vector<Node*> NodeNetwork::FindNodesInArea(const v2& p1, const v2& p2)
 		if (bb.overlaps(bbox2(n->position, n->position + n->size)))
 			v.push_back(n);
 	return v;
+}
+
+void NodeNetwork::PushNodeToTop(Node* node)
+{
+	auto index = std::find(nodes.begin(), nodes.end(), node);
+	if (index != nodes.end())
+	{
+		nodes.erase(index);
+		nodes.push_back(node);
+	}
 }
 
 void NodeNetwork::TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed)
@@ -265,6 +295,10 @@ void NodeNetwork::InitColours()
 		case NodeCol::TopSelectedOutline:
 			c.name = "TopSelectedOutline";
 			c.col = ImColor(0.5f, 0.8f, 1.0f, 0.8f);
+			break;
+		case NodeCol::SelectedFill:
+			c.name = "SelectedFill";
+			c.col = ImColor(0.2f, 0.2f, 0.5f, 1.0f);
 			break;
 		case NodeCol::SelectionOutline:
 			c.name = "SelectionOutline";

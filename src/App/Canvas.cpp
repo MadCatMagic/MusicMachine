@@ -5,6 +5,8 @@
 #include "Engine/Console.h"
 #include "BBox.h"
 
+#include "Engine/Input.h"
+
 Canvas::~Canvas()
 {
     if (nodes != nullptr)
@@ -44,10 +46,15 @@ void Canvas::CreateWindow()
     static bool selectingArea = false;
     static v2 selectionStart = v2::zero;
 
+    // connections
     static bool draggingConnection = false;
     static bool connectionReversed = false;
     static std::string connectionOriginName = "";
     static Node* connectionOrigin = nullptr;
+
+    // dragging stuff
+    static bool draggingNodes = false;
+    static float draggingDistance = 0.0f;
 
     // Pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
@@ -58,7 +65,7 @@ void Canvas::CreateWindow()
     // select thing to drag around
     else if (isActive && !selectingArea && !draggingConnection && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     {
-        Node* node = nodes->GetNodeAtPosition(mousePos, nullptr);
+        Node* node = nodes->GetNodeAtPosition(mousePos, selectedStack.size() > 0 ? selectedStack[selectedStack.size() - 1] : nullptr, 0);
         if (node != nullptr)
         {
             NodeClickResponse r = node->HandleClick(mousePos - node->position);
@@ -66,12 +73,20 @@ void Canvas::CreateWindow()
             if (!r.handled && !selectingArea)
             {
                 // put straight onto stack
-                if (io.KeyShift)
-                    selectedStack.clear();
                 auto i = std::find(selectedStack.begin(), selectedStack.end(), node);
                 if (i != selectedStack.end())
+                {
                     selectedStack.erase(i);
+                    // start dragging nodes
+                    draggingNodes = true;
+                }
+                else if (!io.KeyShift)
+                {
+                    selectedStack.clear();
+                    draggingNodes = true;
+                }
                 selectedStack.push_back(node);
+                nodes->PushNodeToTop(node);
             }
             // dragging a connection
             if (r.handled && (r.type == NodeClickResponseType::BeginConnection || r.type == NodeClickResponseType::BeginConnectionReversed))
@@ -94,20 +109,79 @@ void Canvas::CreateWindow()
     {
         selectingArea = false;
         std::vector<Node*> nodesToAdd = nodes->FindNodesInArea(selectionStart, mousePos);
+
         if (selectedStack.size() > 0)
         {
             Node* last = selectedStack[selectedStack.size() - 1];
+            bool addLast = io.KeyShift;
             selectedStack.pop_back();
-            for (Node* k : nodesToAdd)
+            if (!io.KeyShift)
             {
-                auto i = std::find(selectedStack.begin(), selectedStack.end(), k);
-                if (i != selectedStack.end())
-                    selectedStack.erase(i);
-                selectedStack.push_back(k);
+                selectedStack.clear();
+                for (Node* k : nodesToAdd)
+                {
+                    if (k == last)
+                    {
+                        addLast = true;
+                        continue;
+                    }
+                    selectedStack.push_back(k);
+                }
             }
-            selectedStack.push_back(last);
+            else
+            {
+                for (Node* k : nodesToAdd)
+                {
+                    auto i = std::find(selectedStack.begin(), selectedStack.end(), k);
+                    if (i != selectedStack.end())
+                        selectedStack.erase(i);
+                    selectedStack.push_back(k);
+                }
+            }
+            if (addLast)
+                selectedStack.push_back(last);
+        }
+        else
+            for (Node* k : nodesToAdd)
+                selectedStack.push_back(k);
+    }
+    
+    // drag nodes
+    if (draggingNodes)
+    {
+        if (!isActive)
+        {
+            draggingNodes = false;
+            for (Node* n : selectedStack)
+                n->position = v2(roundf(n->position.x), roundf(n->position.y));
+
+            // select only the node you click on if you do not drag very much
+            if (draggingDistance < 2.0f)
+            {
+                if (selectedStack.size() > 1)
+                    selectedStack.erase(selectedStack.begin(), selectedStack.end() - 1);
+                else
+                {
+                    selectedStack[0] = nodes->GetNodeAtPosition(mousePos, selectedStack[selectedStack.size() - 1], 1);
+                    nodes->PushNodeToTop(selectedStack[0]);
+                }
+            }
+            draggingDistance = 0.0f;
+        }
+        else
+        {
+            for (Node* n : selectedStack)
+            {
+                v2 diff = v2(io.MouseDelta.x * scale.x, io.MouseDelta.y * scale.y);
+                n->position += diff;
+                draggingDistance += v2::Magnitude(v2(io.MouseDelta.x));
+            }
         }
     }
+
+    // escape all seelctions
+    if (Input::GetKeyDown(Input::Key::ESCAPE) && selectedStack.size() > 0)
+        selectedStack.clear();
 
     // taken from LevelEditor\...\Editor.cpp
     if (isHovered && io.MouseWheel != 0.0f)
@@ -158,7 +232,7 @@ void Canvas::CreateWindow()
     }
 
     ImGui::PushFont(textLODs[scalingLevel]);
-    nodes->Draw(drawList, this);
+    nodes->Draw(drawList, this, selectedStack);
 
     // draw dragged connection
     if (draggingConnection)

@@ -16,18 +16,19 @@ public:
 		IO, IOSelected,
 		Connector,
 		Text,
-		SelectedOutline, TopSelectedOutline, 
+		SelectedOutline, TopSelectedOutline, SelectedFill,
 		SelectionOutline, SelectionFill
 	};
 	ImColor GetCol(NodeCol colour);
 	ImColor GetCol(Node::NodeType type);
 
-	void Draw(ImDrawList* drawList, class Canvas* canvas);
+	void Draw(ImDrawList* drawList, class Canvas* canvas, std::vector<Node*>& selected);
 	inline void UnassignCanvas() { currentCanvas = nullptr; }
 
 	Node* AddNodeFromName(const std::string& type, bool positionFromCursor = false);
-	Node* GetNodeAtPosition(const v2& pos, Node* currentSelection = nullptr);
+	Node* GetNodeAtPosition(const v2& pos, Node* currentSelection = nullptr, size_t offset = 0);
 	std::vector<Node*> FindNodesInArea(const v2& p1, const v2& p2);
+	void PushNodeToTop(Node* node);
 
 	void TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 
@@ -43,7 +44,7 @@ public:
 private:
 	const float NODE_ROUNDING = 4.0f;
 	// allows for colour scheming
-	const int NUM_COLOURS = 13;
+	const int NUM_COLOURS = 14;
 	struct NodeColourData
 	{
 		std::string name;

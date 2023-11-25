@@ -203,7 +203,7 @@ v2 Node::GetInputPos(size_t index) const
 
 v2 Node::GetInputPos(const std::string& name) const
 {
-	int n = GetInputIndex(name);
+	size_t n = GetInputIndex(name);
 	if (n == -1)
 		return v2::zero;
 	return GetInputPos(n);
@@ -245,7 +245,7 @@ v2 Node::GetOutputPos(const std::string& name) const
 
 Node::NodeType Node::GetInputType(const std::string& name) const
 {
-	int n = GetInputIndex(name);
+	size_t n = GetInputIndex(name);
 	if (n != -1)
 		return inputs[n].type;
 	return NodeType::Bool;
@@ -253,7 +253,7 @@ Node::NodeType Node::GetInputType(const std::string& name) const
 
 Node::NodeType Node::GetOutputType(const std::string& name) const
 {
-	int n = GetOutputIndex(name);
+	size_t n = GetOutputIndex(name);
 	if (n != -1)
 		return outputs[n].type;
 	return NodeType::Bool;
