@@ -153,7 +153,7 @@ void Canvas::CreateWindow()
         {
             draggingNodes = false;
             for (Node* n : selectedStack)
-                n->position = v2(roundf(n->position.x), roundf(n->position.y));
+                n->position = v2(roundf(n->position.x * 0.125f), roundf(n->position.y * 0.125f)) * 8.0f;
 
             // select only the node you click on if you do not drag very much
             if (draggingDistance < 2.0f)
@@ -177,6 +177,17 @@ void Canvas::CreateWindow()
                 draggingDistance += v2::Magnitude(v2(io.MouseDelta.x));
             }
         }
+    }
+
+    // delete things
+    if (Input::GetKeyDown(Input::Key::DELETE) && selectedStack.size() > 0)
+    {
+        for (Node* n : selectedStack)
+            nodes->DeleteNode(n);
+        selectedStack.clear();
+
+        draggingNodes = false;
+        draggingDistance = 0.0f;
     }
 
     // escape all seelctions
@@ -210,12 +221,12 @@ void Canvas::CreateWindow()
 
     // Draw grid + all lines in the canvas
     drawList->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
-    const v2 gridStep = scale.reciprocal() * 16.0f;
-    const v2 gridStepSmall = scale.reciprocal() * 4.0f;
+    const v2 gridStep = scale.reciprocal() * 32.0f;
+    const v2 gridStepSmall = scale.reciprocal() * 8.0f;
     for (float x = fmodf(-position.x / scale.x, gridStep.x); x < canvasPixelSize.x; x += gridStep.x)
     {
         drawList->AddLine(ImVec2(canvasPixelPos.x + x, canvasPixelPos.y), ImVec2(canvasPixelPos.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
-        if (scalingLevel < 15)
+        if (scalingLevel < 21)
             for (int dx = 1; dx < 4; dx++)
                 drawList->AddLine(
                     ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasPixelPos.y), 
@@ -224,7 +235,7 @@ void Canvas::CreateWindow()
     for (float y = fmodf(-position.y / scale.y, gridStep.x); y < canvasPixelSize.y; y += gridStep.x)
     {
         drawList->AddLine(ImVec2(canvasPixelPos.x, canvasPixelPos.y + y), ImVec2(canvasBottomRight.x, canvasPixelPos.y + y), IM_COL32(200, 200, 200, 40));
-        if (scalingLevel < 15)
+        if (scalingLevel < 21)
             for (int dy = 1; dy < 4; dy++)
                 drawList->AddLine(
                     ImVec2(canvasPixelPos.x, canvasPixelPos.y + y + dy * gridStepSmall.y),

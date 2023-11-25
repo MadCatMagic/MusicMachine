@@ -14,12 +14,14 @@ NodeNetwork::~NodeNetwork()
 void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>& selected)
 {
 	drawList->ChannelsSplit(2 * nodes.size());
-	int currentChannel = 1;
-	drawList->ChannelsSetCurrent(currentChannel);
+	int currentChannel = -1;
 	currentList = drawList;
 	currentCanvas = canvas;
 	for (Node* node : nodes)
 	{
+		currentChannel += 2;
+		drawList->ChannelsSetCurrent(currentChannel);
+
 		// make sure to add the correct node connections to the buffer
 		node->ResetTouchedStatus();
 		node->IO();
@@ -57,9 +59,6 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 			NODE_ROUNDING / canvas->GetSF().x,
 			ImDrawFlags_RoundCornersAll
 		);
-
-		currentChannel += 2;
-		drawList->ChannelsSetCurrent(currentChannel);
 	}
 	drawList->ChannelsMerge();
 }
@@ -132,6 +131,17 @@ void NodeNetwork::TryEndConnection(Node* origin, const std::string& originName, 
 	for (Node* n : nodes)
 		if (n != origin && n->TryConnect(origin, originName, pos, connectionReversed))
 			return;
+}
+
+void NodeNetwork::DeleteNode(Node* node)
+{
+	for (Node* n : nodes)
+		for (size_t i = 0; i < n->inputs.size(); i++)
+			if (n->inputs[i].source != nullptr && n->inputs[i].source == node)
+				n->Disconnect(i);
+
+	nodes.erase(std::find(nodes.begin(), nodes.end(), node));
+	delete node;
 }
 
 void NodeNetwork::DrawInput(const v2& cursor, const std::string& name, Node::NodeType type)

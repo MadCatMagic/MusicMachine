@@ -31,6 +31,7 @@ public:
 	void PushNodeToTop(Node* node);
 
 	void TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
+	void DeleteNode(Node* node);
 
 	void DrawInput(const v2& cursor, const std::string& name, Node::NodeType type);
 	void DrawOutput(const v2& cursor, float xOffset, const std::string& name, Node::NodeType type);
