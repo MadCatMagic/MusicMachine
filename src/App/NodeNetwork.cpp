@@ -11,7 +11,7 @@ NodeNetwork::~NodeNetwork()
 	nodes.clear();
 }
 
-void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>& selected)
+void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen)
 {
 	drawList->ChannelsSplit(2 * nodes.size());
 	int currentChannel = -1;
@@ -27,40 +27,49 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 		node->IO();
 		node->CheckTouchedStatus();
 		// automatically sets the size
-		node->Draw(this);
+		bool cullNode = !screen.overlaps(bbox2(node->position, node->position + node->size));
+		node->Draw(this, cullNode);
 
-		// draw node body
-		v2 topLeft = canvas->ptcts(node->position);
-		v2 bottomRight = canvas->ptcts(node->position + node->size);
-		v2 tlO = canvas->ptcts(node->position - 1.0f);
-		v2 brO = canvas->ptcts(node->position + node->size + 1.0f);
+		if (!cullNode)
+		{
+			// draw node body
+			v2 topLeft = canvas->ptcts(node->position);
+			v2 bottomRight = canvas->ptcts(node->position + node->size);
+			v2 tlO = canvas->ptcts(node->position - 1.0f);
+			v2 brO = canvas->ptcts(node->position + node->size + 1.0f);
 
-		bool isSelected = std::find(selected.begin(), selected.end(), node) != selected.end();
-		bool isSelectedTop = selected.size() > 0 && selected[selected.size() - 1] == node;
+			bool isSelected = std::find(selected.begin(), selected.end(), node) != selected.end();
+			bool isSelectedTop = selected.size() > 0 && selected[selected.size() - 1] == node;
 
-		ImColor outline = GetCol(isSelected ? (NodeCol::SelectedOutline) : NodeCol::BGOutline);
-		outline = isSelectedTop ? GetCol(NodeCol::TopSelectedOutline) : outline;
-		ImColor fill = GetCol(isSelected ? NodeCol::SelectedFill : NodeCol::BGFill);
-		
-		// rounded to 4 pixels - a single grid tile.
-		currentChannel--;
-		drawList->ChannelsSetCurrent(currentChannel);
-		drawList->AddRectFilled(
-			tlO.ImGui(),
-			brO.ImGui(),
-			outline,
-			NODE_ROUNDING / canvas->GetSF().x,
-			ImDrawFlags_RoundCornersAll
-		);
-		drawList->AddRectFilled(
-			topLeft.ImGui(),
-			bottomRight.ImGui(),
-			fill,
-			NODE_ROUNDING / canvas->GetSF().x,
-			ImDrawFlags_RoundCornersAll
-		);
+			ImColor outline = GetCol(isSelected ? (NodeCol::SelectedOutline) : NodeCol::BGOutline);
+			outline = isSelectedTop ? GetCol(NodeCol::TopSelectedOutline) : outline;
+			ImColor fill = GetCol(isSelected ? NodeCol::SelectedFill : NodeCol::BGFill);
+
+			// rounded to 4 pixels - a single grid tile.
+			currentChannel--;
+			drawList->ChannelsSetCurrent(currentChannel);
+			drawList->AddRectFilled(
+				tlO.ImGui(),
+				brO.ImGui(),
+				outline,
+				NODE_ROUNDING / canvas->GetSF().x,
+				ImDrawFlags_RoundCornersAll
+			);
+			drawList->AddRectFilled(
+				topLeft.ImGui(),
+				bottomRight.ImGui(),
+				fill,
+				NODE_ROUNDING / canvas->GetSF().x,
+				ImDrawFlags_RoundCornersAll
+			);
+		}
 	}
 	drawList->ChannelsMerge();
+
+	// draw connections on top of all the nodes
+	for (const ConnectionToDraw& connection : connectionsToDraw)
+		drawList->AddBezierCubic(connection.a, connection.b, connection.c, connection.d, connection.col, connection.thickness);
+	connectionsToDraw.clear();
 }
 
 #include "App/NodeTypes.h"
@@ -200,14 +209,15 @@ void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float wi
 void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeType type)
 {
 	float width = 12.0f + fabsf(target.x - origin.x) * 0.3f + fabsf(target.y - origin.y) * 0.1f;
-	currentList->AddBezierCubic(
+	ConnectionToDraw c{
 		currentCanvas->ptcts(origin).ImGui(),
 		currentCanvas->ptcts(origin + v2(width, 0.0f)).ImGui(),
 		currentCanvas->ptcts(target - v2(width, 0.0f)).ImGui(),
 		currentCanvas->ptcts(target).ImGui(),
 		GetCol(type),
 		1.5f / currentCanvas->GetSF().x
-	);
+	};
+	connectionsToDraw.push_back(c);
 }
 
 void NodeNetwork::DrawContextMenu()

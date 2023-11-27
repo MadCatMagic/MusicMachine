@@ -259,41 +259,43 @@ Node::NodeType Node::GetOutputType(const std::string& name) const
 	return NodeType::Bool;
 }
 
-void Node::Draw(NodeNetwork* network)
+void Node::Draw(NodeNetwork* network, bool cullBody)
 {
 	v2 cursor = position;
 	UpdateDimensions();
-
-	if (!mini)
+	if (!cullBody)
 	{
-		// leave spaces
-		cursor.y += headerHeight + 4.0f;
-		cursor.y += 16.0f * outputs.size();
-		cursor.y += minSpace.y;
-
-		// draw inputs
-		for (const NodeInput& input : inputs)
+		if (!mini)
 		{
-			cursor.y += 8.0f;
-			network->DrawInput(cursor, input.name, input.type);
-			cursor.y += 8.0f;
-		}
+			// leave spaces
+			cursor.y += headerHeight + 4.0f;
+			cursor.y += 16.0f * outputs.size();
+			cursor.y += minSpace.y;
 
-		cursor = position;
-		// draw node header
-		network->DrawHeader(cursor, name, size.x, headerHeight, mini);
-		cursor.y += headerHeight + 4.0f;
+			// draw inputs
+			for (const NodeInput& input : inputs)
+			{
+				cursor.y += 8.0f;
+				network->DrawInput(cursor, input.name, input.type);
+				cursor.y += 8.0f;
+			}
 
-		// draw outputs
-		for (const NodeOutput& output : outputs)
-		{
-			cursor.y += 8.0f;
-			network->DrawOutput(cursor, size.x, output.name, output.type);
-			cursor.y += 8.0f;
+			cursor = position;
+			// draw node header
+			network->DrawHeader(cursor, name, size.x, headerHeight, mini);
+			cursor.y += headerHeight + 4.0f;
+
+			// draw outputs
+			for (const NodeOutput& output : outputs)
+			{
+				cursor.y += 8.0f;
+				network->DrawOutput(cursor, size.x, output.name, output.type);
+				cursor.y += 8.0f;
+			}
 		}
+		else
+			network->DrawHeader(cursor, name, size.x, headerHeight, mini);
 	}
-	else 
-		network->DrawHeader(cursor, name, size.x, headerHeight, mini);
 
 	// draw connections
 	for (const NodeInput& inp : inputs)

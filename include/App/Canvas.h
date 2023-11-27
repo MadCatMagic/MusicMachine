@@ -28,6 +28,7 @@ public:
 
 	// shortcut
 	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
+	inline v2 stctp(const v2& pos) const { return CanvasToPosition(ScreenToCanvas(pos)); }
 
 	void GenerateAllTextLODs();
 

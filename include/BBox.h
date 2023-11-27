@@ -9,8 +9,8 @@ struct bbox2
 	v2 a; // "bottomLeft"
 	v2 b; // "topRight"
 
-	bool overlaps(const bbox2& o);
-	bool contains(const v2& p);
+	bool overlaps(const bbox2& o) const;
+	bool contains(const v2& p) const;
 
 	static bbox2 Min(const bbox2& a, const bbox2& b);
 	static bbox2 Max(const bbox2& a, const bbox2& b);

@@ -243,7 +243,7 @@ void Canvas::CreateWindow()
     }
 
     ImGui::PushFont(textLODs[scalingLevel]);
-    nodes->Draw(drawList, this, selectedStack);
+    nodes->Draw(drawList, this, selectedStack, bbox2(stctp(canvasPixelPos), stctp(canvasBottomRight)));
 
     // draw dragged connection
     if (draggingConnection)

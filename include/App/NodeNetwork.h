@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "imgui.h"
+#include "BBox.h"
 
 class NodeNetwork
 {
@@ -22,7 +23,7 @@ public:
 	ImColor GetCol(NodeCol colour);
 	ImColor GetCol(Node::NodeType type);
 
-	void Draw(ImDrawList* drawList, class Canvas* canvas, std::vector<Node*>& selected);
+	void Draw(ImDrawList* drawList, class Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen);
 	inline void UnassignCanvas() { currentCanvas = nullptr; }
 
 	Node* AddNodeFromName(const std::string& type, bool positionFromCursor = false);
@@ -53,6 +54,15 @@ private:
 	};
 	std::vector<NodeColourData> colours;
 	void InitColours();
+
+	// for drawing later
+	struct ConnectionToDraw
+	{
+		ImVec2 a, b, c, d;
+		ImColor col;
+		float thickness;
+	};
+	std::vector<ConnectionToDraw> connectionsToDraw;
 
 	ImDrawList* currentList = nullptr;
 	Canvas* currentCanvas = nullptr;
