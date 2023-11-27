@@ -61,22 +61,20 @@ protected:
 private:
 	bool mini = false;
 	const float headerHeight = 20.0f;
-	// headerHeight, offsetX
-	float headerSize() const;
 
 	struct NodeOutput
 	{
 		std::string name;
-		void* data;
-		NodeType type;
+		void* data{};
+		NodeType type{};
 		int connections = 0;
 	};
 
 	struct NodeInput
 	{
 		std::string name;
-		void* target;
-		NodeType type;
+		void* target{};
+		NodeType type{};
 
 		Node* source = nullptr;
 		std::string sourceName = "";
