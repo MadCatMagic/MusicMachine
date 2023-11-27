@@ -61,6 +61,8 @@ protected:
 private:
 	bool mini = false;
 	const float headerHeight = 20.0f;
+	// headerHeight, offsetX
+	float headerSize() const;
 
 	struct NodeOutput
 	{

@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 
+#define PI 3.1415927f
+#define TWOPI 6.2831855f
+
 struct v2;
 struct v3;
 struct v4;

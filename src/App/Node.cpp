@@ -133,6 +133,11 @@ bool Node::FloatOutput(const std::string& name, float* target)
 	return false;
 }
 
+float Node::headerSize() const
+{
+	return std::max(headerHeight, 18.0f * (inputs.size() - 1) / (PI * 0.6f));
+}
+
 // O(n^2) (over a whole frame)
 void Node::TransferInput(const NodeInput& i)
 {
@@ -198,7 +203,17 @@ v2 Node::GetInputPos(size_t index) const
 		return position + v2(0.0f, headerHeight + 4.0f + 16.0f * outputs.size() + minSpace.y + 16.0f * index + 8.0f);
 	}
 	else
+	{
+		if (inputs.size() > 1)
+		{
+			const float hh = headerSize() * 0.5f;
+			const float offx = 1.0f - cosf(0.3 * PI);
+			const float angle = PI * (0.2f + 0.6f * index / (float)(inputs.size() - 1));
+			v2 offset = v2(sinf(-angle) - offx, -cosf(angle));
+			return position + hh + offset * hh;
+		}
 		return position + v2(0.0f, headerHeight * 0.5f);
+	}
 }
 
 v2 Node::GetInputPos(const std::string& name) const
@@ -216,7 +231,18 @@ v2 Node::GetOutputPos(size_t index) const
 		return position + v2(size.x, headerHeight + 4.0f + 16.0f * index + 8.0f);
 	}
 	else
-		return position + v2(size.x, headerHeight * 0.5f);
+	{
+		if (outputs.size() > 1)
+		{
+			const float offx = 1.0f - cosf(0.3 * PI);
+			const float hh = headerSize() * 0.5f;
+			const float angle = PI * (0.2f + 0.6f * index / (float)(outputs.size() - 1));
+			v2 offset = v2(sinf(angle) + offx, -cosf(angle));
+			return position + hh + offset * hh + v2(size.x, 0.0f);
+		}		
+		else
+			return position + v2(size.x, headerSize() * 0.5f);
+	}
 }
 
 size_t Node::GetInputIndex(const std::string& name) const
@@ -294,7 +320,13 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 			}
 		}
 		else
-			network->DrawHeader(cursor, name, size.x, headerHeight, mini);
+		{
+			network->DrawHeader(cursor, name, size.x, headerSize(), mini);
+			for (size_t i = 0; i < inputs.size(); i++)
+				network->DrawConnectionEndpoint(GetInputPos(i), network->GetCol(inputs[i].type), true);
+			for (size_t i = 0; i < outputs.size(); i++)
+				network->DrawConnectionEndpoint(GetOutputPos(i), network->GetCol(outputs[i].type), true);
+		}
 	}
 
 	// draw connections
@@ -319,7 +351,7 @@ void Node::UpdateDimensions()
 	maxXOff = std::max(IOWidth(name) + 6.0f, maxXOff);
 
 	if (mini)
-		size = v2(maxXOff, headerHeight);
+		size = v2(maxXOff, headerSize());
 	else
 		size = v2(maxXOff, headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f);
 }

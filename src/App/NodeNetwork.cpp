@@ -83,6 +83,9 @@ Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCur
 	if (type == "Maths")
 		n = new MathsNode();
 
+	if (type == "Long")
+		n = new LongNode();
+
 	if (n == nullptr)
 		return nullptr;
 
@@ -159,8 +162,7 @@ void NodeNetwork::DrawInput(const v2& cursor, const std::string& name, Node::Nod
 	v2 pos = currentCanvas->ptcts(cursor);
 	float sf = currentCanvas->GetSF().x;
 	// input circle thingy
-	currentList->AddCircleFilled(pos.ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
-	currentList->AddCircleFilled(pos.ImGui(), 3.0f / sf, colour);
+	DrawConnectionEndpoint(pos, colour);
 	// text
 	pos = currentCanvas->ptcts(cursor + v2(8.0f, -6.0f));
 	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), name.c_str());
@@ -172,20 +174,35 @@ void NodeNetwork::DrawOutput(const v2& cursor, float xOffset, const std::string&
 	v2 pos = currentCanvas->ptcts(cursor + v2(xOffset, 0.0f));
 	float sf = currentCanvas->GetSF().x;
 	// draw on right side of node
-	currentList->AddCircleFilled(pos.ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
-	currentList->AddCircleFilled(pos.ImGui(), 3.0f / sf, colour);
+	DrawConnectionEndpoint(pos, colour);
 	// text
 	pos = currentCanvas->ptcts(cursor + v2(xOffset - (name.size() + 1) * 6.0f, 0.0f) + v2(-8.0f, -6.0f));
 	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), name.c_str());
 }
 
-void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini)
+void NodeNetwork::DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition)
+{
+	// draw it
+	float sf = currentCanvas->GetSF().x;
+	if (convertPosition)
+	{
+		currentList->AddCircleFilled(currentCanvas->ptcts(centre).ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
+		currentList->AddCircleFilled(currentCanvas->ptcts(centre).ImGui(), 3.0f / sf, color);
+	}
+	else
+	{
+		currentList->AddCircleFilled(centre.ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
+		currentList->AddCircleFilled(centre.ImGui(), 3.0f / sf, color);
+	}
+}
+
+void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float rounding)
 {
 	v2 topLeft = currentCanvas->ptcts(cursor + 1.0f);
 	v2 bottomRight = currentCanvas->ptcts(cursor + v2(width, height) - 1.0f);
 	v2 textPos = currentCanvas->ptcts(v2(cursor.x + 8.0f, cursor.y + height * 0.5f - 6.0f));
 	ImDrawFlags flags = ImDrawFlags_RoundCornersAll;
-	currentList->AddRectFilled(topLeft.ImGui(), bottomRight.ImGui(), GetCol(NodeCol::BGHeader), NODE_ROUNDING / currentCanvas->GetSF().x, flags);
+	currentList->AddRectFilled(topLeft.ImGui(), bottomRight.ImGui(), GetCol(NodeCol::BGHeader), rounding / currentCanvas->GetSF().x, flags);
 	currentList->AddText(textPos.ImGui(), GetCol(NodeCol::Text), name.c_str());
 
 	// minimized triangle thing
@@ -232,7 +249,8 @@ void NodeNetwork::DrawContextMenu()
 	{
 		const std::string nodeNames[] {
 			"Node",
-			"Maths"
+			"Maths",
+			"Long"
 		};
 		for (const std::string& name : nodeNames)
 			if (ImGui::MenuItem(name.c_str()))

@@ -14,3 +14,15 @@ private:
 	float b = 0.0f;
 	float result = 0.0f;
 };
+
+struct LongNode : public Node
+{
+protected:
+	virtual void Init() override;
+	virtual void IO() override;
+
+	inline virtual void Work() override { }
+
+private:
+
+};
