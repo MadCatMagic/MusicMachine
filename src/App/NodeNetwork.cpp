@@ -27,16 +27,17 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 		node->IO();
 		node->CheckTouchedStatus();
 		// automatically sets the size
-		bool cullNode = !screen.overlaps(bbox2(node->position, node->position + node->size));
-		node->Draw(this, cullNode);
+		bool dontCullNode = screen.overlaps(bbox2(node->position, node->position + node->size));
+		node->Draw(this, !dontCullNode);
 
-		if (!cullNode)
+		if (dontCullNode)
 		{
 			// draw node body
-			v2 topLeft = canvas->ptcts(node->position);
-			v2 bottomRight = canvas->ptcts(node->position + node->size);
-			v2 tlO = canvas->ptcts(node->position - 1.0f);
-			v2 brO = canvas->ptcts(node->position + node->size + 1.0f);
+			bbox2 nodeBounds = node->getBounds();
+			v2 topLeft = canvas->ptcts(nodeBounds.a);
+			v2 bottomRight = canvas->ptcts(nodeBounds.b);
+			v2 tlO = canvas->ptcts(nodeBounds.a - 1.0f);
+			v2 brO = canvas->ptcts(nodeBounds.b + 1.0f);
 
 			bool isSelected = std::find(selected.begin(), selected.end(), node) != selected.end();
 			bool isSelectedTop = selected.size() > 0 && selected[selected.size() - 1] == node;
@@ -102,7 +103,7 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection, size
 	if (currentSelection == nullptr)
 	{
 		for (Node* node : nodes)
-			if (pos.inBox(node->position - v2(4.0f), node->position + node->size + v2(4.0f)))
+			if (node->getBounds().containsLeniant(pos, 4.0f))
 				return node;
 	}
 	else
@@ -123,7 +124,7 @@ std::vector<Node*> NodeNetwork::FindNodesInArea(const v2& p1, const v2& p2)
 	std::vector<Node*> v = std::vector<Node*>();
 	bbox2 bb = bbox2(p1, p2);
 	for (Node* n : nodes)
-		if (bb.overlaps(bbox2(n->position, n->position + n->size)))
+		if (bb.overlaps(n->getBounds()))
 			v.push_back(n);
 	return v;
 }

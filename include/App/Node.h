@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector.h"
+#include "BBox.h"
 #include <vector>
 
 struct Node;
@@ -45,7 +46,6 @@ struct Node
 
 protected:
 	virtual void Init();
-	//virtual void IO();
 	inline virtual void Work() { }
 
 	std::string name = "Node";
@@ -97,4 +97,6 @@ private:
 	void Draw(class NodeNetwork* network, bool cullBody);
 	void UpdateDimensions();
 	float IOWidth(const std::string& text);
+	float headerSize() const;
+	bbox2 getBounds() const;
 };

@@ -17,9 +17,8 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		return r;
 	
 	v2 worldPos = nodePos + position;
-	v2 firstOutput = GetOutputPos(0);
 	for (size_t i = 0; i < outputs.size(); i++)
-		if (v2::Distance(firstOutput + v2(0.0f, 16.0f * i), worldPos) <= 8.0f)
+		if (v2::Distance(GetOutputPos(i), worldPos) <= 8.0f)
 		{
 			r.handled = true;
 			r.type = NodeClickResponseType::BeginConnection;
@@ -27,10 +26,9 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 			r.origin = this;
 			return r;
 		}
-
-	v2 firstInput = GetInputPos(0);
+	
 	for (size_t i = 0; i < inputs.size(); i++)
-		if (v2::Distance(firstInput + v2(0.0f, 16.0f * i), worldPos) <= 8.0f)
+		if (v2::Distance(GetInputPos(i), worldPos) <= 8.0f)
 		{
 			r.handled = true;
 			if (inputs[i].source != nullptr)
@@ -133,10 +131,18 @@ bool Node::FloatOutput(const std::string& name, float* target)
 	return false;
 }
 
-/*float Node::headerSize() const
+float Node::headerSize() const
 {
 	return std::max(headerHeight, 18.0f * (inputs.size() - 1) / (PI * 0.6f));
-}*/
+}
+
+bbox2 Node::getBounds() const
+{
+	if (!mini)
+		return bbox2(position, position + size);
+	v2 offset = position - v2(0.0f, headerSize() * 0.5f - headerHeight * 0.5f);
+	return bbox2(offset, offset + size);
+}
 
 // O(n^2) (over a whole frame)
 void Node::TransferInput(const NodeInput& i)
@@ -204,14 +210,15 @@ v2 Node::GetInputPos(size_t index) const
 	}
 	else
 	{
-		/*if (inputs.size() > 1)
+		if (inputs.size() > 1)
 		{
 			const float hh = headerSize() * 0.5f;
 			const float offx = 1.0f - cosf(0.3 * PI);
 			const float angle = PI * (0.2f + 0.6f * index / (float)(inputs.size() - 1));
 			v2 offset = v2(sinf(-angle) - offx, -cosf(angle));
-			return position + hh + offset * hh;
-		}*/
+			v2 offt = v2(hh, 0.0f) + headerHeight * 0.5f;
+			return position + offt * 0.5f + offset * hh;
+		}
 		return position + v2(0.0f, headerHeight * 0.5f);
 	}
 }
@@ -232,15 +239,14 @@ v2 Node::GetOutputPos(size_t index) const
 	}
 	else
 	{
-		/*if (outputs.size() > 1)
+		if (outputs.size() > 1)
 		{
 			const float offx = 1.0f - cosf(0.3 * PI);
 			const float hh = headerSize() * 0.5f;
 			const float angle = PI * (0.2f + 0.6f * index / (float)(outputs.size() - 1));
 			v2 offset = v2(sinf(angle) + offx, -cosf(angle));
-			return position + hh + offset * hh + v2(size.x, 0.0f);
-		}		
-		else*/
+			return position + offset * hh + v2(size.x, 0.0f);
+		}
 		return position + v2(size.x, headerHeight * 0.5f);
 	}
 }
@@ -321,11 +327,11 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 		}
 		else
 		{
-			network->DrawHeader(cursor, name, size.x, headerHeight, mini);
-			if (inputs.size() > 0)
-				network->DrawConnectionEndpoint(cursor + v2(0.0f, headerHeight * 0.5f), network->GetCol(NodeNetwork::NodeCol::TopSelectedOutline), true);
-			if (outputs.size() > 0)
-				network->DrawConnectionEndpoint(cursor + v2(size.x, headerHeight * 0.5f), network->GetCol(NodeNetwork::NodeCol::TopSelectedOutline), true);
+			network->DrawHeader(cursor - v2(0.0f, headerSize() - headerHeight) * 0.5f, name, size.x, headerSize(), mini);
+			for (size_t i = 0; i < inputs.size(); i++)
+				network->DrawConnectionEndpoint(GetInputPos(i), network->GetCol(NodeNetwork::NodeCol::TopSelectedOutline), true);
+			for (size_t i = 0; i < outputs.size(); i++)
+				network->DrawConnectionEndpoint(GetOutputPos(i), network->GetCol(NodeNetwork::NodeCol::TopSelectedOutline), true);
 		}
 	}
 
@@ -351,7 +357,7 @@ void Node::UpdateDimensions()
 	maxXOff = std::max(IOWidth(name) + 6.0f, maxXOff);
 
 	if (mini)
-		size = v2(maxXOff, headerHeight);
+		size = v2(maxXOff, headerSize());
 	else
 		size = v2(maxXOff, headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f);
 }
