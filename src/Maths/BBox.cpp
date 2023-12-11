@@ -23,6 +23,11 @@ bool bbox2::contains(const v2& p) const
 	return p.inBox(a, b);
 }
 
+bool bbox2::containsLeniant(const v2& p, float leniancy)
+{
+	return p.inBox(a - leniancy, b + leniancy);
+}
+
 bbox2 bbox2::Min(const bbox2& a, const bbox2& b)
 {
 	return bbox2(

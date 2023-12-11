@@ -17,36 +17,63 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		return r;
 	
 	v2 worldPos = nodePos + position;
-	for (size_t i = 0; i < outputs.size(); i++)
-		if (v2::Distance(GetOutputPos(i), worldPos) <= 8.0f)
+	if (outputs.size() > 0)
+	{
+		NodeOutput& o = outputs[0];
+		float minDist = FLT_MAX;
+		for (size_t i = 0; i < outputs.size(); i++)
+		{
+			float d = v2::Distance(GetOutputPos(i), worldPos);
+			if (d <= minDist)
+			{
+				o = outputs[i];
+				minDist = d;
+			}
+		}
+		if (minDist <= 8.0f)
 		{
 			r.handled = true;
 			r.type = NodeClickResponseType::BeginConnection;
-			r.originName = outputs[i].name;
+			r.originName = o.name;
 			r.origin = this;
 			return r;
 		}
+	}
 	
-	for (size_t i = 0; i < inputs.size(); i++)
-		if (v2::Distance(GetInputPos(i), worldPos) <= 8.0f)
+	if (inputs.size() > 0)
+	{
+		NodeInput& inp = inputs[0];
+		float minDist = FLT_MAX;
+		size_t inpI = 0;
+		for (size_t i = 0; i < inputs.size(); i++)
+		{
+			float d = v2::Distance(GetInputPos(i), worldPos);
+			if (d <= minDist)
+			{
+				inp = inputs[i];
+				minDist = d;
+				inpI = i;
+			}
+		}
+		if (minDist <= 8.0f)
 		{
 			r.handled = true;
-			if (inputs[i].source != nullptr)
+			if (inp.source != nullptr)
 			{
 				r.type = NodeClickResponseType::BeginConnection;
-				r.originName = inputs[i].sourceName;
-				r.origin = inputs[i].source;
-				Disconnect(i);
+				r.originName = inp.sourceName;
+				r.origin = inp.source;
+				Disconnect(inpI);
 			}
-			else 
+			else
 			{
 				r.type = NodeClickResponseType::BeginConnectionReversed;
-				r.originName = inputs[i].name;
+				r.originName = inp.name;
 				r.origin = this;
 			}
 			return r;
 		}
-
+	}
 	return r;
 }
 
@@ -133,7 +160,7 @@ bool Node::FloatOutput(const std::string& name, float* target)
 
 float Node::headerSize() const
 {
-	return std::max(headerHeight, 18.0f * (inputs.size() - 1) / (PI * 0.6f));
+	return std::max(headerHeight, 16.0f * (inputs.size()) / (PI * 0.6f));
 }
 
 bbox2 Node::getBounds() const
@@ -208,19 +235,16 @@ v2 Node::GetInputPos(size_t index) const
 	{
 		return position + v2(0.0f, headerHeight + 4.0f + 16.0f * outputs.size() + minSpace.y + 16.0f * index + 8.0f);
 	}
-	else
+	else if (inputs.size() > 1)
 	{
-		if (inputs.size() > 1)
-		{
-			const float hh = headerSize() * 0.5f;
-			const float offx = 1.0f - cosf(0.3 * PI);
-			const float angle = PI * (0.2f + 0.6f * index / (float)(inputs.size() - 1));
-			v2 offset = v2(sinf(-angle) - offx, -cosf(angle));
-			v2 offt = v2(hh, 0.0f) + headerHeight * 0.5f;
-			return position + offt * 0.5f + offset * hh;
-		}
-		return position + v2(0.0f, headerHeight * 0.5f);
+		const float hh = headerSize() * 0.5f;
+		const float offx = 1.0f - cosf(0.3 * PI);
+		const float angle = PI * (0.2f + 0.6f * index / (float)(inputs.size() - 1));
+		v2 offset = v2(sinf(-angle) - offx, -cosf(angle));
+		v2 offt = v2(hh - headerHeight * 0.5f - offset.x, headerHeight * 0.5f);
+		return position + offt + offset * hh;
 	}
+	return position + v2(0.0f, headerHeight * 0.5f);
 }
 
 v2 Node::GetInputPos(const std::string& name) const
@@ -329,9 +353,9 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 		{
 			network->DrawHeader(cursor - v2(0.0f, headerSize() - headerHeight) * 0.5f, name, size.x, headerSize(), mini);
 			for (size_t i = 0; i < inputs.size(); i++)
-				network->DrawConnectionEndpoint(GetInputPos(i), network->GetCol(NodeNetwork::NodeCol::TopSelectedOutline), true);
+				network->DrawConnectionEndpoint(GetInputPos(i), network->GetCol(inputs[i].type), true);
 			for (size_t i = 0; i < outputs.size(); i++)
-				network->DrawConnectionEndpoint(GetOutputPos(i), network->GetCol(NodeNetwork::NodeCol::TopSelectedOutline), true);
+				network->DrawConnectionEndpoint(GetOutputPos(i), network->GetCol(outputs[i].type), true);
 		}
 	}
 
@@ -357,7 +381,7 @@ void Node::UpdateDimensions()
 	maxXOff = std::max(IOWidth(name) + 6.0f, maxXOff);
 
 	if (mini)
-		size = v2(maxXOff, headerSize());
+		size = v2(maxXOff + headerSize() - headerHeight, headerSize());
 	else
 		size = v2(maxXOff, headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f);
 }

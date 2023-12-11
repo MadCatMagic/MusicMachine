@@ -39,7 +39,7 @@ public:
 	void DrawInput(const v2& cursor, const std::string& name, Node::NodeType type);
 	void DrawOutput(const v2& cursor, float xOffset, const std::string& name, Node::NodeType type);
 	void DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition = false);
-	void DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float rounding = NODE_ROUNDING);
+	void DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini);
 	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type);
 
 	void DrawContextMenu();

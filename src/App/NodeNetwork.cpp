@@ -13,7 +13,7 @@ NodeNetwork::~NodeNetwork()
 
 void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen)
 {
-	drawList->ChannelsSplit(2 * nodes.size());
+	drawList->ChannelsSplit(2 * (int)nodes.size());
 	int currentChannel = -1;
 	currentList = drawList;
 	currentCanvas = canvas;
@@ -38,6 +38,7 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 			v2 bottomRight = canvas->ptcts(nodeBounds.b);
 			v2 tlO = canvas->ptcts(nodeBounds.a - 1.0f);
 			v2 brO = canvas->ptcts(nodeBounds.b + 1.0f);
+			float rounding = node->mini ? node->headerSize() : NODE_ROUNDING;
 
 			bool isSelected = std::find(selected.begin(), selected.end(), node) != selected.end();
 			bool isSelectedTop = selected.size() > 0 && selected[selected.size() - 1] == node;
@@ -53,14 +54,14 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 				tlO.ImGui(),
 				brO.ImGui(),
 				outline,
-				NODE_ROUNDING / canvas->GetSF().x,
+				rounding / canvas->GetSF().x,
 				ImDrawFlags_RoundCornersAll
 			);
 			drawList->AddRectFilled(
 				topLeft.ImGui(),
 				bottomRight.ImGui(),
 				fill,
-				NODE_ROUNDING / canvas->GetSF().x,
+				rounding / canvas->GetSF().x,
 				ImDrawFlags_RoundCornersAll
 			);
 		}
@@ -197,12 +198,13 @@ void NodeNetwork::DrawConnectionEndpoint(const v2& centre, const ImColor& color,
 	}
 }
 
-void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float rounding)
+void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini)
 {
 	v2 topLeft = currentCanvas->ptcts(cursor + 1.0f);
 	v2 bottomRight = currentCanvas->ptcts(cursor + v2(width, height) - 1.0f);
 	v2 textPos = currentCanvas->ptcts(v2(cursor.x + 8.0f, cursor.y + height * 0.5f - 6.0f));
 	ImDrawFlags flags = ImDrawFlags_RoundCornersAll;
+	float rounding = mini ? height * 0.5f: NODE_ROUNDING;
 	currentList->AddRectFilled(topLeft.ImGui(), bottomRight.ImGui(), GetCol(NodeCol::BGHeader), rounding / currentCanvas->GetSF().x, flags);
 	currentList->AddText(textPos.ImGui(), GetCol(NodeCol::Text), name.c_str());
 

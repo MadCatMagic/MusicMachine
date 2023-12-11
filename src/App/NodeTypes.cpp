@@ -1,4 +1,5 @@
 #include "App/NodeTypes.h"
+#include "Engine/Console.h"
 
 void MathsNode::Init()
 {
@@ -17,15 +18,19 @@ void MathsNode::IO()
 void LongNode::Init()
 {
 	name = "Long Node";
+	Console::AddCommand(&ConsoleCommand, "ln");
 }
 
 void LongNode::IO()
 {
-	FloatInput("in 1", nullptr);
-	FloatInput("in 2", nullptr);
-	BoolInput("in 3", nullptr);
-	FloatInput("in 4", nullptr);
-	BoolInput("and", nullptr);
-	BoolInput("so", nullptr);
-	FloatInput("on", nullptr);
+	for (int i = 0; i < nodeNum; i++)
+		FloatInput("in " + std::to_string(i + 1), nullptr);
 }
+
+void LongNode::ConsoleCommand(std::vector<std::string> arguments)
+{
+	if (arguments.size() > 0)
+		nodeNum = std::stoi(arguments[0]);
+}
+
+int LongNode::nodeNum = 6;

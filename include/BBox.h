@@ -11,6 +11,7 @@ struct bbox2
 
 	bool overlaps(const bbox2& o) const;
 	bool contains(const v2& p) const;
+	bool containsLeniant(const v2& p, float leniancy);
 
 	static bbox2 Min(const bbox2& a, const bbox2& b);
 	static bbox2 Max(const bbox2& a, const bbox2& b);
