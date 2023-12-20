@@ -52,6 +52,7 @@ void Console::AddCommand(ConsoleCommandCallback callback, const std::string& nam
             instance->LogErr("Oi you trying to add a command that already exists??: '" + name + "'");
             return;
         }
+  
     Command c;
     c.callback = callback;
     c.name = name;
@@ -293,6 +294,7 @@ void Console::ExecuteCommand(const std::string& command)
         else
             args[args.size() - 1].push_back(c);
     }
+  
     if (args[args.size() - 1] == "")
         args.pop_back();
 
