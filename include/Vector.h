@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 
+#define PI 3.1415927f
+#define TWOPI 6.2831855f
+
 struct v2;
 struct v3;
 struct v4;
@@ -17,6 +20,9 @@ struct v2
 	v2(float a);
 	v2(float x, float y);
 	v2(v2i i);
+	v2(const struct ImVec2& v);
+
+	ImVec2 ImGui() const;
 
 	static v2 Scale(const v2& a, const v2& b);
 
@@ -25,6 +31,9 @@ struct v2
 	static float Distance(const v2& a, const v2& b);
 	static v2 Normalize(const v2& a);
 	static v2 Reciprocal(const v2& a);
+
+	bool inBox(const v2& bottomLeft, const v2& topRight) const;
+	v2 reciprocal() const;
 	
 	v2 operator+(const v2& a) const;
 	v2 operator-() const;

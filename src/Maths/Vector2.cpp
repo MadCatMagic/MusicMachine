@@ -25,6 +25,18 @@ v2::v2(v2i i)
 	this->y = (float)i.y;
 }
 
+#include "imgui.h"
+v2::v2(const ImVec2& v)
+{
+	x = v.x;
+	y = v.y;
+}
+
+ImVec2 v2::ImGui() const
+{
+	return ImVec2(x, y);
+}
+
 v2 v2::Scale(const v2& a, const v2& b)
 {
 	return v2(a.x * b.x, a.y * b.y);
@@ -58,6 +70,17 @@ v2 v2::Normalize(const v2& a)
 v2 v2::Reciprocal(const v2& a)
 {
 	return v2(1.0f / a.x, 1.0f / a.y);
+}
+
+bool v2::inBox(const v2& bottomLeft, const v2& topRight) const
+{
+	return bottomLeft.x <= x && bottomLeft.y <= y
+		&& topRight.x >= x && topRight.y >= y;
+}
+
+v2 v2::reciprocal() const
+{
+	return v2::Reciprocal(*this);
 }
 
 v2 v2::operator+(const v2& a) const

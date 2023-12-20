@@ -5,6 +5,17 @@
 
 void App::Initialize()
 {
+    n = new NodeNetwork();
+    Node* b = n->AddNodeFromName("Node");
+    b->IO();
+    Node* m = n->AddNodeFromName("Maths");
+    m->IO();
+    if (m->Connect(0, b, 1))
+        Console::Log("successfully connected nodes");
+    else
+        Console::LogErr("failed to connect nodes");
+    c.GenerateAllTextLODs();
+    c.nodes = n;
 }
 
 void App::Update()
@@ -31,8 +42,12 @@ void App::UI(struct ImGuiIO* io)
 
 
 	ImGui::End();
+
+    c.CreateWindow();
 }
 
 void App::Release()
 {
+    if (n != nullptr)
+        delete n;
 }

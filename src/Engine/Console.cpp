@@ -46,6 +46,13 @@ void Console::Execute(const std::string& command)
 
 void Console::AddCommand(ConsoleCommandCallback callback, const std::string& name)
 {
+    for (Command& k : instance->commands)
+        if (k.name == name)
+        {
+            instance->LogErr("Oi you trying to add a command that already exists??: '" + name + "'");
+            return;
+        }
+  
     Command c;
     c.callback = callback;
     c.name = name;
@@ -274,7 +281,7 @@ void Console::ExecuteCommand(const std::string& command)
     std::string commandWord = command.substr(0, wordLength);
     std::string commandArgs;
     if (wordLength < command.size())
-        std::string commandArgs = command.substr(wordLength + 1);
+        commandArgs = command.substr(wordLength + 1);
 
     // split up args into individual strings
     std::vector<std::string> args;
@@ -287,6 +294,9 @@ void Console::ExecuteCommand(const std::string& command)
         else
             args[args.size() - 1].push_back(c);
     }
+  
+    if (args[args.size() - 1] == "")
+        args.pop_back();
 
     // actually try and run the command
     for (size_t i = 0; i < commands.size(); i++)
