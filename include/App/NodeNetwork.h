@@ -47,6 +47,16 @@ public:
 	inline void ClearDrawList() { currentList = nullptr; }
 
 private:
+	// works out whether nodes have circular dependencies. will not calculate if circular dependencies exist.
+	struct AbstractNode
+	{
+		unsigned int id = -1;
+		std::vector<AbstractNode*> markedBy;
+		std::vector<AbstractNode*> outputs;
+		std::vector<AbstractNode*> inputs;
+	};
+	void CheckForCircularDependency();
+
 	// allows for colour scheming
 	const int NUM_COLOURS = 14;
 	struct NodeColourData

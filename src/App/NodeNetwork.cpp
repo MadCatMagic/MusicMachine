@@ -283,6 +283,28 @@ ImColor NodeNetwork::GetCol(Node::NodeType type)
 	return colour;
 }
 
+void NodeNetwork::CheckForCircularDependency()
+{
+	// assume nodes with no endpoints are start points of backpropagation
+	std::vector<size_t> endpointIndices;
+	std::vector<AbstractNode*> endpoints;
+	std::vector<AbstractNode*> absNodes;
+	for (size_t i = 0; i < nodes.size(); i++)
+	{
+		AbstractNode* n = new AbstractNode();
+		n->id = i;
+		if (nodes[i]->outputs.size() == 0)
+		{
+			endpointIndices.push_back(i);
+			endpoints.push_back(n);
+		}
+		absNodes.push_back(n);
+	}
+
+	// now fill out all of the nodes's connections with each other
+
+}
+
 void NodeNetwork::InitColours()
 {
 	for (int i = 0; i < NUM_COLOURS; i++)
