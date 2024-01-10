@@ -4,6 +4,11 @@
 
 #include "BBox.h"
 
+NodeNetwork::NodeNetwork()
+{
+	InitColours();
+}
+
 NodeNetwork::~NodeNetwork()
 {
 	for (Node* n : nodes)
@@ -113,7 +118,7 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection, size
 		for (size_t i = index; i < nodes.size() + index; i++)
 		{
 			Node* n = nodes[i % nodes.size()];
-			if (pos.inBox(n->position - v2(4.0f), n->position + n->size + v2(4.0f)))
+			if (n->getBounds().containsLeniant(pos, 4.0f))
 				return n;
 		}
 	}
@@ -198,7 +203,7 @@ void NodeNetwork::DrawConnectionEndpoint(const v2& centre, const ImColor& color,
 	}
 }
 
-void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini)
+void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float miniTriOffset)
 {
 	v2 topLeft = currentCanvas->ptcts(cursor + 1.0f);
 	v2 bottomRight = currentCanvas->ptcts(cursor + v2(width, height) - 1.0f);
@@ -209,7 +214,8 @@ void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float wi
 	currentList->AddText(textPos.ImGui(), GetCol(NodeCol::Text), name.c_str());
 
 	// minimized triangle thing
-	v2 triCentre = cursor + v2(width - 8.0f, height * 0.5f);
+	// position should be constant regardless of header size
+	v2 triCentre = cursor + v2(miniTriOffset, height * 0.5f);
 	if (mini)
 	{
 		v2 a = currentCanvas->ptcts(triCentre + v2(3.0f, 0.0f));

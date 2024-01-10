@@ -61,6 +61,7 @@ protected:
 private:
 	bool mini = false;
 	const float headerHeight = 20.0f;
+	const float miniTriangleOffset = 10.0f;
 
 	struct NodeOutput
 	{
@@ -96,7 +97,8 @@ private:
 	size_t GetOutputIndex(const std::string& name) const;
 	void Draw(class NodeNetwork* network, bool cullBody);
 	void UpdateDimensions();
-	float IOWidth(const std::string& text);
+	float IOWidth(const std::string& text) const;
 	float headerSize() const;
+	float getNormalWidth() const;
 	bbox2 getBounds() const;
 };

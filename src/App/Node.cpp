@@ -4,7 +4,7 @@
 NodeClickResponse Node::HandleClick(const v2& nodePos)
 {
 	NodeClickResponse r;
-	v2 centre = v2(size.x - 8.0f, headerHeight * 0.5f);
+	v2 centre = v2(getNormalWidth() - miniTriangleOffset, headerHeight * 0.5f);
 	if (v2::Distance(nodePos, centre) <= 6.0f)
 	{
 		mini = !mini;
@@ -160,7 +160,19 @@ bool Node::FloatOutput(const std::string& name, float* target)
 
 float Node::headerSize() const
 {
-	return std::max(headerHeight, 16.0f * (inputs.size()) / (PI * 0.6f));
+	return std::max(headerHeight, 16.0f * (std::max(inputs.size(), outputs.size())) / (PI * 0.6f));
+}
+
+float Node::getNormalWidth() const
+{
+	float maxXOff = 0.0f;
+	for (const NodeInput& input : inputs)
+		maxXOff = std::max(IOWidth(input.name), maxXOff);
+	for (const NodeOutput& output : outputs)
+		maxXOff = std::max(IOWidth(output.name), maxXOff);
+	maxXOff = std::max(minSpace.x, maxXOff);
+	maxXOff = std::max(IOWidth(name) + 8.0f, maxXOff);
+	return maxXOff;
 }
 
 bbox2 Node::getBounds() const
@@ -235,14 +247,21 @@ v2 Node::GetInputPos(size_t index) const
 	{
 		return position + v2(0.0f, headerHeight + 4.0f + 16.0f * outputs.size() + minSpace.y + 16.0f * index + 8.0f);
 	}
-	else if (inputs.size() > 1)
+	if (inputs.size() > 1)
 	{
+		// fuck this shit
+		// ahhh they should take up the same spacing as the most populous node type (input/output)
+		// fuck
+		float amountOfCircle = 0.6f;
+		if (outputs.size() > 1)
+			amountOfCircle *= std::min(1.0f, (float)(inputs.size() - 1) / (float)(outputs.size() - 1));
+		if (inputs.size() == 2 && outputs.size() <= 2)
+			amountOfCircle *= 2.0f / 3.0f;
 		const float hh = headerSize() * 0.5f;
-		const float offx = 1.0f - cosf(0.3 * PI);
-		const float angle = PI * (0.2f + 0.6f * index / (float)(inputs.size() - 1));
-		v2 offset = v2(sinf(-angle) - offx, -cosf(angle));
-		v2 offt = v2(hh - headerHeight * 0.5f - offset.x, headerHeight * 0.5f);
-		return position + offt + offset * hh;
+		const float angle = PI * (0.5f - amountOfCircle * 0.5f + amountOfCircle * index / (float)(inputs.size() - 1));
+		const v2 offset = v2(sinf(-angle), -cosf(angle));
+		const v2 constOffset = v2(hh, headerHeight * 0.5f);
+		return position + constOffset + offset * hh;
 	}
 	return position + v2(0.0f, headerHeight * 0.5f);
 }
@@ -261,18 +280,21 @@ v2 Node::GetOutputPos(size_t index) const
 	{
 		return position + v2(size.x, headerHeight + 4.0f + 16.0f * index + 8.0f);
 	}
-	else
+	if (outputs.size() > 1)
 	{
-		if (outputs.size() > 1)
-		{
-			const float offx = 1.0f - cosf(0.3 * PI);
-			const float hh = headerSize() * 0.5f;
-			const float angle = PI * (0.2f + 0.6f * index / (float)(outputs.size() - 1));
-			v2 offset = v2(sinf(angle) + offx, -cosf(angle));
-			return position + offset * hh + v2(size.x, 0.0f);
-		}
-		return position + v2(size.x, headerHeight * 0.5f);
+		// same as for inputs but with one or two changes
+		float amountOfCircle = 0.6f;
+		if (inputs.size() > 1)
+			amountOfCircle *= std::min(1.0f, (float)(outputs.size() - 1) / (float)(inputs.size() - 1));
+		if (outputs.size() == 2 && inputs.size() <= 2)
+			amountOfCircle *= 2.0f / 3.0f;
+		const float hh = headerSize() * 0.5f;
+		const float angle = PI * (0.5f - amountOfCircle * 0.5f + amountOfCircle * index / (float)(outputs.size() - 1));
+		const v2 offset = v2(sinf(angle), -cosf(angle));
+		const v2 constOffset = v2(size.x - hh, headerHeight * 0.5f);
+		return position + constOffset + offset * hh;
 	}
+	return position + v2(size.x, headerHeight * 0.5f);
 }
 
 size_t Node::GetInputIndex(const std::string& name) const
@@ -338,7 +360,7 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 
 			cursor = position;
 			// draw node header
-			network->DrawHeader(cursor, name, size.x, headerHeight, mini);
+			network->DrawHeader(cursor, name, size.x, headerHeight, mini, getNormalWidth() - miniTriangleOffset);
 			cursor.y += headerHeight + 4.0f;
 
 			// draw outputs
@@ -351,7 +373,7 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 		}
 		else
 		{
-			network->DrawHeader(cursor - v2(0.0f, headerSize() - headerHeight) * 0.5f, name, size.x, headerSize(), mini);
+			network->DrawHeader(cursor - v2(0.0f, (headerSize() - headerHeight) * 0.5f), name, size.x, headerSize(), mini, getNormalWidth() - miniTriangleOffset);
 			for (size_t i = 0; i < inputs.size(); i++)
 				network->DrawConnectionEndpoint(GetInputPos(i), network->GetCol(inputs[i].type), true);
 			for (size_t i = 0; i < outputs.size(); i++)
@@ -371,22 +393,20 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 
 void Node::UpdateDimensions()
 {
-	// calculate node width
-	float maxXOff = 0.0f;
-	for (const NodeInput& input : inputs)
-		maxXOff = std::max(IOWidth(input.name), maxXOff);
-	for (const NodeOutput& output : outputs)
-		maxXOff = std::max(IOWidth(output.name), maxXOff);
-	maxXOff = std::max(minSpace.x, maxXOff);
-	maxXOff = std::max(IOWidth(name) + 6.0f, maxXOff);
-
+	float maxXOff = getNormalWidth();
 	if (mini)
-		size = v2(maxXOff + headerSize() - headerHeight, headerSize());
+		size = v2(
+			std::max(maxXOff, headerSize() + 2.0f), 
+			headerSize()
+		);
 	else
-		size = v2(maxXOff, headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f);
+		size = v2(
+			maxXOff, 
+			headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f
+		);
 }
 
-float Node::IOWidth(const std::string& text)
+float Node::IOWidth(const std::string& text) const
 {
 	// return length
 	// text space + 8px padding either side

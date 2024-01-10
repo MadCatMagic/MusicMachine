@@ -23,14 +23,22 @@ void LongNode::Init()
 
 void LongNode::IO()
 {
-	for (int i = 0; i < nodeNum; i++)
+	for (int i = 0; i < inputNum; i++)
 		FloatInput("in " + std::to_string(i + 1), nullptr);
+	for (int i = 0; i < outputNum; i++)
+		FloatOutput("out " + std::to_string(i + 1), nullptr);
 }
 
 void LongNode::ConsoleCommand(std::vector<std::string> arguments)
 {
-	if (arguments.size() > 0)
-		nodeNum = std::stoi(arguments[0]);
+	if (arguments.size() == 1)
+		inputNum = std::stoi(arguments[0]);
+	else if (arguments.size() == 2)
+	{
+		inputNum = std::stoi(arguments[0]);
+		outputNum = std::stoi(arguments[1]);
+	}
 }
 
-int LongNode::nodeNum = 6;
+int LongNode::inputNum = 6;
+int LongNode::outputNum = 3;

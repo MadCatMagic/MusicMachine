@@ -24,6 +24,7 @@ protected:
 	inline virtual void Work() override { }
 
 private:
-	static int nodeNum;
+	static int inputNum;
+	static int outputNum;
 	static void ConsoleCommand(std::vector<std::string> arguments);
 };
