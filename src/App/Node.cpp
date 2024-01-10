@@ -16,14 +16,14 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 	v2 worldPos = nodePos + position;
 	if (outputs.size() > 0)
 	{
-		NodeOutput& o = outputs[0];
+		size_t oi = 0;
 		float minDist = FLT_MAX;
 		for (size_t i = 0; i < outputs.size(); i++)
 		{
 			float d = v2::Distance(GetOutputPos(i), worldPos);
 			if (d <= minDist)
 			{
-				o = outputs[i];
+				oi = i;
 				minDist = d;
 			}
 		}
@@ -31,7 +31,7 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		{
 			r.handled = true;
 			r.type = NodeClickResponseType::BeginConnection;
-			r.originName = o.name;
+			r.originName = outputs[oi].name;
 			r.origin = this;
 			return r;
 		}
@@ -39,7 +39,6 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 	
 	if (inputs.size() > 0)
 	{
-		NodeInput& inp = inputs[0];
 		float minDist = FLT_MAX;
 		size_t inpI = 0;
 		for (size_t i = 0; i < inputs.size(); i++)
@@ -47,13 +46,13 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 			float d = v2::Distance(GetInputPos(i), worldPos);
 			if (d <= minDist)
 			{
-				inp = inputs[i];
 				minDist = d;
 				inpI = i;
 			}
 		}
 		if (minDist <= 8.0f)
 		{
+			NodeInput& inp = inputs[inpI];
 			r.handled = true;
 			if (inp.source != nullptr)
 			{
