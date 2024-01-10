@@ -21,6 +21,17 @@ struct NodeClickResponse
 	Node* origin = nullptr;
 };
 
+/*
+-- Inheriting from the Node class --
+override 'void IO()' to create your own inputs and outputs.
+- inputs and outputs can share names, but no two inputs should have the same name AND type, and the same for two outputs.
+- they will be displayed in the order you call them in this function
+
+override 'void Init()' instead of using a constructor for anything which needs to be done before runtime but after initialisation
+override 'void Work()' to actually serve your function, taking your inputs and turning them into the output. Called every frame.
+
+in a constructor or in Init assign 'name' and 'minSpace' do declare, respectively, the name of the node and the minimum space it wants for ui.
+*/
 struct Node
 {
 	enum NodeType {
