@@ -12,9 +12,6 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		r.type = NodeClickResponseType::Minimise;
 		return r;
 	}
-
-	if (mini)
-		return r;
 	
 	v2 worldPos = nodePos + position;
 	if (outputs.size() > 0)
