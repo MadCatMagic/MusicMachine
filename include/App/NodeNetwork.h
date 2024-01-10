@@ -51,11 +51,12 @@ private:
 	struct AbstractNode
 	{
 		unsigned int id = -1;
-		std::vector<AbstractNode*> markedBy;
-		std::vector<AbstractNode*> outputs;
-		std::vector<AbstractNode*> inputs;
+		// all index references to the master vector
+		std::vector<size_t> markedBy;
+		std::vector<size_t> outputs;
+		std::vector<size_t> inputs;
 	};
-	void CheckForCircularDependency();
+	std::vector<AbstractNode*> CheckForCircularDependency();
 
 	// allows for colour scheming
 	const int NUM_COLOURS = 14;
@@ -80,4 +81,6 @@ private:
 	Canvas* currentCanvas = nullptr;
 
 	std::vector<Node*> nodes;
+
+	bool drawDebugInformation = false;
 };

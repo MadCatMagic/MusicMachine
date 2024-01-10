@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 
 #define PI 3.1415927f
@@ -34,6 +35,7 @@ struct v2
 
 	bool inBox(const v2& bottomLeft, const v2& topRight) const;
 	v2 reciprocal() const;
+	float length() const;
 	
 	v2 operator+(const v2& a) const;
 	v2 operator-() const;

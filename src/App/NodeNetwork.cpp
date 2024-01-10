@@ -1,8 +1,9 @@
 #include "App/NodeNetwork.h"
 #include "App/Canvas.h"
 #include "imgui.h"
-
+#include <unordered_map>
 #include "BBox.h"
+#include "Random.h"
 
 NodeNetwork::NodeNetwork()
 {
@@ -77,6 +78,62 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 	for (const ConnectionToDraw& connection : connectionsToDraw)
 		drawList->AddBezierCubic(connection.a, connection.b, connection.c, connection.d, connection.col, connection.thickness);
 	connectionsToDraw.clear();
+
+	// draw debugging stuff
+	if (drawDebugInformation)
+	{
+		const float k_r = 0.2f;
+		const float k_a = 0.02f;
+
+		std::vector<AbstractNode*> absNodes = CheckForCircularDependency();
+		srand(10); // TODO: remove
+		std::vector<v2> positions = std::vector<v2>(absNodes.size());
+		for (size_t i = 0; i < absNodes.size(); i++)
+			positions[i] = Random::randv2() * 50.0f - 25.0f;
+		// pretty slow
+		for (size_t iter = 0; iter < 20; iter++)
+		{
+			// repulsive force between nodes
+			for (size_t i = 0; i < absNodes.size(); i++)
+				for (size_t j = i + 1; j < absNodes.size(); j++)
+				{
+					const v2 diff = positions[j] - positions[i];
+					const float dist = std::max(0.1f, diff.length());
+					const v2 force = diff * (k_r / dist);
+					positions[i] -= force;
+					positions[j] += force;
+				}
+
+			// attractive force along edges
+			// only consider node inputs so not to repeat anything
+			for (size_t i = 0; i < absNodes.size(); i++)
+				for (size_t j : absNodes[i]->inputs)
+				{
+					const v2 diff = positions[j] - positions[i];
+					const float dist = std::max(0.1f, diff.length());
+					const v2 force = diff * (k_a / dist);
+					positions[i] -= force;
+					positions[j] += force;
+				}
+		}
+
+		// actually draw the damn thing
+		// again only care about inputs
+		for (size_t i = 0; i < absNodes.size(); i++)
+		{
+			v2 origin = canvas->ptcts(positions[i]);
+			for (size_t j : absNodes[i]->inputs)
+			{
+				v2 endpoint = canvas->ptcts(positions[j]);
+				drawList->AddLine(origin.ImGui(), endpoint.ImGui(), GetCol(NodeCol::IOBool), 2.0f / canvas->GetSF().x);
+			}
+		}
+		for (size_t i = 0; i < absNodes.size(); i++)
+		{
+			v2 origin = canvas->ptcts(positions[i]);
+			drawList->AddCircleFilled(origin.ImGui(), 4.0f / canvas->GetSF().x, GetCol(NodeCol::Text));
+		}
+	}
 }
 
 #include "App/NodeTypes.h"
@@ -266,6 +323,8 @@ void NodeNetwork::DrawContextMenu()
 				AddNodeFromName(name, true);
 		ImGui::EndMenu();
 	}
+
+	ImGui::MenuItem("Debug Enable", nullptr, &drawDebugInformation);
 }
 
 ImColor NodeNetwork::GetCol(NodeCol colour)
@@ -283,12 +342,15 @@ ImColor NodeNetwork::GetCol(Node::NodeType type)
 	return colour;
 }
 
-void NodeNetwork::CheckForCircularDependency()
+std::vector<NodeNetwork::AbstractNode*> NodeNetwork::CheckForCircularDependency()
 {
 	// assume nodes with no endpoints are start points of backpropagation
 	std::vector<size_t> endpointIndices;
 	std::vector<AbstractNode*> endpoints;
 	std::vector<AbstractNode*> absNodes;
+	// lookup table for increased speed
+	std::unordered_map<Node*, size_t> nodeMap;
+
 	for (size_t i = 0; i < nodes.size(); i++)
 	{
 		AbstractNode* n = new AbstractNode();
@@ -299,10 +361,20 @@ void NodeNetwork::CheckForCircularDependency()
 			endpoints.push_back(n);
 		}
 		absNodes.push_back(n);
+
+		nodeMap[nodes[i]] = i;
 	}
 
 	// now fill out all of the nodes's connections with each other
+	for (size_t i = 0; i < nodes.size(); i++)
+		for (Node::NodeInput& k : nodes[i]->inputs)
+			if (k.source != nullptr)
+			{
+				absNodes[i]->inputs.push_back(nodeMap[k.source]);
+				absNodes[nodeMap[k.source]]->outputs.push_back(i);
+			}
 
+	return absNodes;
 }
 
 void NodeNetwork::InitColours()
