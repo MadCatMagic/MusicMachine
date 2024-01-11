@@ -30,7 +30,8 @@ override 'void IO()' to create your own inputs and outputs.
 override 'void Init()' instead of using a constructor for anything which needs to be done before runtime but after initialisation
 override 'void Work()' to actually serve your function, taking your inputs and turning them into the output. Called every frame.
 
-in a constructor or in Init assign 'name' and 'minSpace' do declare, respectively, the name of the node and the minimum space it wants for ui.
+do not use a regular constructor pwease
+in Init assign 'name' and 'minSpace' do declare, respectively, the name of the node and the minimum space it wants for ui.
 */
 struct Node
 {
@@ -39,6 +40,7 @@ struct Node
 	};
 
 	friend class NodeNetwork;
+	inline Node(NodeNetwork* parent) : parent(parent) {}
 	virtual void IO();
 
 	v2 position = v2::zero;
@@ -73,6 +75,8 @@ private:
 	bool mini = false;
 	const float headerHeight = 20.0f;
 	const float miniTriangleOffset = 10.0f;
+
+	NodeNetwork* parent;
 
 	struct NodeOutput
 	{

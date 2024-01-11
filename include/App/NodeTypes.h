@@ -3,6 +3,8 @@
 
 struct MathsNode : public Node
 {
+public:
+	using Node::Node;
 protected:
 	virtual void Init() override;
 	virtual void IO() override;
@@ -17,6 +19,7 @@ private:
 
 struct LongNode : public Node
 {
+	using Node::Node;
 protected:
 	virtual void Init() override;
 	virtual void IO() override;

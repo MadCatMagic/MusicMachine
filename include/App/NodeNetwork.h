@@ -45,6 +45,7 @@ public:
 	void DrawContextMenu();
 
 	inline void ClearDrawList() { currentList = nullptr; }
+	inline void RecalculateDependencies() { recalculateDependencies = true; }
 
 private:
 	// works out whether nodes have circular dependencies. will not calculate if circular dependencies exist.
@@ -56,7 +57,16 @@ private:
 		std::vector<size_t> outputs;
 		std::vector<size_t> inputs;
 	};
-	std::vector<AbstractNode*> CheckForCircularDependency();
+	struct NodeDependencyInformation
+	{
+		~NodeDependencyInformation();
+		std::vector<AbstractNode*> nodes;
+		std::pair<size_t, size_t> problemConnection = std::make_pair<size_t, size_t>(0, 0);
+		bool problemConnectionExists = false;
+	};
+	NodeDependencyInformation* CheckForCircularDependency();
+	NodeDependencyInformation* nodeDependencyInfoPersistent = nullptr;
+	bool recalculateDependencies = true;
 
 	// allows for colour scheming
 	const int NUM_COLOURS = 14;

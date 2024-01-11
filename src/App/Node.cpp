@@ -83,6 +83,7 @@ bool Node::Connect(size_t inputIndex, Node* origin, size_t originIndex)
 	inputs[inputIndex].sourceName = origin->outputs[originIndex].name;
 	inputs[inputIndex].target = origin->outputs[originIndex].data;
 	origin->outputs[originIndex].connections++;
+	parent->RecalculateDependencies();
 	return true;
 }
 
@@ -100,6 +101,7 @@ void Node::Disconnect(size_t inputIndex)
 	i.source = nullptr;
 	i.sourceName = "";
 	i.target = nullptr;
+	parent->RecalculateDependencies();
 }
 
 void Node::Init()
