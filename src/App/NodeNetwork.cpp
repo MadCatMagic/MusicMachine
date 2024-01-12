@@ -77,22 +77,30 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 	}
 	drawList->ChannelsMerge();
 
-	// draw connections on top of all the nodes
-	for (const ConnectionToDraw& connection : connectionsToDraw)
-		drawList->AddBezierCubic(connection.a, connection.b, connection.c, connection.d, connection.col, connection.thickness);
-	connectionsToDraw.clear();
-
+	// need this here so we know if to draw any invalid connections
 	if (recalculateDependencies)
 	{
 		if (nodeDependencyInfoPersistent != nullptr)
 			delete nodeDependencyInfoPersistent;
-		
+
 		nodeDependencyInfoPersistent = CheckForCircularDependency();
 		recalculateDependencies = false;
 
 		if (drawDebugInformation)
 			Console::Log("DEBUG: recalculated node network dependency graph");
 	}
+
+	// draw connections on top of all the nodes
+	for (const ConnectionToDraw& connection : connectionsToDraw)
+		if (nodeDependencyInfoPersistent->problemConnectionExists && (
+			connection.from == nodeDependencyInfoPersistent->problemConnection.first &&
+			connection.to == nodeDependencyInfoPersistent->problemConnection.second ||
+			connection.to == nodeDependencyInfoPersistent->problemConnection.first &&
+			connection.from == nodeDependencyInfoPersistent->problemConnection.second))
+			drawList->AddBezierCubic(connection.a, connection.b, connection.c, connection.d, GetCol(NodeCol::ConnectorInvalid), connection.thickness);
+		else
+			drawList->AddBezierCubic(connection.a, connection.b, connection.c, connection.d, connection.col, connection.thickness);
+	connectionsToDraw.clear();
 
 	// draw debugging stuff
 	if (drawDebugInformation)
@@ -143,7 +151,13 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 				ImColor col = ImColor(1.0f, 0.0f, 1.0f);
 				if (std::find(absNodes[j]->markedBy.begin(), absNodes[j]->markedBy.end(), i) != absNodes[j]->markedBy.end())
 					col = ImColor(0.0f, 1.0f, 1.0f);
-				if (nodeDependencyInfoPersistent->problemConnectionExists && i == nodeDependencyInfoPersistent->problemConnection.first && j == nodeDependencyInfoPersistent->problemConnection.second)
+				if (
+					nodeDependencyInfoPersistent->problemConnectionExists &&
+					(j == nodeDependencyInfoPersistent->problemConnection.first && 
+					i == nodeDependencyInfoPersistent->problemConnection.second ||
+					i == nodeDependencyInfoPersistent->problemConnection.first &&
+					j == nodeDependencyInfoPersistent->problemConnection.second)
+				)
 					col = ImColor(1.0f, 1.0f, 0.0f);
 				drawList->AddLine(origin.ImGui(), endpoint.ImGui(), col, 2.0f / canvas->GetSF().x);
 			}
@@ -151,7 +165,7 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 		for (size_t i = 0; i < absNodes.size(); i++)
 		{
 			v2 origin = canvas->ptcts(positions[i]);
-			ImColor col = absNodes[i]->outputs.size() == 0 ? GetCol(NodeCol::IOBool) : GetCol(NodeCol::Text);
+			ImColor col = absNodes[i]->isEndpoint ? GetCol(NodeCol::IOBool) : GetCol(NodeCol::Text);
 			drawList->AddCircleFilled(origin.ImGui(), 4.0f / canvas->GetSF().x, col);
 		}
 	}
@@ -216,7 +230,8 @@ std::vector<Node*> NodeNetwork::FindNodesInArea(const v2& p1, const v2& p2)
 void NodeNetwork::PushNodeToTop(Node* node)
 {
 	auto index = std::find(nodes.begin(), nodes.end(), node);
-	if (index != nodes.end())
+	// dont do anything if it is either not in the network, or the last element anyway
+	if (index < nodes.end() - 1)
 	{
 		nodes.erase(index);
 		nodes.push_back(node);
@@ -313,8 +328,20 @@ void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float wi
 	}
 }
 
-void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeType type)
+void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeType type, Node* from, Node* to)
 {
+	size_t f = -1;
+	size_t t = -1;
+	if (from != nullptr && to != nullptr)
+	{
+		for (size_t i = 0; i < nodes.size(); i++)
+		{
+			if (nodes[i] == from)
+				f = i;
+			if (nodes[i] == to)
+				t = i;
+		}
+	}
 	float width = 12.0f + fabsf(target.x - origin.x) * 0.3f + fabsf(target.y - origin.y) * 0.1f;
 	ConnectionToDraw c{
 		currentCanvas->ptcts(origin).ImGui(),
@@ -322,7 +349,9 @@ void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeT
 		currentCanvas->ptcts(target - v2(width, 0.0f)).ImGui(),
 		currentCanvas->ptcts(target).ImGui(),
 		GetCol(type),
-		1.5f / currentCanvas->GetSF().x
+		1.5f / currentCanvas->GetSF().x,
+		f,
+		t
 	};
 	connectionsToDraw.push_back(c);
 }
@@ -375,6 +404,8 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 	// lookup table for increased speed
 	std::unordered_map<Node*, size_t> nodeMap;
 
+	std::deque<size_t> queue;
+
 	for (size_t i = 0; i < nodes.size(); i++)
 	{
 		AbstractNode* n = new AbstractNode();
@@ -383,7 +414,19 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 		{
 			endpointIndices.push_back(i);
 			endpoints.push_back(n);
+			n->isEndpoint = true;
 		}
+		// fuckery to get it to detect problems properly
+		bool isUnusedEndpoint = true;
+		for (auto& aaa : nodes[i]->outputs)
+			if (aaa.connections > 0)
+			{
+				isUnusedEndpoint = false;
+				break;
+			}
+		if (isUnusedEndpoint)
+			queue.push_back(i);
+			
 		absNodes.push_back(n);
 
 		nodeMap[nodes[i]] = i;
@@ -392,16 +435,13 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 	// now fill out all of the nodes's connections with each other
 	for (size_t i = 0; i < nodes.size(); i++)
 		for (Node::NodeInput& k : nodes[i]->inputs)
-			if (k.source != nullptr)
+			if (k.source != nullptr && std::find(absNodes[i]->inputs.begin(), absNodes[i]->inputs.end(), nodeMap[k.source]) == absNodes[i]->inputs.end())
 			{
 				absNodes[i]->inputs.push_back(nodeMap[k.source]);
 				absNodes[nodeMap[k.source]]->outputs.push_back(i);
 			}
 
 	// backpropagate, marking nodes as you go, using the endpoints 'queue'
-	std::deque<size_t> queue;
-	for (size_t n : endpointIndices)
-		queue.push_back(n);
 
 	NodeDependencyInformation* nodeDependencyInformation = new NodeDependencyInformation();
 	nodeDependencyInformation->nodes = absNodes;
@@ -416,20 +456,33 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 		{
 			size_t inputI = current->inputs[i];
 			AbstractNode* input = absNodes[inputI];
-			// kinda cheaky, but who cares
-			size_t outputIndex = *std::find(input->outputs.begin(), input->outputs.end(), currentI)._Ptr;
 			// should not need to check whether outputIndex is actually valid, should always be
-			if (std::find(input->markedBy.begin(), input->markedBy.end(), outputIndex) != input->markedBy.end())
+			if (std::find(input->markedBy.begin(), input->markedBy.end(), currentI) != input->markedBy.end())
 			{
 				// panic! there is some circular shit going on
-				nodeDependencyInfoPersistent->problemConnectionExists = true;
-				nodeDependencyInfoPersistent->problemConnection = std::make_pair(inputI, currentI);
+				nodeDependencyInformation->problemConnectionExists = true;
+				nodeDependencyInformation->problemConnection = std::make_pair(inputI, currentI);
 				return nodeDependencyInformation;
 			}
-			input->markedBy.push_back(outputIndex);
+			input->markedBy.push_back(currentI);
 			// only add the new node if it is full of outputs
 			if (input->markedBy.size() == input->outputs.size())
 				queue.push_back(inputI);
+			else if (queue.size() == 0)
+			{
+				// panic! impossible to activate node
+				// have to find erroneous connection :sadpenisbee:
+				size_t error = 0;
+				for (size_t connection : input->outputs)
+					if (std::find(input->markedBy.begin(), input->markedBy.end(), connection) == input->markedBy.end())
+					{
+						error = connection;
+						break;
+					}
+				nodeDependencyInformation->problemConnectionExists = true;
+				nodeDependencyInformation->problemConnection = std::make_pair(inputI, error);
+				return nodeDependencyInformation;
+			}
 		}
 	}
 	return nodeDependencyInformation;
@@ -480,6 +533,11 @@ void NodeNetwork::InitColours()
 		case NodeCol::Connector:
 			c.name = "Connector";
 			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+			break;
+
+		case NodeCol::ConnectorInvalid:
+			c.name = "ConnectorInvalid";
+			c.col = ImColor(1.0f, 0.0f, 0.0f, 1.0f);
 			break;
 
 		case NodeCol::Text:

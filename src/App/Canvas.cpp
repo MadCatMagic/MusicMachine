@@ -254,13 +254,17 @@ void Canvas::CreateWindow()
                 nodes->DrawConnection(
                     connectionOrigin->GetInputPos(connectionOriginName),
                     mousePos,
-                    connectionOrigin->GetInputType(connectionOriginName)
+                    connectionOrigin->GetInputType(connectionOriginName),
+                    nullptr,
+                    nullptr
                 );
             else
                 nodes->DrawConnection(
                     mousePos,
                     connectionOrigin->GetOutputPos(connectionOriginName),
-                    connectionOrigin->GetOutputType(connectionOriginName)
+                    connectionOrigin->GetOutputType(connectionOriginName),
+                    nullptr,
+                    nullptr
                 );
         }
         else

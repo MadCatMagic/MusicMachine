@@ -17,7 +17,7 @@ public:
 		BGFill, BGOutline, BGHeader,
 		IOBool, IOFloat,
 		IO, IOSelected,
-		Connector,
+		Connector, ConnectorInvalid,
 		Text,
 		SelectedOutline, TopSelectedOutline, SelectedFill,
 		SelectionOutline, SelectionFill
@@ -40,7 +40,7 @@ public:
 	void DrawOutput(const v2& cursor, float xOffset, const std::string& name, Node::NodeType type);
 	void DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition = false);
 	void DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float miniTriOffset);
-	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type);
+	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type, Node* from, Node* to);
 
 	void DrawContextMenu();
 
@@ -56,6 +56,7 @@ private:
 		std::vector<size_t> markedBy;
 		std::vector<size_t> outputs;
 		std::vector<size_t> inputs;
+		bool isEndpoint = false;
 	};
 	struct NodeDependencyInformation
 	{
@@ -69,7 +70,7 @@ private:
 	bool recalculateDependencies = true;
 
 	// allows for colour scheming
-	const int NUM_COLOURS = 14;
+	const int NUM_COLOURS = 15;
 	struct NodeColourData
 	{
 		std::string name;
@@ -84,6 +85,8 @@ private:
 		ImVec2 a, b, c, d;
 		ImColor col;
 		float thickness;
+		size_t from;
+		size_t to;
 	};
 	std::vector<ConnectionToDraw> connectionsToDraw;
 

@@ -83,7 +83,9 @@ private:
 		std::string name;
 		void* data{};
 		NodeType type{};
-		int connections = 0;
+
+		size_t connections = 0;
+		bool touchedThisFrame = false;
 	};
 
 	struct NodeInput
@@ -101,6 +103,7 @@ private:
 	std::vector<NodeOutput> outputs;
 
 	void TransferInput(const NodeInput& i);
+	void TransferOutput(const NodeOutput& i);
 	void ResetTouchedStatus();
 	void CheckTouchedStatus();
 

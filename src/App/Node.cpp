@@ -116,6 +116,7 @@ void Node::IO()
 	FloatOutput("and out we go", nullptr);
 }
 
+#pragma region IOTypes
 bool Node::BoolInput(const std::string& name, bool* target)
 {
 	NodeInput o;
@@ -132,7 +133,7 @@ bool Node::BoolOutput(const std::string& name, bool* target)
 	o.name = name;
 	o.data = target;
 	o.type = NodeType::Bool;
-	outputs.push_back(o);
+	TransferOutput(o);
 	return false;
 }
 
@@ -152,9 +153,10 @@ bool Node::FloatOutput(const std::string& name, float* target)
 	o.name = name;
 	o.data = target;
 	o.type = NodeType::Float;
-	outputs.push_back(o);
+	TransferOutput(o);
 	return false;
 }
+#pragma endregion IOTypes
 
 float Node::headerSize() const
 {
@@ -199,11 +201,27 @@ void Node::TransferInput(const NodeInput& i)
 	inputs[inputs.size() - 1].touchedThisFrame = true;
 }
 
+void Node::TransferOutput(const NodeOutput& i)
+{
+	for (size_t j = 0; j < outputs.size(); j++)
+		if (outputs[j].name == i.name && outputs[j].type == i.type)
+		{
+			size_t connections = outputs[j].connections;
+			outputs[j] = i;
+			outputs[j].connections = connections;
+			outputs[j].touchedThisFrame = true;
+			return;
+		}
+	outputs.push_back(i);
+	outputs[outputs.size() - 1].touchedThisFrame = true;
+}
+
 void Node::ResetTouchedStatus()
 {
 	for (size_t i = 0; i < inputs.size(); i++)
 		inputs[i].touchedThisFrame = false;
-	outputs.clear();
+	for (size_t i = 0; i < outputs.size(); i++)
+		outputs[i].touchedThisFrame = false;
 }
 
 void Node::CheckTouchedStatus()
@@ -211,6 +229,9 @@ void Node::CheckTouchedStatus()
 	for (size_t i = 0; i < inputs.size(); i++)
 		if (inputs[i].touchedThisFrame == false)
 			inputs.erase(inputs.begin() + i);
+	for (size_t i = 0; i < outputs.size(); i++)
+		if (outputs[i].touchedThisFrame == false)
+			outputs.erase(outputs.begin() + i);
 }
 
 bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed)
@@ -384,7 +405,7 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 	{
 		if (inp.source != nullptr)
 		{
-			network->DrawConnection(GetInputPos(inp.name), inp.source->GetOutputPos(inp.sourceName), inp.type);
+			network->DrawConnection(GetInputPos(inp.name), inp.source->GetOutputPos(inp.sourceName), inp.type, this, inp.source);
 		}
 	}
 }
