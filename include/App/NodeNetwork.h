@@ -10,6 +10,9 @@
 class NodeNetwork
 {
 public:
+	static NodeNetwork* context;
+	static void ExecuteCommand(std::vector<std::string> args);
+
 	NodeNetwork();
 	~NodeNetwork();
 
@@ -44,6 +47,8 @@ public:
 
 	void DrawContextMenu();
 
+	bool Execute();
+
 	inline void ClearDrawList() { currentList = nullptr; }
 	inline void RecalculateDependencies() { recalculateDependencies = true; }
 
@@ -62,6 +67,7 @@ private:
 	{
 		~NodeDependencyInformation();
 		std::vector<AbstractNode*> nodes;
+		std::vector<Node*> endpoints;
 		std::pair<size_t, size_t> problemConnection = std::make_pair<size_t, size_t>(0, 0);
 		bool problemConnectionExists = false;
 	};

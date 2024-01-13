@@ -8,8 +8,27 @@
 #include "Engine/Console.h"
 #include <deque>
 
+NodeNetwork* NodeNetwork::context = nullptr;
+
+void NodeNetwork::ExecuteCommand(std::vector<std::string> args)
+{
+	if (context == nullptr)
+		return;
+
+	Console::Log("Executing NodeNetwork...");
+	if (context->Execute())
+		Console::Log("success=true");
+	else
+		Console::Log("success=false");
+	for (Node* n : context->nodeDependencyInfoPersistent->endpoints)
+		Console::Log("Result: " + n->Result());
+}
+
 NodeNetwork::NodeNetwork()
 {
+	if (context == nullptr)
+		Console::AddCommand(ExecuteCommand, "exec");
+	context = this;
 	InitColours();
 }
 
@@ -36,7 +55,7 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 		node->IO();
 		node->CheckTouchedStatus();
 		// automatically sets the size
-		bool dontCullNode = screen.overlaps(bbox2(node->position, node->position + node->size));
+		bool dontCullNode = screen.overlaps(node->getBounds());
 		node->Draw(this, !dontCullNode);
 
 		if (dontCullNode)
@@ -144,10 +163,10 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 		// again only care about inputs
 		for (size_t i = 0; i < absNodes.size(); i++)
 		{
-			v2 origin = canvas->ptcts(positions[i]);
+			v2 origin = positions[i] + canvas->ScreenToCanvas(-100.0f);
 			for (size_t j : absNodes[i]->inputs)
 			{
-				v2 endpoint = canvas->ptcts(positions[j]);
+				v2 endpoint = positions[j] + canvas->ScreenToCanvas(-100.0f);
 				ImColor col = ImColor(1.0f, 0.0f, 1.0f);
 				if (std::find(absNodes[j]->markedBy.begin(), absNodes[j]->markedBy.end(), i) != absNodes[j]->markedBy.end())
 					col = ImColor(0.0f, 1.0f, 1.0f);
@@ -159,14 +178,14 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 					j == nodeDependencyInfoPersistent->problemConnection.second)
 				)
 					col = ImColor(1.0f, 1.0f, 0.0f);
-				drawList->AddLine(origin.ImGui(), endpoint.ImGui(), col, 2.0f / canvas->GetSF().x);
+				drawList->AddLine(origin.ImGui(), endpoint.ImGui(), col, 2.0f);
 			}
 		}
 		for (size_t i = 0; i < absNodes.size(); i++)
 		{
-			v2 origin = canvas->ptcts(positions[i]);
+			v2 origin = positions[i] + canvas->ScreenToCanvas(-100.0f);
 			ImColor col = absNodes[i]->isEndpoint ? GetCol(NodeCol::IOBool) : GetCol(NodeCol::Text);
-			drawList->AddCircleFilled(origin.ImGui(), 4.0f / canvas->GetSF().x, col);
+			drawList->AddCircleFilled(origin.ImGui(), 4.0f, col);
 		}
 	}
 }
@@ -177,17 +196,21 @@ Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCur
 	Node* n = nullptr;
 
 	if (type == "Node")
-		n = new Node(this);
+		n = new Node();
 
 	if (type == "Maths")
-		n = new MathsNode(this);
+		n = new MathsNode();
 
 	if (type == "Long")
-		n = new LongNode(this);
+		n = new LongNode();
+
+	if (type == "Const")
+		n = new ConstNode();
 
 	if (n == nullptr)
 		return nullptr;
 
+	n->NodeInit(this);
 	n->Init();
 	n->UpdateDimensions();
 	if (positionFromCursor)
@@ -369,7 +392,8 @@ void NodeNetwork::DrawContextMenu()
 		const std::string nodeNames[] {
 			"Node",
 			"Maths",
-			"Long"
+			"Long",
+			"Const"
 		};
 		for (const std::string& name : nodeNames)
 			if (ImGui::MenuItem(name.c_str()))
@@ -395,16 +419,29 @@ ImColor NodeNetwork::GetCol(Node::NodeType type)
 	return colour;
 }
 
+bool NodeNetwork::Execute()
+{
+	// dont execute if there is a dependency problem
+	if (nodeDependencyInfoPersistent->problemConnectionExists)
+		return false;
+
+	// backpropagate in a sensible manner
+	for (Node* n : nodes)
+		n->hasBeenExecuted = false;
+	for (Node* e : nodeDependencyInfoPersistent->endpoints)
+		e->Execute();
+	return true;
+}
+
 NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency()
 {
 	// assume nodes with no endpoints are start points of backpropagation
-	std::vector<size_t> endpointIndices;
-	std::vector<AbstractNode*> endpoints;
+	std::vector<Node*> endpoints;
 	std::vector<AbstractNode*> absNodes;
 	// lookup table for increased speed
 	std::unordered_map<Node*, size_t> nodeMap;
 
-	std::deque<size_t> queue;
+	std::deque<std::pair<size_t, bool>> queue;
 
 	for (size_t i = 0; i < nodes.size(); i++)
 	{
@@ -412,8 +449,7 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 		n->id = (unsigned int)i;
 		if (nodes[i]->outputs.size() == 0)
 		{
-			endpointIndices.push_back(i);
-			endpoints.push_back(n);
+			endpoints.push_back(nodes[i]);
 			n->isEndpoint = true;
 		}
 		// fuckery to get it to detect problems properly
@@ -425,7 +461,7 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 				break;
 			}
 		if (isUnusedEndpoint)
-			queue.push_back(i);
+			queue.push_back(std::make_pair(i, false));
 			
 		absNodes.push_back(n);
 
@@ -445,10 +481,12 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 
 	NodeDependencyInformation* nodeDependencyInformation = new NodeDependencyInformation();
 	nodeDependencyInformation->nodes = absNodes;
+	nodeDependencyInformation->endpoints = endpoints;
 
 	while (queue.size() > 0)
 	{
-		size_t currentI = queue.front();
+		auto& pair = queue.front();
+		size_t currentI = pair.first;
 		AbstractNode* current = absNodes[currentI];
 		queue.pop_front();
 
@@ -459,6 +497,20 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 			// should not need to check whether outputIndex is actually valid, should always be
 			if (std::find(input->markedBy.begin(), input->markedBy.end(), currentI) != input->markedBy.end())
 			{
+				if (pair.second)
+				{
+					// means that the loop is the next connection down kinda
+					size_t error = 0;
+					for (size_t connection : input->outputs)
+						if (std::find(input->markedBy.begin(), input->markedBy.end(), connection) == input->markedBy.end())
+						{
+							error = connection;
+							break;
+						}
+					nodeDependencyInformation->problemConnectionExists = true;
+					nodeDependencyInformation->problemConnection = std::make_pair(inputI, error);
+					return nodeDependencyInformation;
+				}
 				// panic! there is some circular shit going on
 				nodeDependencyInformation->problemConnectionExists = true;
 				nodeDependencyInformation->problemConnection = std::make_pair(inputI, currentI);
@@ -467,7 +519,7 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 			input->markedBy.push_back(currentI);
 			// only add the new node if it is full of outputs
 			if (input->markedBy.size() == input->outputs.size())
-				queue.push_back(inputI);
+				queue.push_back(std::make_pair(inputI, false));
 			else if (queue.size() == 0)
 			{
 				// panic! impossible to activate node
@@ -483,6 +535,8 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 				nodeDependencyInformation->problemConnection = std::make_pair(inputI, error);
 				return nodeDependencyInformation;
 			}
+			else
+				queue.push_back(std::make_pair(currentI, true));
 		}
 	}
 	return nodeDependencyInformation;

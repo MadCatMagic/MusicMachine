@@ -18,27 +18,25 @@ void MathsNode::IO()
 void LongNode::Init()
 {
 	name = "Long Node";
-	Console::AddCommand(&ConsoleCommand, "ln");
 }
 
 void LongNode::IO()
 {
-	for (int i = 0; i < inputNum; i++)
-		FloatInput("in " + std::to_string(i + 1), nullptr);
-	for (int i = 0; i < outputNum; i++)
-		FloatOutput("out " + std::to_string(i + 1), nullptr);
+	FloatInput("in 1", &in1);
+	FloatInput("in 2", &in2);
+	FloatInput("in 3", &in3);
+	FloatInput("in 4", &in4);
+	FloatInput("in 5", &in5);
+	FloatInput("in 6", &in6);
 }
 
-void LongNode::ConsoleCommand(std::vector<std::string> arguments)
+std::string LongNode::Result()
 {
-	if (arguments.size() == 1)
-		inputNum = std::stoi(arguments[0]);
-	else if (arguments.size() == 2)
-	{
-		inputNum = std::stoi(arguments[0]);
-		outputNum = std::stoi(arguments[1]);
-	}
+	return
+		std::to_string(in1) + ", " +
+		std::to_string(in2) + ", " +
+		std::to_string(in3) + ", " +
+		std::to_string(in4) + ", " +
+		std::to_string(in5) + ", " +
+		std::to_string(in6);
 }
-
-int LongNode::inputNum = 6;
-int LongNode::outputNum = 3;

@@ -158,6 +158,23 @@ bool Node::FloatOutput(const std::string& name, float* target)
 }
 #pragma endregion IOTypes
 
+void Node::Execute()
+{
+	for (const NodeInput& input : inputs)
+	{
+		if (input.source == nullptr)
+			continue;
+		if (!input.source->hasBeenExecuted)
+			input.source->Execute();
+		size_t index = input.source->GetOutputIndex(input.sourceName);
+		// need to transfer data
+		if (input.target != nullptr && input.source->outputs[index].data != nullptr)
+			memcpy(input.target, input.source->outputs[index].data, DataSize(input.type));
+	}
+
+	Work();
+}
+
 float Node::headerSize() const
 {
 	return std::max(headerHeight, 16.0f * (std::max(inputs.size(), outputs.size())) / (PI * 0.6f));
@@ -430,4 +447,16 @@ float Node::IOWidth(const std::string& text) const
 	// return length
 	// text space + 8px padding either side
 	return 6.0f * (float)(text.size() + 1) + 16.0f;
+}
+
+size_t Node::DataSize(NodeType type)
+{
+	switch (type)
+	{
+	case NodeType::Bool:
+		return sizeof(bool);
+	case NodeType::Float:
+		return sizeof(float);
+	}
+	return 0;
 }

@@ -3,8 +3,6 @@
 
 struct MathsNode : public Node
 {
-public:
-	using Node::Node;
 protected:
 	virtual void Init() override;
 	virtual void IO() override;
@@ -19,15 +17,29 @@ private:
 
 struct LongNode : public Node
 {
-	using Node::Node;
 protected:
 	virtual void Init() override;
 	virtual void IO() override;
+	virtual std::string Result() override;
 
 	inline virtual void Work() override { }
 
 private:
-	static int inputNum;
-	static int outputNum;
-	static void ConsoleCommand(std::vector<std::string> arguments);
+	float in1 = 0.0f;
+	float in2 = 0.0f;
+	float in3 = 0.0f;
+	float in4 = 0.0f;
+	float in5 = 0.0f;
+	float in6 = 0.0f;
+};
+
+struct ConstNode : public Node
+{
+protected:
+	inline virtual void Init() override { name = "4.0f"; minSpace = 0.0f; }
+	inline virtual void IO() override { FloatOutput("out", &out); }
+
+
+private:
+	float out = 4.0f;
 };

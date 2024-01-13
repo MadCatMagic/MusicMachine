@@ -40,7 +40,6 @@ struct Node
 	};
 
 	friend class NodeNetwork;
-	inline Node(NodeNetwork* parent) : parent(parent) {}
 	virtual void IO();
 
 	v2 position = v2::zero;
@@ -60,6 +59,7 @@ struct Node
 protected:
 	virtual void Init();
 	inline virtual void Work() { }
+	inline virtual std::string Result() { return "Null"; }
 
 	std::string name = "Node";
 	v2 minSpace = v2(20, 20);
@@ -76,7 +76,9 @@ private:
 	const float headerHeight = 20.0f;
 	const float miniTriangleOffset = 10.0f;
 
-	NodeNetwork* parent;
+	NodeNetwork* parent = nullptr;
+	bool hasBeenExecuted = true;
+	void Execute();
 
 	struct NodeOutput
 	{
@@ -107,6 +109,8 @@ private:
 	void ResetTouchedStatus();
 	void CheckTouchedStatus();
 
+	inline void NodeInit(NodeNetwork* parent) { this->parent = parent; }
+
 	bool TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 	
 	v2 GetInputPos(size_t index) const;
@@ -119,4 +123,6 @@ private:
 	float headerSize() const;
 	float getNormalWidth() const;
 	bbox2 getBounds() const;
+
+	size_t DataSize(NodeType type);
 };
