@@ -282,43 +282,57 @@ void NodeNetwork::DeleteNode(Node* node)
 	recalculateDependencies = true;
 }
 
-void NodeNetwork::DrawInput(const v2& cursor, const std::string& name, Node::NodeType type)
+void NodeNetwork::DrawInput(const v2& cursor, const Node::NodeInput& inp, float width)
 {
-	ImColor colour = GetCol(type);
-	v2 pos = currentCanvas->ptcts(cursor);
+	ImColor colour = GetCol(inp.type);
 	float sf = currentCanvas->GetSF().x;
+	// interaction
+	if (inp.type == Node::NodeType::Float && inp.target != nullptr)
+	{
+		v2 tl = currentCanvas->ptcts(cursor + v2(0.0f, -6.0f));
+		v2 br = currentCanvas->ptcts(cursor + v2(
+			(*(float*)inp.target - inp.fmin) / (inp.fmax - inp.fmin) * width, 
+			6.0f
+		));
+		currentList->AddRectFilled(tl.ImGui(), br.ImGui(), GetCol(NodeCol::IOFloat));
+	}
+	v2 pos = currentCanvas->ptcts(cursor + v2(8.0f, -6.0f));
+	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), inp.name.c_str());
 	// input circle thingy
-	DrawConnectionEndpoint(pos, colour);
-	// text
-	pos = currentCanvas->ptcts(cursor + v2(8.0f, -6.0f));
-	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), name.c_str());
+	pos = currentCanvas->ptcts(cursor);
+	DrawConnectionEndpoint(pos, colour, false, inp.target == nullptr);
 }
 
-void NodeNetwork::DrawOutput(const v2& cursor, float xOffset, const std::string& name, Node::NodeType type)
+void NodeNetwork::DrawOutput(const v2& cursor, float xOffset, const Node::NodeOutput& out)
 {
-	ImColor colour = GetCol(type);
+	ImColor colour = GetCol(out.type);
 	v2 pos = currentCanvas->ptcts(cursor + v2(xOffset, 0.0f));
 	float sf = currentCanvas->GetSF().x;
 	// draw on right side of node
-	DrawConnectionEndpoint(pos, colour);
+	DrawConnectionEndpoint(pos, colour, false, out.data == nullptr);
 	// text
-	pos = currentCanvas->ptcts(cursor + v2(xOffset - (name.size() + 1) * 6.0f, 0.0f) + v2(-8.0f, -6.0f));
-	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), name.c_str());
+	pos = currentCanvas->ptcts(cursor + v2(xOffset - (out.name.size() + 1) * 6.0f, 0.0f) + v2(-8.0f, -6.0f));
+	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), out.name.c_str());
 }
 
-void NodeNetwork::DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition)
+void NodeNetwork::DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition, bool isNull)
 {
 	// draw it
 	float sf = currentCanvas->GetSF().x;
 	if (convertPosition)
 	{
-		currentList->AddCircleFilled(currentCanvas->ptcts(centre).ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
-		currentList->AddCircleFilled(currentCanvas->ptcts(centre).ImGui(), 3.0f / sf, color);
+		ImVec2 c = currentCanvas->ptcts(centre).ImGui();
+		currentList->AddCircleFilled(c, 4.0f / sf, GetCol(NodeCol::IO));
+		currentList->AddCircleFilled(c, 3.0f / sf, color);
+		if (isNull)
+			currentList->AddCircle(c, 2.0f / sf, GetCol(NodeCol::IO), 0, 1.0f / sf);
 	}
 	else
 	{
 		currentList->AddCircleFilled(centre.ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
 		currentList->AddCircleFilled(centre.ImGui(), 3.0f / sf, color);
+		if (isNull)
+			currentList->AddCircle(centre.ImGui(), 2.0f / sf, GetCol(NodeCol::IO), 0, 1.0f / sf);
 	}
 }
 

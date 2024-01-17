@@ -39,9 +39,9 @@ public:
 	void TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 	void DeleteNode(Node* node);
 
-	void DrawInput(const v2& cursor, const std::string& name, Node::NodeType type);
-	void DrawOutput(const v2& cursor, float xOffset, const std::string& name, Node::NodeType type);
-	void DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition = false);
+	void DrawInput(const v2& cursor, const Node::NodeInput& inp, float width);
+	void DrawOutput(const v2& cursor, float xOffset, const Node::NodeOutput& out);
+	void DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition = false, bool isNull = false);
 	void DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float miniTriOffset);
 	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type, Node* from, Node* to);
 

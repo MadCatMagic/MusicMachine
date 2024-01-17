@@ -68,7 +68,7 @@ protected:
 	bool BoolInput(const std::string& name, bool* target);
 	bool BoolOutput(const std::string& name, bool* target);
 
-	bool FloatInput(const std::string& name, float* target);
+	bool FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f);
 	bool FloatOutput(const std::string& name, float* target);
 
 private:
@@ -95,6 +95,9 @@ private:
 		std::string name;
 		void* target{};
 		NodeType type{};
+
+		float fmin = 0.0f;
+		float fmax = 1.0f;
 
 		Node* source = nullptr;
 		std::string sourceName = "";
