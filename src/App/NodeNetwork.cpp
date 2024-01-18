@@ -288,20 +288,28 @@ void NodeNetwork::DrawInput(const v2& cursor, const Node::NodeInput& inp, float 
 	ImColor colour = GetCol(inp.type);
 	float sf = currentCanvas->GetSF().x;
 	// interaction for floats
-	if (inp.type == Node::NodeType::Float && inp.target != nullptr && inp.source == nullptr)
+	if ((inp.type == Node::NodeType::Float || inp.type == Node::NodeType::Int) && inp.target != nullptr && inp.source == nullptr)
 	{
+		float value;
+		if (inp.type == Node::NodeType::Float)
+			value = *(float*)inp.target;
+		else
+			value = (float)(*(int*)inp.target);
 		// drawing the box representing the value
-		v2 tl = currentCanvas->ptcts(cursor + v2(0.0f, -6.0f));
-		float proportion = (*(float*)inp.target - inp.fmin) / (inp.fmax - inp.fmin);
+		v2 tl = currentCanvas->ptcts(cursor + v2(0.0f, -8.0f));
+		float proportion = (value - inp.fmin) / (inp.fmax - inp.fmin);
 		v2 br = currentCanvas->ptcts(cursor + v2(
 			std::min(std::max(proportion, 0.0f), 1.0f) * width, 
-			6.0f
+			8.0f
 		));
 		currentList->AddRectFilled(tl.ImGui(), br.ImGui(), GetCol(NodeCol::BGHeader));
 		// drawing the text displaying the value
 		std::ostringstream ss;
 		ss.precision(3);
-		ss << *(float*)inp.target;
+		if (inp.type == Node::NodeType::Float)
+			ss << value;
+		else
+			ss << *(int*)inp.target;
 		std::string convertedString = ss.str();
 		v2 ftpos = currentCanvas->ptcts(cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f));
 		currentList->AddText(
@@ -444,6 +452,8 @@ ImColor NodeNetwork::GetCol(Node::NodeType type)
 		colour = GetCol(NodeCol::IOBool);
 	else if (type == Node::NodeType::Float)
 		colour = GetCol(NodeCol::IOFloat);
+	else if (type == Node::NodeType::Int)
+		colour = GetCol(NodeCol::IOInt);
 	return colour;
 }
 
@@ -600,6 +610,11 @@ void NodeNetwork::InitColours()
 		case NodeCol::IOFloat:
 			c.name = "IOFloat";
 			c.col = ImColor(0.4f, 0.6f, 0.9f);
+			break;
+
+		case NodeCol::IOInt:
+			c.name = "IOInt";
+			c.col = ImColor(0.2f, 0.7f, 0.6f);
 			break;
 
 		case NodeCol::IO:

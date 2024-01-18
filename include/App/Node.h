@@ -11,7 +11,8 @@ struct Node;
 // inside UI it should call functions similar to ImGui to be able to display that info
 
 enum NodeClickResponseType {
-	None, Minimise, BeginConnection, BeginConnectionReversed, InteractWithSlider
+	None, Minimise, BeginConnection, BeginConnectionReversed, 
+	InteractWithFloatSlider, InteractWithIntSlider
 };
 struct NodeClickResponse
 {
@@ -19,7 +20,12 @@ struct NodeClickResponse
 	NodeClickResponseType type = NodeClickResponseType::None;
 	std::string originName = "";
 	Node* origin = nullptr;
-	float* sliderValue = nullptr;
+	union sliderValueType {
+		float* f;
+		int* i;
+	};
+
+	sliderValueType sliderValue = { };
 	float sliderDelta = 0.0f;
 };
 
@@ -38,7 +44,7 @@ in Init assign 'name' and 'minSpace' do declare, respectively, the name of the n
 struct Node
 {
 	enum NodeType {
-		Bool, Float
+		Bool, Float, Int
 	};
 
 	friend class NodeNetwork;
@@ -67,11 +73,14 @@ protected:
 	v2 minSpace = v2(20, 20);
 
 	// to be called in InitializeUI()
-	bool BoolInput(const std::string& name, bool* target);
-	bool BoolOutput(const std::string& name, bool* target);
+	void BoolInput(const std::string& name, bool* target);
+	void BoolOutput(const std::string& name, bool* target);
 
-	bool FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f);
-	bool FloatOutput(const std::string& name, float* target);
+	void FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f);
+	void FloatOutput(const std::string& name, float* target);
+
+	void IntInput(const std::string& name, int* target, int min = 0, int max = 127);
+	void IntOutput(const std::string& name, int* target);
 
 private:
 	bool mini = false;

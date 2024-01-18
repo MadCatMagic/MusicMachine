@@ -7,11 +7,13 @@ protected:
 	virtual void Init() override;
 	virtual void IO() override;
 
-	inline virtual void Work() override { result = a + b; }
+	inline virtual void Work() override { result = a + b; resultRounded = (int)result + c; }
 
 private:
 	float a = 0.0f;
 	float b = 0.0f;
+	int c = 0;
+	int resultRounded = 0;
 	float result = 0.0f;
 };
 

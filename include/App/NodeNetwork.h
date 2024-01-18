@@ -18,7 +18,7 @@ public:
 
 	enum NodeCol {
 		BGFill, BGOutline, BGHeader,
-		IOBool, IOFloat,
+		IOBool, IOFloat, IOInt,
 		IO, IOSelected,
 		Connector, ConnectorInvalid,
 		Text,
@@ -76,7 +76,7 @@ private:
 	bool recalculateDependencies = true;
 
 	// allows for colour scheming
-	const int NUM_COLOURS = 15;
+	const int NUM_COLOURS = 16;
 	struct NodeColourData
 	{
 		std::string name;

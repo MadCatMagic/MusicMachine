@@ -58,8 +58,11 @@ void Canvas::CreateWindow()
 
     // sliders
     static bool draggingSlider = false;
-    static float* sliderValue = nullptr;
+    static bool sliderIsInt = false;
+    static NodeClickResponse::sliderValueType sliderValue{};
     static float sliderDelta = 0.0f;
+    static float totalSliderMovement = 0.0f;
+    static float originalSliderValue = 0.0f;
 
     // Pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
@@ -102,11 +105,14 @@ void Canvas::CreateWindow()
                 connectionReversed = r.type == NodeClickResponseType::BeginConnectionReversed;
             }
             // dragging a node slider
-            else if (r.handled && r.type == NodeClickResponseType::InteractWithSlider)
+            else if (r.handled && (r.type == NodeClickResponseType::InteractWithIntSlider || r.type == NodeClickResponseType::InteractWithFloatSlider))
             {
                 draggingSlider = true;
                 sliderValue = r.sliderValue;
                 sliderDelta = r.sliderDelta;
+                sliderIsInt = r.type == NodeClickResponseType::InteractWithIntSlider;
+                totalSliderMovement = 0.0f;
+                originalSliderValue = sliderIsInt ? (float)*sliderValue.i : *sliderValue.f;
             }
         }
         else if (!selectingArea)
@@ -197,11 +203,14 @@ void Canvas::CreateWindow()
         if (!isActive)
         {
             draggingSlider = false;
-            sliderValue = nullptr;
         }
         else
         {
-            *sliderValue += sliderDelta * io.MouseDelta.x * scale.x;
+            totalSliderMovement += sliderDelta * io.MouseDelta.x * scale.x;
+            if (sliderIsInt)
+                *sliderValue.i = (int)originalSliderValue + (int)totalSliderMovement;
+            else
+                *sliderValue.f = originalSliderValue + totalSliderMovement;
         }
     }
 

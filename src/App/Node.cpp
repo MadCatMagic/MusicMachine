@@ -71,18 +71,27 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 			return r;
 		}
 
-		// handle the float sliders
+		// handle the sliders
 		for (size_t i = 0; i < inputs.size(); i++)
 		{
-			if (inputs[i].target == nullptr || inputs[i].type != NodeType::Float || inputs[i].source != nullptr)
+			if (inputs[i].target == nullptr || !(inputs[i].type == NodeType::Int || inputs[i].type == NodeType::Float) || inputs[i].source != nullptr)
 				continue;
 			v2 p = GetInputPos(i);
 			bbox2 bb = bbox2(p - v2(0.0f, 8.0f), p + v2(size.y, 8.0f));
 			if (bb.contains(worldPos))
 			{
-				r.type = NodeClickResponseType::InteractWithSlider;
-				r.sliderValue = (float*)inputs[i].target;
-				r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+				if (inputs[i].type == NodeType::Float)
+				{
+					r.type = NodeClickResponseType::InteractWithFloatSlider;
+					r.sliderValue.f = (float*)inputs[i].target;
+					r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+				}
+				else
+				{
+					r.type = NodeClickResponseType::InteractWithIntSlider;
+					r.sliderValue.i = (int*)inputs[i].target;
+					r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+				}
 				return r;
 			}
 		}
@@ -136,27 +145,25 @@ void Node::IO()
 }
 
 #pragma region IOTypes
-bool Node::BoolInput(const std::string& name, bool* target)
+void Node::BoolInput(const std::string& name, bool* target)
 {
 	NodeInput o;
 	o.name = name;
 	o.target = target;
 	o.type = NodeType::Bool;
 	TransferInput(o);
-	return false;
 }
 
-bool Node::BoolOutput(const std::string& name, bool* target)
+void Node::BoolOutput(const std::string& name, bool* target)
 {
 	NodeOutput o;
 	o.name = name;
 	o.data = target;
 	o.type = NodeType::Bool;
 	TransferOutput(o);
-	return false;
 }
 
-bool Node::FloatInput(const std::string& name, float* target, float min, float max)
+void Node::FloatInput(const std::string& name, float* target, float min, float max)
 {
 	NodeInput o;
 	o.name = name;
@@ -165,18 +172,37 @@ bool Node::FloatInput(const std::string& name, float* target, float min, float m
 	o.fmin = min;
 	o.fmax = max;
 	TransferInput(o);
-	return false;
 }
 
-bool Node::FloatOutput(const std::string& name, float* target)
+void Node::FloatOutput(const std::string& name, float* target)
 {
 	NodeOutput o;
 	o.name = name;
 	o.data = target;
 	o.type = NodeType::Float;
 	TransferOutput(o);
-	return false;
 }
+
+void Node::IntInput(const std::string& name, int* target, int min, int max)
+{
+	NodeInput o;
+	o.name = name;
+	o.target = target;
+	o.type = NodeType::Int;
+	o.fmin = (float)min;
+	o.fmax = (float)max;
+	TransferInput(o);
+}
+
+void Node::IntOutput(const std::string& name, int* target)
+{
+	NodeOutput o;
+	o.name = name;
+	o.data = target;
+	o.type = NodeType::Int;
+	TransferOutput(o);
+}
+
 #pragma endregion IOTypes
 
 void Node::Execute()
@@ -206,7 +232,7 @@ float Node::getNormalWidth() const
 	float maxXOff = 0.0f;
 	for (const NodeInput& input : inputs)
 	{
-		size_t additionalWidth = input.type == NodeType::Float ? 5 : 0;
+		size_t additionalWidth = (input.type == NodeType::Float || input.type == NodeType::Int) ? 5 : 0;
 		maxXOff = std::max(IOWidth(input.name, additionalWidth), maxXOff);
 	}
 	for (const NodeOutput& output : outputs)
