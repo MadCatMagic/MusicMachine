@@ -11,7 +11,7 @@ struct Node;
 // inside UI it should call functions similar to ImGui to be able to display that info
 
 enum NodeClickResponseType {
-	None, Minimise, BeginConnection, BeginConnectionReversed
+	None, Minimise, BeginConnection, BeginConnectionReversed, InteractWithSlider
 };
 struct NodeClickResponse
 {
@@ -19,6 +19,8 @@ struct NodeClickResponse
 	NodeClickResponseType type = NodeClickResponseType::None;
 	std::string originName = "";
 	Node* origin = nullptr;
+	float* sliderValue = nullptr;
+	float sliderDelta = 0.0f;
 };
 
 /*
@@ -122,7 +124,7 @@ private:
 	size_t GetOutputIndex(const std::string& name) const;
 	void Draw(class NodeNetwork* network, bool cullBody);
 	void UpdateDimensions();
-	float IOWidth(const std::string& text) const;
+	float IOWidth(const std::string& text, size_t additionalWidth = 0) const;
 	float headerSize() const;
 	float getNormalWidth() const;
 	bbox2 getBounds() const;

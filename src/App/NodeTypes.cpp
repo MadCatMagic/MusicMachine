@@ -9,7 +9,7 @@ void MathsNode::Init()
 
 void MathsNode::IO()
 {
-	FloatInput("Input A", &a);
+	FloatInput("Input A", &a, 0.0f, 2.0f);
 	FloatInput("Input B", &b);
 	BoolInput("Freak out", nullptr);
 	FloatOutput("Result", &result);

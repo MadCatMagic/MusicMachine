@@ -4,15 +4,18 @@
 NodeClickResponse Node::HandleClick(const v2& nodePos)
 {
 	NodeClickResponse r;
+	r.handled = true;
 	v2 centre = v2(getNormalWidth() - miniTriangleOffset, headerHeight * 0.5f);
+
+	// handle the minimise button
 	if (v2::Distance(nodePos, centre) <= 6.0f)
 	{
 		mini = !mini;
-		r.handled = true;
 		r.type = NodeClickResponseType::Minimise;
 		return r;
 	}
 	
+	// handle outputs and inputs interactions
 	v2 worldPos = nodePos + position;
 	if (outputs.size() > 0)
 	{
@@ -29,7 +32,6 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		}
 		if (minDist <= 8.0f)
 		{
-			r.handled = true;
 			r.type = NodeClickResponseType::BeginConnection;
 			r.originName = outputs[oi].name;
 			r.origin = this;
@@ -53,7 +55,6 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		if (minDist <= 8.0f)
 		{
 			NodeInput& inp = inputs[inpI];
-			r.handled = true;
 			if (inp.source != nullptr)
 			{
 				r.type = NodeClickResponseType::BeginConnection;
@@ -69,7 +70,25 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 			}
 			return r;
 		}
+
+		// handle the float sliders
+		for (size_t i = 0; i < inputs.size(); i++)
+		{
+			if (inputs[i].target == nullptr || inputs[i].type != NodeType::Float || inputs[i].source != nullptr)
+				continue;
+			v2 p = GetInputPos(i);
+			bbox2 bb = bbox2(p - v2(0.0f, 8.0f), p + v2(size.y, 8.0f));
+			if (bb.contains(worldPos))
+			{
+				r.type = NodeClickResponseType::InteractWithSlider;
+				r.sliderValue = (float*)inputs[i].target;
+				r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+				return r;
+			}
+		}
 	}
+
+	r.handled = false;
 	return r;
 }
 
@@ -186,7 +205,10 @@ float Node::getNormalWidth() const
 {
 	float maxXOff = 0.0f;
 	for (const NodeInput& input : inputs)
-		maxXOff = std::max(IOWidth(input.name), maxXOff);
+	{
+		size_t additionalWidth = input.type == NodeType::Float ? 5 : 0;
+		maxXOff = std::max(IOWidth(input.name, additionalWidth), maxXOff);
+	}
 	for (const NodeOutput& output : outputs)
 		maxXOff = std::max(IOWidth(output.name), maxXOff);
 	maxXOff = std::max(minSpace.x, maxXOff);
@@ -444,11 +466,11 @@ void Node::UpdateDimensions()
 		);
 }
 
-float Node::IOWidth(const std::string& text) const
+float Node::IOWidth(const std::string& text, size_t additionalWidth) const
 {
 	// return length
 	// text space + 8px padding either side
-	return 6.0f * (float)(text.size() + 1) + 16.0f;
+	return 6.0f * (float)(text.size() + additionalWidth + 1) + 16.0f;
 }
 
 size_t Node::DataSize(NodeType type)

@@ -7,6 +7,7 @@
 
 #include "Engine/Console.h"
 #include <deque>
+#include <sstream>
 
 NodeNetwork* NodeNetwork::context = nullptr;
 
@@ -286,15 +287,28 @@ void NodeNetwork::DrawInput(const v2& cursor, const Node::NodeInput& inp, float 
 {
 	ImColor colour = GetCol(inp.type);
 	float sf = currentCanvas->GetSF().x;
-	// interaction
-	if (inp.type == Node::NodeType::Float && inp.target != nullptr)
+	// interaction for floats
+	if (inp.type == Node::NodeType::Float && inp.target != nullptr && inp.source == nullptr)
 	{
+		// drawing the box representing the value
 		v2 tl = currentCanvas->ptcts(cursor + v2(0.0f, -6.0f));
+		float proportion = (*(float*)inp.target - inp.fmin) / (inp.fmax - inp.fmin);
 		v2 br = currentCanvas->ptcts(cursor + v2(
-			(*(float*)inp.target - inp.fmin) / (inp.fmax - inp.fmin) * width, 
+			std::min(std::max(proportion, 0.0f), 1.0f) * width, 
 			6.0f
 		));
-		currentList->AddRectFilled(tl.ImGui(), br.ImGui(), GetCol(NodeCol::IOFloat));
+		currentList->AddRectFilled(tl.ImGui(), br.ImGui(), GetCol(NodeCol::BGHeader));
+		// drawing the text displaying the value
+		std::ostringstream ss;
+		ss.precision(3);
+		ss << *(float*)inp.target;
+		std::string convertedString = ss.str();
+		v2 ftpos = currentCanvas->ptcts(cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f));
+		currentList->AddText(
+			ftpos.ImGui(), 
+			GetCol(NodeCol::Text) - ImColor(0.0f, 0.0f, 0.0f, 0.4f),
+			convertedString.c_str()
+		);
 	}
 	v2 pos = currentCanvas->ptcts(cursor + v2(8.0f, -6.0f));
 	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), inp.name.c_str());

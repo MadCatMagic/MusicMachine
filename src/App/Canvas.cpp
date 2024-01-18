@@ -56,6 +56,11 @@ void Canvas::CreateWindow()
     static bool draggingNodes = false;
     static float draggingDistance = 0.0f;
 
+    // sliders
+    static bool draggingSlider = false;
+    static float* sliderValue = nullptr;
+    static float sliderDelta = 0.0f;
+
     // Pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
     {
@@ -89,12 +94,19 @@ void Canvas::CreateWindow()
                 nodes->PushNodeToTop(node);
             }
             // dragging a connection
-            if (r.handled && (r.type == NodeClickResponseType::BeginConnection || r.type == NodeClickResponseType::BeginConnectionReversed))
+            else if (r.handled && (r.type == NodeClickResponseType::BeginConnection || r.type == NodeClickResponseType::BeginConnectionReversed))
             {
                 draggingConnection = true;
                 connectionOrigin = r.origin;
                 connectionOriginName = r.originName;
                 connectionReversed = r.type == NodeClickResponseType::BeginConnectionReversed;
+            }
+            // dragging a node slider
+            else if (r.handled && r.type == NodeClickResponseType::InteractWithSlider)
+            {
+                draggingSlider = true;
+                sliderValue = r.sliderValue;
+                sliderDelta = r.sliderDelta;
             }
         }
         else if (!selectingArea)
@@ -176,6 +188,20 @@ void Canvas::CreateWindow()
                 n->position += diff;
                 draggingDistance += v2::Magnitude(v2(io.MouseDelta.x));
             }
+        }
+    }
+
+    // dragging sliders
+    if (draggingSlider)
+    {
+        if (!isActive)
+        {
+            draggingSlider = false;
+            sliderValue = nullptr;
+        }
+        else
+        {
+            *sliderValue += sliderDelta * io.MouseDelta.x * scale.x;
         }
     }
 
