@@ -16,6 +16,7 @@ void App::Initialize()
         Console::LogErr("failed to connect nodes");
     c.GenerateAllTextLODs();
     c.nodes = n;
+    c.InitCanvas();
 }
 
 void App::Update()

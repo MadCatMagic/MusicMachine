@@ -1,5 +1,6 @@
 #pragma once
 #include "Node.h"
+#include "Engine/DrawList.h"
 
 #include <vector>
 #include "imgui.h"
@@ -16,19 +17,7 @@ public:
 	NodeNetwork();
 	~NodeNetwork();
 
-	enum NodeCol {
-		BGFill, BGOutline, BGHeader,
-		IOBool, IOFloat, IOInt,
-		IO, IOSelected,
-		Connector, ConnectorInvalid,
-		Text,
-		SelectedOutline, TopSelectedOutline, SelectedFill,
-		SelectionOutline, SelectionFill
-	};
-	ImColor GetCol(NodeCol colour);
-	ImColor GetCol(Node::NodeType type);
-
-	void Draw(ImDrawList* drawList, class Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen);
+	void Draw(DrawList* drawList, class Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen);
 	inline void UnassignCanvas() { currentCanvas = nullptr; }
 
 	Node* AddNodeFromName(const std::string& type, bool positionFromCursor = false);
@@ -41,7 +30,7 @@ public:
 
 	void DrawInput(const v2& cursor, const Node::NodeInput& inp, float width);
 	void DrawOutput(const v2& cursor, float xOffset, const Node::NodeOutput& out);
-	void DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition = false, bool isNull = false);
+	void DrawConnectionEndpoint(const v2& centre, DrawColour col, bool convertPosition = false, bool isNull = false);
 	void DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float miniTriOffset);
 	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type, Node* from, Node* to);
 
@@ -52,7 +41,10 @@ public:
 	inline void ClearDrawList() { currentList = nullptr; }
 	inline void RecalculateDependencies() { recalculateDependencies = true; }
 
+	DrawColour GetCol(Node::NodeType type);
+
 private:
+
 	// works out whether nodes have circular dependencies. will not calculate if circular dependencies exist.
 	struct AbstractNode
 	{
@@ -75,28 +67,18 @@ private:
 	NodeDependencyInformation* nodeDependencyInfoPersistent = nullptr;
 	bool recalculateDependencies = true;
 
-	// allows for colour scheming
-	const int NUM_COLOURS = 16;
-	struct NodeColourData
-	{
-		std::string name;
-		ImColor col;
-	};
-	std::vector<NodeColourData> colours;
-	void InitColours();
-
 	// for drawing later
 	struct ConnectionToDraw
 	{
-		ImVec2 a, b, c, d;
-		ImColor col;
+		v2 a, b, c, d;
+		DrawColour col;
 		float thickness;
 		size_t from;
 		size_t to;
 	};
 	std::vector<ConnectionToDraw> connectionsToDraw;
 
-	ImDrawList* currentList = nullptr;
+	DrawList* currentList = nullptr;
 	Canvas* currentCanvas = nullptr;
 
 	std::vector<Node*> nodes;

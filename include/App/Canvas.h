@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector.h"
+#include "Engine/DrawList.h"
 
 // will act as a file which contains all of the nodes, but only as a reference grid point
 // all of the transformations between local and canvas coordinates happen here
@@ -16,6 +17,7 @@ public:
 	inline Canvas() {}
 	~Canvas();
 
+	void InitCanvas();
 	void CreateWindow();
 
 	v2 ScreenToCanvas(const v2& pos) const;
@@ -44,4 +46,6 @@ private:
 
 	v2 canvasPixelPos;
 	v2 canvasPixelSize;
+
+	DrawList drawList;
 };

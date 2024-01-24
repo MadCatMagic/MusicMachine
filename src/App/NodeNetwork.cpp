@@ -30,7 +30,6 @@ NodeNetwork::NodeNetwork()
 	if (context == nullptr)
 		Console::AddCommand(ExecuteCommand, "exec");
 	context = this;
-	InitColours();
 }
 
 NodeNetwork::~NodeNetwork()
@@ -40,16 +39,16 @@ NodeNetwork::~NodeNetwork()
 	nodes.clear();
 }
 
-void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen)
+void NodeNetwork::Draw(DrawList* drawList, Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen)
 {
-	drawList->ChannelsSplit(2 * (int)nodes.size());
+	drawList->dl->ChannelsSplit(2 * (int)nodes.size());
 	int currentChannel = -1;
 	currentList = drawList;
 	currentCanvas = canvas;
 	for (Node* node : nodes)
 	{
 		currentChannel += 2;
-		drawList->ChannelsSetCurrent(currentChannel);
+		drawList->dl->ChannelsSetCurrent(currentChannel);
 
 		// make sure to add the correct node connections to the buffer
 		node->ResetTouchedStatus();
@@ -63,39 +62,37 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 		{
 			// draw node body
 			bbox2 nodeBounds = node->getBounds();
-			v2 topLeft = canvas->ptcts(nodeBounds.a);
-			v2 bottomRight = canvas->ptcts(nodeBounds.b);
-			v2 tlO = canvas->ptcts(nodeBounds.a - 1.0f);
-			v2 brO = canvas->ptcts(nodeBounds.b + 1.0f);
+			v2 topLeft = nodeBounds.a;
+			v2 bottomRight = nodeBounds.b;
 			float rounding = node->mini ? node->headerSize() : NODE_ROUNDING;
 
 			bool isSelected = std::find(selected.begin(), selected.end(), node) != selected.end();
 			bool isSelectedTop = selected.size() > 0 && selected[selected.size() - 1] == node;
 
-			ImColor outline = GetCol(isSelected ? (NodeCol::SelectedOutline) : NodeCol::BGOutline);
-			outline = isSelectedTop ? GetCol(NodeCol::TopSelectedOutline) : outline;
-			ImColor fill = GetCol(isSelected ? NodeCol::SelectedFill : NodeCol::BGFill);
+			DrawColour outline = isSelected ? DrawColour::Node_SelectedOutline : DrawColour::Node_BGOutline;
+			outline = isSelectedTop ? DrawColour::Node_TopSelectedOutline : outline;
+			DrawColour fill = isSelected ? DrawColour::Node_SelectedFill : DrawColour::Node_BGFill;
 
 			// rounded to 4 pixels - a single grid tile.
 			currentChannel--;
-			drawList->ChannelsSetCurrent(currentChannel);
-			drawList->AddRectFilled(
-				tlO.ImGui(),
-				brO.ImGui(),
+			drawList->dl->ChannelsSetCurrent(currentChannel);
+			drawList->RectFilled(
+				nodeBounds.a - 1.0f,
+				nodeBounds.b + 1.0f,
 				outline,
 				rounding / canvas->GetSF().x,
 				ImDrawFlags_RoundCornersAll
 			);
-			drawList->AddRectFilled(
-				topLeft.ImGui(),
-				bottomRight.ImGui(),
+			drawList->RectFilled(
+				topLeft,
+				bottomRight,
 				fill,
 				rounding / canvas->GetSF().x,
 				ImDrawFlags_RoundCornersAll
 			);
 		}
 	}
-	drawList->ChannelsMerge();
+	drawList->dl->ChannelsMerge();
 
 	// need this here so we know if to draw any invalid connections
 	if (recalculateDependencies)
@@ -117,9 +114,9 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 			connection.to == nodeDependencyInfoPersistent->problemConnection.second ||
 			connection.to == nodeDependencyInfoPersistent->problemConnection.first &&
 			connection.from == nodeDependencyInfoPersistent->problemConnection.second))
-			drawList->AddBezierCubic(connection.a, connection.b, connection.c, connection.d, GetCol(NodeCol::ConnectorInvalid), connection.thickness);
+			drawList->BezierCubic(connection.a, connection.b, connection.c, connection.d, DrawColour::Node_ConnectorInvalid, connection.thickness);
 		else
-			drawList->AddBezierCubic(connection.a, connection.b, connection.c, connection.d, connection.col, connection.thickness);
+			drawList->BezierCubic(connection.a, connection.b, connection.c, connection.d, connection.col, connection.thickness);
 	connectionsToDraw.clear();
 
 	// draw debugging stuff
@@ -162,6 +159,7 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 
 		// actually draw the damn thing
 		// again only care about inputs
+		drawList->convertPosition = false;
 		for (size_t i = 0; i < absNodes.size(); i++)
 		{
 			v2 origin = positions[i] + canvas->ScreenToCanvas(-100.0f);
@@ -179,15 +177,16 @@ void NodeNetwork::Draw(ImDrawList* drawList, Canvas* canvas, std::vector<Node*>&
 					j == nodeDependencyInfoPersistent->problemConnection.second)
 				)
 					col = ImColor(1.0f, 1.0f, 0.0f);
-				drawList->AddLine(origin.ImGui(), endpoint.ImGui(), col, 2.0f);
+				drawList->Line(origin, endpoint, col, 2.0f);
 			}
 		}
 		for (size_t i = 0; i < absNodes.size(); i++)
 		{
 			v2 origin = positions[i] + canvas->ScreenToCanvas(-100.0f);
-			ImColor col = absNodes[i]->isEndpoint ? GetCol(NodeCol::IOBool) : GetCol(NodeCol::Text);
-			drawList->AddCircleFilled(origin.ImGui(), 4.0f, col);
+			ImColor col = absNodes[i]->isEndpoint ? DrawColour::Node_IOBool : DrawColour::Text;
+			drawList->CircleFilled(origin, 4.0f, col);
 		}
+		drawList->convertPosition = true;
 	}
 }
 
@@ -285,7 +284,6 @@ void NodeNetwork::DeleteNode(Node* node)
 
 void NodeNetwork::DrawInput(const v2& cursor, const Node::NodeInput& inp, float width)
 {
-	ImColor colour = GetCol(inp.type);
 	float sf = currentCanvas->GetSF().x;
 	// interaction for floats
 	if ((inp.type == Node::NodeType::Float || inp.type == Node::NodeType::Int) && inp.target != nullptr && inp.source == nullptr)
@@ -296,13 +294,13 @@ void NodeNetwork::DrawInput(const v2& cursor, const Node::NodeInput& inp, float 
 		else
 			value = (float)(*(int*)inp.target);
 		// drawing the box representing the value
-		v2 tl = currentCanvas->ptcts(cursor + v2(0.0f, -8.0f));
+		v2 tl = cursor + v2(0.0f, -8.0f);
 		float proportion = (value - inp.fmin) / (inp.fmax - inp.fmin);
-		v2 br = currentCanvas->ptcts(cursor + v2(
+		v2 br = cursor + v2(
 			std::min(std::max(proportion, 0.0f), 1.0f) * width, 
 			8.0f
-		));
-		currentList->AddRectFilled(tl.ImGui(), br.ImGui(), GetCol(NodeCol::BGHeader));
+		);
+		currentList->RectFilled(tl, br, DrawColour::Node_BGHeader);
 		// drawing the text displaying the value
 		std::ostringstream ss;
 		ss.precision(3);
@@ -311,80 +309,70 @@ void NodeNetwork::DrawInput(const v2& cursor, const Node::NodeInput& inp, float 
 		else
 			ss << *(int*)inp.target;
 		std::string convertedString = ss.str();
-		v2 ftpos = currentCanvas->ptcts(cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f));
-		currentList->AddText(
-			ftpos.ImGui(), 
-			GetCol(NodeCol::Text) - ImColor(0.0f, 0.0f, 0.0f, 0.4f),
+		v2 ftpos = cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f);
+		currentList->Text(
+			ftpos, 
+			DrawColour::TextFaded,
 			convertedString.c_str()
 		);
 	}
-	v2 pos = currentCanvas->ptcts(cursor + v2(8.0f, -6.0f));
-	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), inp.name.c_str());
+	v2 pos = cursor + v2(8.0f, -6.0f);
+	currentList->Text(pos, DrawColour::Text, inp.name.c_str());
 	// input circle thingy
-	pos = currentCanvas->ptcts(cursor);
-	DrawConnectionEndpoint(pos, colour, false, inp.target == nullptr);
+	pos = cursor;
+	DrawConnectionEndpoint(pos, GetCol(inp.type), true, inp.target == nullptr);
 }
 
 void NodeNetwork::DrawOutput(const v2& cursor, float xOffset, const Node::NodeOutput& out)
 {
-	ImColor colour = GetCol(out.type);
-	v2 pos = currentCanvas->ptcts(cursor + v2(xOffset, 0.0f));
+	v2 pos = cursor + v2(xOffset, 0.0f);
 	float sf = currentCanvas->GetSF().x;
 	// draw on right side of node
-	DrawConnectionEndpoint(pos, colour, false, out.data == nullptr);
+	DrawConnectionEndpoint(pos, GetCol(out.type), true, out.data == nullptr);
 	// text
-	pos = currentCanvas->ptcts(cursor + v2(xOffset - (out.name.size() + 1) * 6.0f, 0.0f) + v2(-8.0f, -6.0f));
-	currentList->AddText(pos.ImGui(), GetCol(NodeCol::Text), out.name.c_str());
+	pos = cursor + v2(xOffset - (out.name.size() + 1) * 6.0f, 0.0f) + v2(-8.0f, -6.0f);
+	currentList->Text(pos, DrawColour::Text, out.name.c_str());
 }
 
-void NodeNetwork::DrawConnectionEndpoint(const v2& centre, const ImColor& color, bool convertPosition, bool isNull)
+void NodeNetwork::DrawConnectionEndpoint(const v2& centre, DrawColour col, bool convertPosition, bool isNull)
 {
 	// draw it
 	float sf = currentCanvas->GetSF().x;
-	if (convertPosition)
-	{
-		ImVec2 c = currentCanvas->ptcts(centre).ImGui();
-		currentList->AddCircleFilled(c, 4.0f / sf, GetCol(NodeCol::IO));
-		currentList->AddCircleFilled(c, 3.0f / sf, color);
-		if (isNull)
-			currentList->AddCircle(c, 2.0f / sf, GetCol(NodeCol::IO), 0, 1.0f / sf);
-	}
-	else
-	{
-		currentList->AddCircleFilled(centre.ImGui(), 4.0f / sf, GetCol(NodeCol::IO));
-		currentList->AddCircleFilled(centre.ImGui(), 3.0f / sf, color);
-		if (isNull)
-			currentList->AddCircle(centre.ImGui(), 2.0f / sf, GetCol(NodeCol::IO), 0, 1.0f / sf);
-	}
+	currentList->convertPosition = convertPosition;
+	currentList->CircleFilled(centre, 4.0f / sf, DrawColour::Node_IO);
+	currentList->CircleFilled(centre, 3.0f / sf, col);
+	if (isNull)
+		currentList->Circle(centre, 2.0f / sf, DrawColour::Node_IO, 1.0f / sf);
+	currentList->convertPosition = true;
 }
 
 void NodeNetwork::DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float miniTriOffset)
 {
-	v2 topLeft = currentCanvas->ptcts(cursor + 1.0f);
-	v2 bottomRight = currentCanvas->ptcts(cursor + v2(width, height) - 1.0f);
-	v2 textPos = currentCanvas->ptcts(v2(cursor.x + 8.0f, cursor.y + height * 0.5f - 6.0f));
+	v2 topLeft = cursor + 1.0f;
+	v2 bottomRight = cursor + v2(width, height) - 1.0f;
+	v2 textPos = v2(cursor.x + 8.0f, cursor.y + height * 0.5f - 6.0f);
 	ImDrawFlags flags = ImDrawFlags_RoundCornersAll;
 	float rounding = mini ? height * 0.5f: NODE_ROUNDING;
-	currentList->AddRectFilled(topLeft.ImGui(), bottomRight.ImGui(), GetCol(NodeCol::BGHeader), rounding / currentCanvas->GetSF().x, flags);
-	currentList->AddText(textPos.ImGui(), GetCol(NodeCol::Text), name.c_str());
+	currentList->RectFilled(topLeft, bottomRight, DrawColour::Node_BGHeader, rounding / currentCanvas->GetSF().x, flags);
+	currentList->Text(textPos, DrawColour::Text, name.c_str());
 
 	// minimized triangle thing
 	// position should be constant regardless of header size
 	v2 triCentre = cursor + v2(miniTriOffset, height * 0.5f);
 	if (mini)
-	{
-		v2 a = currentCanvas->ptcts(triCentre + v2(3.0f, 0.0f));
-		v2 b = currentCanvas->ptcts(triCentre + v2(-3.0f, -3.0f));
-		v2 c = currentCanvas->ptcts(triCentre + v2(-3.0f, 3.0f));
-		currentList->AddTriangleFilled(a.ImGui(), b.ImGui(), c.ImGui(), GetCol(NodeCol::Text));
-	}
+		currentList->TriangleFilled(
+			triCentre + v2(3.0f, 0.0f), 
+			triCentre + v2(-3.0f, -3.0f), 
+			triCentre + v2(-3.0f, 3.0f), 
+			DrawColour::Text
+		);
 	else
-	{
-		v2 b = currentCanvas->ptcts(triCentre + v2(0.0f, 3.0f));
-		v2 a = currentCanvas->ptcts(triCentre + v2(-3.0f, -3.0f));
-		v2 c = currentCanvas->ptcts(triCentre + v2(3.0f, -3.0f));
-		currentList->AddTriangleFilled(a.ImGui(), b.ImGui(), c.ImGui(), GetCol(NodeCol::Text));
-	}
+		currentList->TriangleFilled(
+			triCentre + v2(0.0f, 3.0f), 
+			triCentre + v2(-3.0f, -3.0f), 
+			triCentre + v2(3.0f, -3.0f), 
+			DrawColour::Text
+		);
 }
 
 void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeType type, Node* from, Node* to)
@@ -403,10 +391,10 @@ void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeT
 	}
 	float width = 12.0f + fabsf(target.x - origin.x) * 0.3f + fabsf(target.y - origin.y) * 0.1f;
 	ConnectionToDraw c{
-		currentCanvas->ptcts(origin).ImGui(),
-		currentCanvas->ptcts(origin + v2(width, 0.0f)).ImGui(),
-		currentCanvas->ptcts(target - v2(width, 0.0f)).ImGui(),
-		currentCanvas->ptcts(target).ImGui(),
+		origin,
+		origin + v2(width, 0.0f),
+		target - v2(width, 0.0f),
+		target,
 		GetCol(type),
 		1.5f / currentCanvas->GetSF().x,
 		f,
@@ -417,12 +405,6 @@ void NodeNetwork::DrawConnection(const v2& target, const v2& origin, Node::NodeT
 
 void NodeNetwork::DrawContextMenu()
 {
-	if (ImGui::BeginMenu("Colours"))
-	{
-		for (int i = 0; i < NUM_COLOURS; i++)
-			ImGui::ColorEdit4(colours[i].name.c_str(), &colours[i].col.Value.x, ImGuiColorEditFlags_NoInputs);
-		ImGui::EndMenu();
-	}
 	if (ImGui::BeginMenu("Nodes"))
 	{
 		const std::string nodeNames[] {
@@ -440,21 +422,15 @@ void NodeNetwork::DrawContextMenu()
 	ImGui::MenuItem("Debug Enable", nullptr, &drawDebugInformation);
 }
 
-ImColor NodeNetwork::GetCol(NodeCol colour)
+DrawColour NodeNetwork::GetCol(Node::NodeType type)
 {
-	return colours[(int)colour].col;
-}
-
-ImColor NodeNetwork::GetCol(Node::NodeType type)
-{
-	ImColor colour = ImColor(1.0f, 1.0f, 1.0f, 1.0f);
 	if (type == Node::NodeType::Bool)
-		colour = GetCol(NodeCol::IOBool);
+		return DrawColour::Node_IOBool;
 	else if (type == Node::NodeType::Float)
-		colour = GetCol(NodeCol::IOFloat);
+		return DrawColour::Node_IOFloat;
 	else if (type == Node::NodeType::Int)
-		colour = GetCol(NodeCol::IOInt);
-	return colour;
+		return DrawColour::Node_IOInt;
+	return DrawColour::Canvas_BG;
 }
 
 bool NodeNetwork::Execute()
@@ -578,93 +554,6 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 		}
 	}
 	return nodeDependencyInformation;
-}
-
-void NodeNetwork::InitColours()
-{
-	for (int i = 0; i < NUM_COLOURS; i++)
-	{
-		NodeColourData c;
-		switch ((NodeCol)i)
-		{
-		case NodeCol::BGFill:
-			c.name = "BGFill";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
-			break;
-
-		case NodeCol::BGOutline:
-			c.name = "BGOutline";
-			c.col = ImColor(0.0f, 0.0f, 0.4f, 0.8f);
-			break;
-
-		case NodeCol::BGHeader:
-			c.name = "BGHeader";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Header);
-			break;
-
-		case NodeCol::IOBool:
-			c.name = "IOBool";
-			c.col = ImColor(1.0f, 0.2f, 0.6f);
-			break;
-
-		case NodeCol::IOFloat:
-			c.name = "IOFloat";
-			c.col = ImColor(0.4f, 0.6f, 0.9f);
-			break;
-
-		case NodeCol::IOInt:
-			c.name = "IOInt";
-			c.col = ImColor(0.2f, 0.7f, 0.6f);
-			break;
-
-		case NodeCol::IO:
-			c.name = "IO";
-			c.col = ImColor(0.1f, 0.1f, 0.1f);
-			break;
-
-		case NodeCol::IOSelected:
-			c.name = "IOSelected";
-			c.col = ImColor(0.6f, 0.6f, 0.6f);
-			break;
-		
-		case NodeCol::Connector:
-			c.name = "Connector";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
-			break;
-
-		case NodeCol::ConnectorInvalid:
-			c.name = "ConnectorInvalid";
-			c.col = ImColor(1.0f, 0.0f, 0.0f, 1.0f);
-			break;
-
-		case NodeCol::Text:
-			c.name = "Text";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
-			break;
-
-		case NodeCol::SelectedOutline:
-			c.name = "SelectedOutline";
-			c.col = ImColor(0.2f, 0.6f, 1.0f, 0.8f);
-			break;
-		case NodeCol::TopSelectedOutline:
-			c.name = "TopSelectedOutline";
-			c.col = ImColor(0.5f, 0.8f, 1.0f, 0.8f);
-			break;
-		case NodeCol::SelectedFill:
-			c.name = "SelectedFill";
-			c.col = ImColor(0.2f, 0.2f, 0.5f, 1.0f);
-			break;
-		case NodeCol::SelectionOutline:
-			c.name = "SelectionOutline";
-			c.col = ImColor(1.0f, 0.8f, 0.2f, 0.8f);
-			break;
-		case NodeCol::SelectionFill:
-			c.name = "SelectionFill";
-			c.col = ImColor(1.0f, 0.8f, 0.2f, 0.2f);
-			break;
-		}
-		colours.push_back(c);
-	}
 }
 
 NodeNetwork::NodeDependencyInformation::~NodeDependencyInformation()

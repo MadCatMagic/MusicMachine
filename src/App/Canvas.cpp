@@ -6,6 +6,7 @@
 #include "BBox.h"
 
 #include "Engine/Input.h"
+#include "Engine/DrawList.h"
 
 Canvas::~Canvas()
 {
@@ -13,10 +14,22 @@ Canvas::~Canvas()
         nodes->UnassignCanvas();
 }
 
+void Canvas::InitCanvas()
+{
+    drawList.SetConversionCallback([this](const v2& p) -> v2 { return this->ptcts(p); });
+    drawList.InitColours();
+}
+
 // a lot of this code is taken from the ImGui canvas example
 void Canvas::CreateWindow()
 {
     ImGui::Begin("Canvas");
+    if (ImGui::BeginMenu("Colours"))
+    {
+        for (int i = 0; i < NUM_DRAW_COLOURS; i++)
+            ImGui::ColorEdit4(drawList.colours[i].name.c_str(), &drawList.colours[i].col.Value.x, ImGuiColorEditFlags_NoInputs);
+        ImGui::EndMenu();
+    }
     ImGui::InputFloat2("position", &position.x);
 
     // Using InvisibleButton() as a convenience 
@@ -30,9 +43,10 @@ void Canvas::CreateWindow()
 
     // Draw border and background color
     ImGuiIO& io = ImGui::GetIO();
-    ImDrawList* drawList = ImGui::GetWindowDrawList();
-    drawList->AddRectFilled(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), IM_COL32(50, 50, 50, 255));
-    drawList->AddRect(canvasPixelPos.ImGui(), canvasBottomRight.ImGui(), IM_COL32(255, 255, 255, 255));
+    drawList.dl = ImGui::GetWindowDrawList();
+    drawList.convertPosition = false;
+    drawList.RectFilled(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_BG);
+    drawList.Rect(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
 
     // This will catch our interactions
     ImGui::InvisibleButton("canvas", canvasPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
@@ -255,30 +269,31 @@ void Canvas::CreateWindow()
     }
 
     // Draw grid + all lines in the canvas
-    drawList->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
+    drawList.dl->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
     const v2 gridStep = scale.reciprocal() * 32.0f;
     const v2 gridStepSmall = scale.reciprocal() * 8.0f;
     for (float x = fmodf(-position.x / scale.x, gridStep.x) - gridStep.x; x < canvasPixelSize.x; x += gridStep.x)
     {
-        drawList->AddLine(ImVec2(canvasPixelPos.x + x, canvasPixelPos.y), ImVec2(canvasPixelPos.x + x, canvasBottomRight.y), IM_COL32(200, 200, 200, 40));
+        drawList.Line(v2(canvasPixelPos.x + x, canvasPixelPos.y), v2(canvasPixelPos.x + x, canvasBottomRight.y), DrawColour::Canvas_GridLinesHeavy);
         if (scalingLevel < 21)
             for (int dx = 1; dx < 4; dx++)
-                drawList->AddLine(
+                drawList.Line(
                     ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasPixelPos.y), 
-                    ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasBottomRight.y), IM_COL32(200, 200, 200, 20));
+                    ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasBottomRight.y), DrawColour::Canvas_GridLinesLight);
     }
     for (float y = fmodf(-position.y / scale.y, gridStep.y) - gridStep.y; y < canvasPixelSize.y; y += gridStep.y)
     {
-        drawList->AddLine(ImVec2(canvasPixelPos.x, canvasPixelPos.y + y), ImVec2(canvasBottomRight.x, canvasPixelPos.y + y), IM_COL32(200, 200, 200, 40));
+        drawList.Line(v2(canvasPixelPos.x, canvasPixelPos.y + y), v2(canvasBottomRight.x, canvasPixelPos.y + y), DrawColour::Canvas_GridLinesHeavy);
         if (scalingLevel < 21)
             for (int dy = 1; dy < 4; dy++)
-                drawList->AddLine(
-                    ImVec2(canvasPixelPos.x, canvasPixelPos.y + y + dy * gridStepSmall.y),
-                    ImVec2(canvasBottomRight.x, canvasPixelPos.y + y + dy * gridStepSmall.y), IM_COL32(200, 200, 200, 20));
+                drawList.Line(
+                    v2(canvasPixelPos.x, canvasPixelPos.y + y + dy * gridStepSmall.y),
+                    v2(canvasBottomRight.x, canvasPixelPos.y + y + dy * gridStepSmall.y), DrawColour::Canvas_GridLinesLight);
     }
 
     ImGui::PushFont(textLODs[scalingLevel]);
-    nodes->Draw(drawList, this, selectedStack, bbox2(stctp(canvasPixelPos), stctp(canvasBottomRight)));
+    drawList.convertPosition = true;
+    nodes->Draw(&drawList, this, selectedStack, bbox2(stctp(canvasPixelPos), stctp(canvasBottomRight)));
 
     // draw dragged connection
     if (draggingConnection)
@@ -316,12 +331,12 @@ void Canvas::CreateWindow()
     if (selectingArea)
     {
         bbox2 box = bbox2(mousePos, selectionStart);
-        drawList->AddRectFilled(ptcts(box.a).ImGui(), ptcts(box.b).ImGui(), nodes->GetCol(NodeNetwork::SelectionFill));
-        drawList->AddRect(ptcts(box.a).ImGui(), ptcts(box.b).ImGui(), nodes->GetCol(NodeNetwork::SelectionOutline));
+        drawList.RectFilled(box.a, box.b, DrawColour::Node_SelectionFill);
+        drawList.Rect(box.a, box.b, DrawColour::Node_SelectionOutline);
     }
 
     ImGui::PopFont();
-    drawList->PopClipRect();
+    drawList.dl->PopClipRect();
 
     ImGui::End();
 }
