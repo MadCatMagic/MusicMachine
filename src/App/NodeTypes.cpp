@@ -12,7 +12,7 @@ void MathsNode::IO()
 	FloatInput("Input A", &a, 0.0f, 2.0f);
 	FloatInput("Input B", &b);
 	IntInput("Integer brugh", &c);
-	BoolInput("Freak out", nullptr);
+	BoolInput("Freak out", &crazy);
 	FloatOutput("Result", &result);
 	IntOutput("Result rounded", &resultRounded);
 }

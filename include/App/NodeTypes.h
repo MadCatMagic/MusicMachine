@@ -15,6 +15,7 @@ private:
 	int c = 0;
 	int resultRounded = 0;
 	float result = 0.0f;
+	bool crazy = true;
 };
 
 struct LongNode : public Node

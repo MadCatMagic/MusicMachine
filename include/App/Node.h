@@ -12,7 +12,7 @@ struct Node;
 
 enum NodeClickResponseType {
 	None, Minimise, BeginConnection, BeginConnectionReversed, 
-	InteractWithFloatSlider, InteractWithIntSlider
+	InteractWithFloatSlider, InteractWithIntSlider, InteractWithBool
 };
 struct NodeClickResponse
 {

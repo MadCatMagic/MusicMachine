@@ -285,36 +285,47 @@ void NodeNetwork::DeleteNode(Node* node)
 void NodeNetwork::DrawInput(const v2& cursor, const Node::NodeInput& inp, float width)
 {
 	float sf = currentCanvas->GetSF().x;
-	// interaction for floats
-	if ((inp.type == Node::NodeType::Float || inp.type == Node::NodeType::Int) && inp.target != nullptr && inp.source == nullptr)
+	if (inp.target != nullptr && inp.source == nullptr)
 	{
-		float value;
-		if (inp.type == Node::NodeType::Float)
-			value = *(float*)inp.target;
-		else
-			value = (float)(*(int*)inp.target);
-		// drawing the box representing the value
-		v2 tl = cursor + v2(0.0f, -8.0f);
-		float proportion = (value - inp.fmin) / (inp.fmax - inp.fmin);
-		v2 br = cursor + v2(
-			std::min(std::max(proportion, 0.0f), 1.0f) * width, 
-			8.0f
-		);
-		currentList->RectFilled(tl, br, DrawColour::Node_BGHeader);
-		// drawing the text displaying the value
-		std::ostringstream ss;
-		ss.precision(3);
-		if (inp.type == Node::NodeType::Float)
-			ss << value;
-		else
-			ss << *(int*)inp.target;
-		std::string convertedString = ss.str();
-		v2 ftpos = cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f);
-		currentList->Text(
-			ftpos, 
-			DrawColour::TextFaded,
-			convertedString.c_str()
-		);
+		// interaction for floats and integers
+		if ((inp.type == Node::NodeType::Float || inp.type == Node::NodeType::Int))
+		{
+			float value;
+			if (inp.type == Node::NodeType::Float)
+				value = *(float*)inp.target;
+			else
+				value = (float)(*(int*)inp.target);
+			// drawing the box representing the value
+			v2 tl = cursor + v2(0.0f, -8.0f);
+			float proportion = (value - inp.fmin) / (inp.fmax - inp.fmin);
+			v2 br = cursor + v2(
+				std::min(std::max(proportion, 0.0f), 1.0f) * width,
+				8.0f
+			);
+			currentList->RectFilled(tl, br, DrawColour::Node_BGHeader);
+			// drawing the text displaying the value
+			std::ostringstream ss;
+			ss.precision(3);
+			if (inp.type == Node::NodeType::Float)
+				ss << value;
+			else
+				ss << *(int*)inp.target;
+			std::string convertedString = ss.str();
+			v2 ftpos = cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f);
+			currentList->Text(
+				ftpos,
+				DrawColour::TextFaded,
+				convertedString.c_str()
+			);
+		}
+		// interaction for bool inputs
+		else if (inp.type == Node::NodeType::Bool)
+		{
+			v2 centre = cursor + v2(width - 10.0f, 0.0f);
+			currentList->Circle(centre, 4.0f / sf, DrawColour::TextFaded, 1.0f / sf);
+			if (*(bool*)inp.target)
+				currentList->CircleFilled(centre, 2.0f / sf, DrawColour::TextFaded);
+		}
 	}
 	v2 pos = cursor + v2(8.0f, -6.0f);
 	currentList->Text(pos, DrawColour::Text, inp.name.c_str());

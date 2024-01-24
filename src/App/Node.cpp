@@ -74,24 +74,36 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		// handle the sliders
 		for (size_t i = 0; i < inputs.size(); i++)
 		{
-			if (inputs[i].target == nullptr || !(inputs[i].type == NodeType::Int || inputs[i].type == NodeType::Float) || inputs[i].source != nullptr)
+			if (inputs[i].target == nullptr || inputs[i].source != nullptr)
 				continue;
 			v2 p = GetInputPos(i);
-			bbox2 bb = bbox2(p - v2(0.0f, 8.0f), p + v2(size.y, 8.0f));
-			if (bb.contains(worldPos))
+			if (inputs[i].type == NodeType::Int || inputs[i].type == NodeType::Float)
 			{
-				if (inputs[i].type == NodeType::Float)
+				bbox2 bb = bbox2(p - v2(0.0f, 8.0f), p + v2(size.y, 8.0f));
+				if (bb.contains(worldPos))
 				{
-					r.type = NodeClickResponseType::InteractWithFloatSlider;
-					r.sliderValue.f = (float*)inputs[i].target;
-					r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+					if (inputs[i].type == NodeType::Float)
+					{
+						r.type = NodeClickResponseType::InteractWithFloatSlider;
+						r.sliderValue.f = (float*)inputs[i].target;
+						r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+					}
+					else
+					{
+						r.type = NodeClickResponseType::InteractWithIntSlider;
+						r.sliderValue.i = (int*)inputs[i].target;
+						r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+					}
+					return r;
 				}
-				else
-				{
-					r.type = NodeClickResponseType::InteractWithIntSlider;
-					r.sliderValue.i = (int*)inputs[i].target;
-					r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
-				}
+			}
+			else if (inputs[i].type == NodeType::Bool)
+			{
+				v2 centre = p + v2(size.x - 10.0f, 0.0f);
+				if ((centre - worldPos).length() > 6.0f)
+					continue;
+				*(bool*)inputs[i].target = !(*(bool*)inputs[i].target);
+				r.type = NodeClickResponseType::InteractWithBool;
 				return r;
 			}
 		}
