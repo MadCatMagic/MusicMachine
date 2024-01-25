@@ -1,24 +1,25 @@
 #include "JSON/JSON.h"
 #include <sstream>
+#include "Engine/Console.h"
 
 std::string JSONType::ToString(int indents) const
 {
     switch (t)
     {
     case Num:
-        return std::to_string(data.i);
+        return std::to_string(i);
     case Float:
-        return std::to_string(data.f);
+        return std::to_string(f);
     case String:
-        return data.s;
+        return "\"" + s + "\"";
     case Bool:
-        return data.b ? "true" : "false";
+        return b ? "true" : "false";
 
     case Array:
     {
         std::string ind = std::string(indents, '\t');
         std::string r = "[\n";
-        for (auto& v : data.arr)
+        for (auto& v : arr)
         {
             r += ind + "\t" + v.ToString(indents + 1) + ",\n";
         }
@@ -29,7 +30,7 @@ std::string JSONType::ToString(int indents) const
     {
         std::string ind = std::string(indents, '\t');
         std::string r = "{\n";
-        for (auto& v : data.obj)
+        for (auto& v : obj)
         {
             r += ind + "\t\"" + v.first + "\": " + v.second.ToString(indents + 1) + ",\n";
         }
@@ -39,11 +40,37 @@ std::string JSONType::ToString(int indents) const
     return "ERRTYPE";
 }
 
+JSONType JSONType::FromTokens(const std::vector<std::string>& tokens, Type type)
+{
+    switch (type)
+    {
+    case Type::Num:
+        return JSONType();
+    case Type::Float:
+        return JSONType();
+    case Type::String:
+        return JSONType();
+    case Type::Bool:
+        return JSONType();
+    case Type::Array:
+        return JSONType();
+    case Type::Object:
+        return JSONType();
+    }
+    return JSONType();
+}
+
 std::vector<std::pair<std::string, JSONType>> JSONDecoder::Decode(const std::string& str)
 {
     std::vector<std::string> tokens = Tokenise(str);
+    
+    std::vector<JSONType> res;
+    for (auto& t : tokens)
+        res.push_back(JSONType(t));
 
-    return std::vector<std::pair<std::string, JSONType>>();
+    return {
+        {"tokens", JSONType(res)}
+    };
 }
 
 #include <regex>
@@ -80,4 +107,29 @@ std::vector<std::string> JSONDecoder::Tokenise(const std::string& inp) const
         result.push_back((*i).str());
 
     return result;
+}
+
+void RegisterJSONCommands()
+{
+    Console::AddCommand(&TestJSONCommand, "json");
+    Console::Log("<JSON>: registered json command");
+
+    JSONType jsonobj = JSONType({
+        { "dumb", JSONType((long)24)},
+        { "another", JSONType(12.04)},
+        { "arr", JSONType({ JSONType((long)24), JSONType("string"), JSONType(true)})}
+    });
+    Console::Log("Test json object: " + jsonobj.ToString());
+}
+
+void TestJSONCommand(std::vector<std::string> args)
+{
+    std::string s;
+    for (auto& v : args)
+        s += v;
+    JSONDecoder d;
+    std::vector<std::pair<std::string, JSONType>> r = d.Decode(s);
+    Console::Log("Decode result:");
+    for (auto& p : r)
+        Console::Log("\"" + p.first + "\": " + p.second.ToString());
 }

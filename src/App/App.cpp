@@ -2,6 +2,7 @@
 
 #include "imgui.h"
 #include "Engine/Console.h"
+#include "JSON/JSON.h"
 
 void App::Initialize()
 {
@@ -17,6 +18,7 @@ void App::Initialize()
     c.GenerateAllTextLODs();
     c.nodes = n;
     c.InitCanvas();
+    RegisterJSONCommands();
 }
 
 void App::Update()
