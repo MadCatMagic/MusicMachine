@@ -12,12 +12,13 @@
 		"name", // comment
 		"obj",
 		{
-			"nestedObject": 42
+			"nestedObject": 42,
 			"okay": true
 		}
 	]
 }
 */
+// "{\"data\": \"string\",\"num\" : 1234,\"float\" : 1.04,\"array\" : [42,	\"name\",	\"obj\",{\"nestedObject\": 42,\"okay\" : true}]}"
 
 #include <vector>
 #include <unordered_map>
@@ -35,7 +36,8 @@ struct JSONType
 	std::unordered_map<std::string, JSONType> obj;
 	Type t;
 
-	inline JSONType() :t(Type::None) {}
+	inline JSONType() : t(Type::None) {}
+	inline JSONType(Type t) : t(t) {}
 	inline JSONType(long i) : i(i), t(Type::Num) {}
 	inline JSONType(double f) : f(f), t(Type::Float) {}
 	inline JSONType(const std::string& s) : s(s), t(Type::String) {}
@@ -45,7 +47,7 @@ struct JSONType
 	inline JSONType(const std::unordered_map<std::string, JSONType> obj) : obj(obj), t(Type::Object) {}
 
 	std::string ToString(int indents = 0) const;
-	static JSONType FromTokens(const std::vector<std::string>& tokens, Type type);
+	static JSONType FromTokens(const std::vector<std::string>& tokens);
 };
 
 class JSONDecoder

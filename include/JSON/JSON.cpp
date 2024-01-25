@@ -19,9 +19,9 @@ std::string JSONType::ToString(int indents) const
     {
         std::string ind = std::string(indents, '\t');
         std::string r = "[\n";
-        for (auto& v : arr)
+        for (size_t i = 0; i < arr.size(); i++)
         {
-            r += ind + "\t" + v.ToString(indents + 1) + ",\n";
+            r += ind + "\t" + arr[i].ToString(indents + 1) + (i < arr.size() - 1 ? ",\n" : "\n");
         }
         return r + ind + "]";
     }
@@ -30,9 +30,11 @@ std::string JSONType::ToString(int indents) const
     {
         std::string ind = std::string(indents, '\t');
         std::string r = "{\n";
+        size_t i = 0;
         for (auto& v : obj)
         {
-            r += ind + "\t\"" + v.first + "\": " + v.second.ToString(indents + 1) + ",\n";
+            i++;
+            r += ind + "\t\"" + v.first + "\": " + v.second.ToString(indents + 1) + (i < obj.size() ? ",\n" : "\n");
         }
         return r + ind + "}";
     }
@@ -40,36 +42,98 @@ std::string JSONType::ToString(int indents) const
     return "ERRTYPE";
 }
 
-JSONType JSONType::FromTokens(const std::vector<std::string>& tokens, Type type)
+#include <exception>
+
+JSONType JSONType::FromTokens(const std::vector<std::string>& tokens)
 {
-    switch (type)
+    // will be either bool, long, double, or text
+    if (tokens.size() == 1)
     {
-    case Type::Num:
-        return JSONType();
-    case Type::Float:
-        return JSONType();
-    case Type::String:
-        return JSONType();
-    case Type::Bool:
-        return JSONType();
-    case Type::Array:
-        return JSONType();
-    case Type::Object:
-        return JSONType();
+        std::string s = tokens[0];
+        if (s[0] == '\"')
+            return JSONType(s.substr(1, s.size() - 2));
+        if (s == "true")
+            return JSONType(true);
+        if (s == "false")
+            return JSONType(false);
+        if (std::find(s.begin(), s.end(), '.') != s.end())
+            return JSONType(std::stod(s));
+        return JSONType(std::stol(s));
     }
+
+    // array type
+    if (tokens[0] == "[")
+    {
+        JSONType t{ Type::Array };
+        std::vector<std::string> subSection;
+        int currentLevel = 0;
+        for (size_t i = 1; i < tokens.size(); i++)
+        {
+            if (tokens[i] == "{" || tokens[i] == "[")
+                currentLevel++;
+            if (currentLevel == 0 && (tokens[i] == "," || tokens[i] == "]"))
+            {
+                t.arr.push_back(FromTokens(subSection));
+                subSection.clear();
+            }
+            else
+                subSection.push_back(tokens[i]);
+            if (tokens[i] == "}" || tokens[i] == "]")
+                currentLevel--;
+        }
+        return t;
+    }
+
+    // object type
+    if (tokens[0] == "{")
+    {
+        JSONType t{ Type::Object };
+        std::string first;
+        std::vector<std::string> subSection;
+        int currentLevel = 0;
+        for (size_t i = 1; i < tokens.size(); i++)
+        {
+            if (first != "")
+            {
+                if (tokens[i] == "{" || tokens[i] == "[")
+                    currentLevel++;
+                if (currentLevel == 0 && (tokens[i] == "," || tokens[i] == "}"))
+                {
+                    t.obj[first.substr(1, first.size() - 2)] = FromTokens(subSection);
+                    subSection.clear();
+                    first = "";
+                }
+                else
+                    subSection.push_back(tokens[i]);
+                if (tokens[i] == "}" || tokens[i] == "]")
+                    currentLevel--;
+            }
+            else if (tokens[i] == ":")
+                first = tokens[i - 1];
+        }
+        return t;
+    }
+
+    // error!
+    std::string s;
+    for (const std::string& v : tokens)
+        s += "\"" + v + "\", ";
+    Console::LogErr("Malformed sequence of tokens passed to FromTokens: [" + s + "]");
+
     return JSONType();
 }
 
 std::vector<std::pair<std::string, JSONType>> JSONDecoder::Decode(const std::string& str)
 {
     std::vector<std::string> tokens = Tokenise(str);
-    
+    JSONType t = JSONType::FromTokens(tokens);
     std::vector<JSONType> res;
     for (auto& t : tokens)
         res.push_back(JSONType(t));
 
     return {
-        {"tokens", JSONType(res)}
+        {"tokens", JSONType(res)},
+        {"obj", t}
     };
 }
 
@@ -120,6 +184,7 @@ void RegisterJSONCommands()
         { "arr", JSONType({ JSONType((long)24), JSONType("string"), JSONType(true)})}
     });
     Console::Log("Test json object: " + jsonobj.ToString());
+    TestJSONCommand({ jsonobj.ToString() });
 }
 
 void TestJSONCommand(std::vector<std::string> args)
