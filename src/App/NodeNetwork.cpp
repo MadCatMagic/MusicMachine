@@ -5,6 +5,8 @@
 #include "BBox.h"
 #include "Random.h"
 
+#include "JSON/JSON.h"
+
 #include "Engine/Console.h"
 #include <deque>
 #include <sstream>
@@ -30,6 +32,10 @@ NodeNetwork::NodeNetwork()
 	if (context == nullptr)
 		Console::AddCommand(ExecuteCommand, "exec");
 	context = this;
+}
+
+NodeNetwork::NodeNetwork(const std::string& nnFilePath)
+{
 }
 
 NodeNetwork::~NodeNetwork()
@@ -210,7 +216,8 @@ Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCur
 	if (n == nullptr)
 		return nullptr;
 
-	n->NodeInit(this);
+	// random enough for now but unreliable
+	n->NodeInit(this, (uint64_t)rand() << 16 ^ nodes.size());
 	n->Init();
 	n->UpdateDimensions();
 	if (positionFromCursor)
@@ -456,6 +463,10 @@ bool NodeNetwork::Execute()
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
 		e->Execute();
 	return true;
+}
+
+void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
+{
 }
 
 NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency()

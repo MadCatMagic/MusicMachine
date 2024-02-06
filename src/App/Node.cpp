@@ -217,6 +217,17 @@ void Node::IntOutput(const std::string& name, int* target)
 
 #pragma endregion IOTypes
 
+#include <sstream>
+#include <iomanip>
+std::string Node::id_s()
+{
+	std::stringstream stream;
+	stream
+		<< std::setfill('0') << std::setw(sizeof(uint64_t) * 2)
+		<< std::hex << id;
+	return stream.str() + "_" + name;
+}
+
 void Node::Execute()
 {
 	for (const NodeInput& input : inputs)
@@ -311,6 +322,24 @@ void Node::CheckTouchedStatus()
 	for (size_t i = 0; i < outputs.size(); i++)
 		if (outputs[i].touchedThisFrame == false)
 			outputs.erase(outputs.begin() + i);
+}
+
+void Node::LoadData(const JSONType& data)
+{
+	
+}
+
+JSONType Node::SaveData()
+{
+	JSONType inputData{ JSONType::Array };
+	JSONType outputData{ JSONType::Array };
+	return JSONType({
+		{ "id", id_s() },
+		{ "pos", std::vector<JSONType>{ position.x, position.y }},
+		{ "mini", mini },
+		{ "inputs", inputData },
+		{ "outputs", outputData }
+	});
 }
 
 bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed)

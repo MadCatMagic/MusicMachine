@@ -15,6 +15,7 @@ public:
 	static void ExecuteCommand(std::vector<std::string> args);
 
 	NodeNetwork();
+	NodeNetwork(const std::string& nnFilePath);
 	~NodeNetwork();
 
 	void Draw(DrawList* drawList, class Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen);
@@ -37,6 +38,8 @@ public:
 	void DrawContextMenu();
 
 	bool Execute();
+
+	void SaveNetworkToFile(const std::string& nnFilePath);
 
 	inline void ClearDrawList() { currentList = nullptr; }
 	inline void RecalculateDependencies() { recalculateDependencies = true; }

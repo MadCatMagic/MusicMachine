@@ -2,6 +2,7 @@
 #include "Vector.h"
 #include "BBox.h"
 #include <vector>
+#include "JSON/JSON.h"
 
 struct Node;
 
@@ -69,6 +70,9 @@ protected:
 	inline virtual void Work() { }
 	inline virtual std::string Result() { return "Null"; }
 
+	inline virtual JSONType Save() { return JSONType(); }
+	inline virtual void Load(const JSONType& data) { }
+
 	std::string name = "Node";
 	v2 minSpace = v2(20, 20);
 
@@ -83,6 +87,9 @@ protected:
 	void IntOutput(const std::string& name, int* target);
 
 private:
+	uint64_t id = 0;
+	std::string id_s();
+
 	bool mini = false;
 	const float headerHeight = 20.0f;
 	const float miniTriangleOffset = 10.0f;
@@ -123,7 +130,10 @@ private:
 	void ResetTouchedStatus();
 	void CheckTouchedStatus();
 
-	inline void NodeInit(NodeNetwork* parent) { this->parent = parent; }
+	inline void NodeInit(NodeNetwork* parent, uint64_t id) { this->parent = parent; this->id = id; }
+	
+	void LoadData(const JSONType& data);
+	JSONType SaveData();
 
 	bool TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 	
