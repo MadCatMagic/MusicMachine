@@ -36,6 +36,44 @@ NodeNetwork::NodeNetwork()
 
 NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 {
+	JSONConverter conv;
+	auto res = conv.DecodeFile(nnFilePath);
+	if (!res.second)
+	{
+		Console::LogWarn("Failed to open or decode file <" + nnFilePath + ">!");
+		return;
+	}
+
+	// first pass creates the nodes themselves and reassigns their ids
+	auto& arr = res.first["nodes"].arr;
+	for (JSONType& t : arr)
+	{
+		Node* node = CreateRawNode(t.obj["name"].s);
+		if (node == nullptr)
+		{
+			Console::LogErr("Unrecognised node name '" + t.obj["name"].s + "'.");
+			continue;
+		}
+		std::string id = t.obj["id"].s;
+		uint64_t idv = -1;
+		for (size_t i = 0; i < id.size(); i++)
+			if (id[i] == '_')
+			{
+				std::istringstream iss(id.substr(0, i));
+				iss >> std::hex >> idv;
+			}
+		node->NodeInit(this, idv);
+		node->Init();
+		node->IO();
+		node->UpdateDimensions();
+		nodes.push_back(node);
+		nodeIDMap[node->id_s()] = node;
+	}
+
+	// second pass calls the load functions on the nodes to load in node-specific data
+	// and also to create all the inputs and outputs required.
+	for (size_t i = 0; i < nodes.size(); i++)
+		nodes[i]->LoadData(arr[i]);
 }
 
 NodeNetwork::~NodeNetwork()
@@ -199,19 +237,7 @@ void NodeNetwork::Draw(DrawList* drawList, Canvas* canvas, std::vector<Node*>& s
 #include "App/NodeTypes.h"
 Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCursor)
 {
-	Node* n = nullptr;
-
-	if (type == "Node")
-		n = new Node();
-
-	if (type == "Maths")
-		n = new MathsNode();
-
-	if (type == "Long")
-		n = new LongNode();
-
-	if (type == "Const")
-		n = new ConstNode();
+	Node* n = CreateRawNode(type);
 
 	if (n == nullptr)
 		return nullptr;
@@ -223,6 +249,7 @@ Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCur
 	if (positionFromCursor)
 		n->position = currentCanvas->CanvasToPosition(currentCanvas->ScreenToCanvas(ImGui::GetMousePos())) - n->size * 0.5f;
 	nodes.push_back(n);
+	nodeIDMap[n->id_s()] = n;
 	return n;
 }
 
@@ -285,6 +312,7 @@ void NodeNetwork::DeleteNode(Node* node)
 				n->Disconnect(i);
 
 	nodes.erase(std::find(nodes.begin(), nodes.end(), node));
+	nodeIDMap.erase(node->id_s());
 	delete node;
 	recalculateDependencies = true;
 }
@@ -427,9 +455,9 @@ void NodeNetwork::DrawContextMenu()
 	{
 		const std::string nodeNames[] {
 			"Node",
-			"Maths",
-			"Long",
-			"Const"
+			"MathsNode",
+			"LongNode",
+			"ConstNode"
 		};
 		for (const std::string& name : nodeNames)
 			if (ImGui::MenuItem(name.c_str()))
@@ -451,6 +479,26 @@ DrawColour NodeNetwork::GetCol(Node::NodeType type)
 	return DrawColour::Canvas_BG;
 }
 
+Node* NodeNetwork::GetNodeFromID(const std::string& id)
+{
+	if (nodeIDMap.find(id) != nodeIDMap.end())
+		return nodeIDMap[id];
+	return nullptr;
+}
+
+Node* NodeNetwork::CreateRawNode(const std::string& type)
+{
+	if (type == "Node")
+		return new Node();
+	if (type == "MathsNode")
+		return new MathsNode();
+	if (type == "LongNode")
+		return new LongNode();
+	if (type == "ConstNode")
+		return new ConstNode();
+	return nullptr;
+}
+
 bool NodeNetwork::Execute()
 {
 	// dont execute if there is a dependency problem
@@ -467,6 +515,18 @@ bool NodeNetwork::Execute()
 
 void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 {
+	JSONConverter conv;
+	JSONType nodeData = JSONType(JSONType::Array);
+
+	for (Node* n : nodes)
+		nodeData.arr.push_back(n->SaveData());
+
+	conv.WriteFile(nnFilePath, JSONType({
+		{ "nodes", nodeData },
+		{ "dummy", false }
+	}));
+
+	Console::Log("Saved current node network data to file <" + nnFilePath + ">.");
 }
 
 NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency()

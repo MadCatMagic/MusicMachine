@@ -46,7 +46,11 @@ public:
 
 	DrawColour GetCol(Node::NodeType type);
 
+	Node* GetNodeFromID(const std::string& id);
+
 private:
+
+	Node* CreateRawNode(const std::string& type);
 
 	// works out whether nodes have circular dependencies. will not calculate if circular dependencies exist.
 	struct AbstractNode
@@ -85,6 +89,7 @@ private:
 	Canvas* currentCanvas = nullptr;
 
 	std::vector<Node*> nodes;
+	std::unordered_map<std::string, Node*> nodeIDMap;
 
 	bool drawDebugInformation = false;
 };

@@ -38,7 +38,7 @@ struct JSONType
 
 	inline JSONType() : t(Type::None) {}
 	inline JSONType(Type t) : t(t) {}
-	inline JSONType(long i) : i(i), t(Type::Num) {}
+	inline JSONType(long i) : i(i), f((double)i), t(Type::Num) {}
 	inline JSONType(double f) : f(f), t(Type::Float) {}
 	inline JSONType(const std::string& s) : s(s), t(Type::String) {}
 	inline JSONType(const char* s) : s(s), t(Type::String) {}

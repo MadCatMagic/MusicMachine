@@ -70,10 +70,11 @@ protected:
 	inline virtual void Work() { }
 	inline virtual std::string Result() { return "Null"; }
 
-	inline virtual JSONType Save() { return JSONType(); }
-	inline virtual void Load(const JSONType& data) { }
+	inline virtual JSONType Save() { return JSONType(JSONType::Object); }
+	inline virtual void Load(JSONType& data) { }
 
 	std::string name = "Node";
+	std::string title = "Base Node";
 	v2 minSpace = v2(20, 20);
 
 	// to be called in InitializeUI()
@@ -132,7 +133,7 @@ private:
 
 	inline void NodeInit(NodeNetwork* parent, uint64_t id) { this->parent = parent; this->id = id; }
 	
-	void LoadData(const JSONType& data);
+	void LoadData(JSONType& data);
 	JSONType SaveData();
 
 	bool TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);

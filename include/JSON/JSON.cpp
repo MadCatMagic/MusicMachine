@@ -25,6 +25,8 @@ std::string JSONType::ToString(bool compress, int indents) const
 
     case Array:
     {
+        if (arr.size() == 0)
+            return "[]";
         if (compress)
         {
             std::string r = "[";
@@ -44,6 +46,8 @@ std::string JSONType::ToString(bool compress, int indents) const
 
     case Object:
     {
+        if (obj.size() == 0)
+            return "{}";
         if (compress)
         {
             std::string r = "{";
@@ -88,6 +92,11 @@ JSONType JSONType::FromTokens(const std::vector<std::string>& tokens)
             return JSONType(false);
         if (std::find(s.begin(), s.end(), '.') != s.end())
             return JSONType(std::stod(s));
+        if (s == "ERRTYPE")
+        {
+            Console::LogWarn("Token of type ERRTYPE passed to FromTokens, returning an empty JSONType.");
+            return JSONType();
+        }
         return JSONType(std::stol(s));
     }
 
@@ -95,6 +104,8 @@ JSONType JSONType::FromTokens(const std::vector<std::string>& tokens)
     if (tokens[0] == "[")
     {
         JSONType t{ Type::Array };
+        if (tokens[1] == "]")
+            return t;
         std::vector<std::string> subSection;
         int currentLevel = 0;
         for (size_t i = 1; i < tokens.size(); i++)
@@ -118,6 +129,8 @@ JSONType JSONType::FromTokens(const std::vector<std::string>& tokens)
     if (tokens[0] == "{")
     {
         JSONType t{ Type::Object };
+        if (tokens[1] == "}")
+            return t;
         std::string first;
         std::vector<std::string> subSection;
         int currentLevel = 0;
@@ -196,11 +209,12 @@ std::pair<std::unordered_map<std::string, JSONType>, bool> JSONConverter::Decode
 
 void JSONConverter::WriteFile(const std::string& filename, const JSONType& type)
 {
-    std::ofstream stream(filename);
+    std::ofstream stream(filename, std::ios::out | std::ios::trunc);
     if (type.t != JSONType::Object)
         throw "AAAA";
     
-    stream << type.ToString(true);
+    std::string dat = type.ToString(true);
+    stream.write(dat.c_str(), dat.size());
     stream.close();
 }
 
@@ -229,7 +243,7 @@ std::vector<std::string> JSONConverter::Tokenise(const std::string& inp) const
 
     // tokenise with regex
     // made this bad boy up all by myself (pain and suffering was endured at heroic length)
-    std::regex tokenise("(?:\"(?:(?:\\\\\")|[^\"])*\")|(?:\\d+(?:.\\d+)?)|[{}[\\]:,]|(?:true)|(?:false)");
+    std::regex tokenise("(?:\"(?:(?:\\\\\")|[^\"])*\")|(?:[-]?\\d+(?:[.]\\d+)?)|[{}[\\]:,]|(?:true)|(?:false)|(?:ERRTYPE)");
     std::vector<std::string> result;
     auto begin = std::sregex_iterator(tot.begin(), tot.end(), tokenise);
     auto end = std::sregex_iterator();
