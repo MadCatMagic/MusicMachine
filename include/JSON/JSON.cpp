@@ -15,7 +15,7 @@ std::string JSONType::ToString(bool compress, int indents) const
     case Float:
     {
         std::stringstream ss;
-        ss << std::setprecision(32) << f;
+        ss << std::setprecision(16) << f;
         return ss.str();
     }
     case String:
@@ -29,7 +29,7 @@ std::string JSONType::ToString(bool compress, int indents) const
         {
             std::string r = "[";
             for (size_t i = 0; i < arr.size(); i++)
-                r +=  arr[i].ToString(true) + (i < arr.size() - 1 ? "," : "");
+                r += arr[i].ToString(true) + (i < arr.size() - 1 ? "," : "");
             return r + "]";
         }
         else

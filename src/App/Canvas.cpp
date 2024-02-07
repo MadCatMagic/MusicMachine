@@ -265,6 +265,34 @@ void Canvas::CreateWindow()
     if (ImGui::BeginPopup("context"))
     {
         nodes->DrawContextMenu();
+
+        if (ImGui::MenuItem("Save Network"))
+            ImGui::OpenPopup("Save pp");
+        if (ImGui::MenuItem("Load Network"))
+            ImGui::OpenPopup("Load");
+
+        ImGui::EndPopup();
+    }
+
+    if (ImGui::BeginPopupModal("Save pp", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        static char filename[64] = {};
+        ImGui::InputText("network name", filename, sizeof(char) * 64);
+
+        if (ImGui::Button("Save"))
+        {
+            memset(filename, 0, 64);
+        }
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+    if (ImGui::BeginPopupModal("Load"))
+    {
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
     }
 
