@@ -46,14 +46,17 @@ struct JSONType
 	inline JSONType(const std::vector<JSONType>& arr) : arr(arr), t(Type::Array) {}
 	inline JSONType(const std::unordered_map<std::string, JSONType> obj) : obj(obj), t(Type::Object) {}
 
-	std::string ToString(int indents = 0) const;
+	std::string ToString(bool compress, int indents = 0) const;
 	static JSONType FromTokens(const std::vector<std::string>& tokens);
 };
 
-class JSONDecoder
+class JSONConverter
 {
 public:
-	std::vector<std::pair<std::string, JSONType>> Decode(const std::string& str);
+	std::pair<std::unordered_map<std::string, JSONType>, bool> DecodeFile(const std::string& filename);
+	std::pair<std::unordered_map<std::string, JSONType>, bool> Decode(const std::string& str);
+
+	void WriteFile(const std::string& filename, const JSONType& type);
 
 private:
 	std::vector<std::string> Tokenise(const std::string& inp) const;

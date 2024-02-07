@@ -2,14 +2,22 @@
 #include <sstream>
 #include "Engine/Console.h"
 
-std::string JSONType::ToString(int indents) const
+#include <fstream>
+#include <iomanip>
+#include <regex>
+
+std::string JSONType::ToString(bool compress, int indents) const
 {
     switch (t)
     {
     case Num:
         return std::to_string(i);
     case Float:
-        return std::to_string(f);
+    {
+        std::stringstream ss;
+        ss << std::setprecision(32) << f;
+        return ss.str();
+    }
     case String:
         return "\"" + s + "\"";
     case Bool:
@@ -17,26 +25,48 @@ std::string JSONType::ToString(int indents) const
 
     case Array:
     {
-        std::string ind = std::string(indents, '\t');
-        std::string r = "[\n";
-        for (size_t i = 0; i < arr.size(); i++)
+        if (compress)
         {
-            r += ind + "\t" + arr[i].ToString(indents + 1) + (i < arr.size() - 1 ? ",\n" : "\n");
+            std::string r = "[";
+            for (size_t i = 0; i < arr.size(); i++)
+                r +=  arr[i].ToString(true) + (i < arr.size() - 1 ? "," : "");
+            return r + "]";
         }
-        return r + ind + "]";
+        else
+        {
+            std::string ind = std::string(indents, '\t');
+            std::string r = "[\n";
+            for (size_t i = 0; i < arr.size(); i++)
+                r += ind + "\t" + arr[i].ToString(false, indents + 1) + (i < arr.size() - 1 ? ",\n" : "\n");
+            return r + ind + "]";
+        }
     }
 
     case Object:
     {
-        std::string ind = std::string(indents, '\t');
-        std::string r = "{\n";
-        size_t i = 0;
-        for (auto& v : obj)
+        if (compress)
         {
-            i++;
-            r += ind + "\t\"" + v.first + "\": " + v.second.ToString(indents + 1) + (i < obj.size() ? ",\n" : "\n");
+            std::string r = "{";
+            size_t i = 0;
+            for (auto& v : obj)
+            {
+                i++;
+                r += "\"" + v.first + "\":" + v.second.ToString(true) + (i < obj.size() ? "," : "");
+            }
+            return r + "}";
         }
-        return r + ind + "}";
+        else
+        {
+            std::string ind = std::string(indents, '\t');
+            std::string r = "{\n";
+            size_t i = 0;
+            for (auto& v : obj)
+            {
+                i++;
+                r += ind + "\t\"" + v.first + "\": " + v.second.ToString(false, indents + 1) + (i < obj.size() ? ",\n" : "\n");
+            }
+            return r + ind + "}";
+        }
     }
     }
     return "ERRTYPE";
@@ -120,25 +150,61 @@ JSONType JSONType::FromTokens(const std::vector<std::string>& tokens)
         s += "\"" + v + "\", ";
     Console::LogErr("Malformed sequence of tokens passed to FromTokens: [" + s + "]");
 
-    return JSONType();
+    throw std::runtime_error("JSON decoding error");
 }
 
-std::vector<std::pair<std::string, JSONType>> JSONDecoder::Decode(const std::string& str)
+// expects a file pointing to an object.
+std::pair<std::unordered_map<std::string, JSONType>, bool> JSONConverter::DecodeFile(const std::string& filename)
+{
+    std::ifstream stream(filename);
+    std::string f;
+    if (stream) {
+        std::ostringstream ss;
+        ss << stream.rdbuf(); // reading data
+        f = ss.str();
+    }
+    stream.close();
+    return Decode(f);
+}
+
+// if this process fails, result.second == false.
+// if it is an object, returns the map of object keys to items in result.first.
+// otherwise, returns a map containing { "obj": JSONType }
+std::pair<std::unordered_map<std::string, JSONType>, bool> JSONConverter::Decode(const std::string& str)
 {
     std::vector<std::string> tokens = Tokenise(str);
-    JSONType t = JSONType::FromTokens(tokens);
-    std::vector<JSONType> res;
-    for (auto& t : tokens)
-        res.push_back(JSONType(t));
+    JSONType t;
+    try
+    {
+        t = JSONType::FromTokens(tokens);
+    }
+    catch (...)
+    {
+        Console::LogErr("Failed to decode tokens in JSONDecoder::Decode");
+        //std::vector<JSONType> res;
+        //for (auto& t : tokens)
+        //    res.push_back(JSONType(t));
+        //Console::LogErr(JSONType(res).ToString());
+        return { {}, false };
+    }
 
-    return {
-        {"tokens", JSONType(res)},
-        {"obj", t}
-    };
+    if (t.t == JSONType::Object)
+        return { t.obj, true };
+    else
+        return { {{ "obj", t }}, true };
 }
 
-#include <regex>
-std::vector<std::string> JSONDecoder::Tokenise(const std::string& inp) const
+void JSONConverter::WriteFile(const std::string& filename, const JSONType& type)
+{
+    std::ofstream stream(filename);
+    if (type.t != JSONType::Object)
+        throw "AAAA";
+    
+    stream << type.ToString(true);
+    stream.close();
+}
+
+std::vector<std::string> JSONConverter::Tokenise(const std::string& inp) const
 {
     std::istringstream ss{inp};
     std::string line;
@@ -180,11 +246,12 @@ void RegisterJSONCommands()
 
     JSONType jsonobj = JSONType({
         { "dumb", JSONType((long)24)},
-        { "another", JSONType(12.04)},
+        { "another", JSONType(12.0419483347)},
         { "arr", JSONType({ JSONType((long)24), JSONType("string"), JSONType(true)})}
     });
-    Console::Log("Test json object: " + jsonobj.ToString());
-    TestJSONCommand({ jsonobj.ToString() });
+    Console::Log("Test json object: " + jsonobj.ToString(false));
+    Console::Log("Test json object compressed: " + jsonobj.ToString(true));
+    TestJSONCommand({ jsonobj.ToString(false) });
 }
 
 void TestJSONCommand(std::vector<std::string> args)
@@ -192,9 +259,11 @@ void TestJSONCommand(std::vector<std::string> args)
     std::string s;
     for (auto& v : args)
         s += v;
-    JSONDecoder d;
-    std::vector<std::pair<std::string, JSONType>> r = d.Decode(s);
+    JSONConverter d;
+    auto r = d.Decode(s);
+    if (!r.second)
+        return;
     Console::Log("Decode result:");
-    for (auto& p : r)
-        Console::Log("\"" + p.first + "\": " + p.second.ToString());
+    for (auto& p : r.first)
+        Console::Log("\"" + p.first + "\": " + p.second.ToString(false));
 }
