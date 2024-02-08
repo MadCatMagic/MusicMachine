@@ -20,9 +20,9 @@ void MathsNode::IO()
 
 void MathsNode::Load(JSONType& data)
 {
-	a = data.obj["a"].f;
-	b = data.obj["b"].f;
-	c = data.obj["c"].i;
+	a = (float)data.obj["a"].f;
+	b = (float)data.obj["b"].f;
+	c = (int)data.obj["c"].i;
 	crazy = data.obj["crazy"].b;
 }
 

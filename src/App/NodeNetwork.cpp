@@ -333,11 +333,14 @@ void NodeNetwork::DrawInput(const v2& cursor, const Node::NodeInput& inp, float 
 			// drawing the box representing the value
 			v2 tl = cursor + v2(0.0f, -8.0f);
 			float proportion = (value - inp.fmin) / (inp.fmax - inp.fmin);
-			v2 br = cursor + v2(
-				std::min(std::max(proportion, 0.0f), 1.0f) * width,
-				8.0f
-			);
-			currentList->RectFilled(tl, br, DrawColour::Node_BGHeader);
+			if (proportion > 0.0f)
+			{
+				v2 br = cursor + v2(
+					std::min(std::max(proportion, 0.0f), 1.0f) * width,
+					8.0f
+				);
+				currentList->RectFilled(tl, br, DrawColour::Node_BGHeader, 4.0f / currentCanvas->GetSF().x);
+			}
 			// drawing the text displaying the value
 			std::ostringstream ss;
 			ss.precision(3);

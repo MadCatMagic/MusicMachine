@@ -220,7 +220,7 @@ void Canvas::CreateWindow()
         }
         else
         {
-            totalSliderMovement += sliderDelta * io.MouseDelta.x * scale.x;
+            totalSliderMovement += sliderDelta * io.MouseDelta.x * scale.x * (io.KeyShift ? 0.2f : 1.0f);
             if (sliderIsInt)
                 *sliderValue.i = (int)originalSliderValue + (int)totalSliderMovement;
             else
