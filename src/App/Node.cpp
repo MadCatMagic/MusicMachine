@@ -1,5 +1,6 @@
 #include "App/Node.h"
 #include "App/NodeNetwork.h"
+#include "Engine/Console.h"
 
 NodeClickResponse Node::HandleClick(const v2& nodePos)
 {
@@ -217,6 +218,17 @@ void Node::IntOutput(const std::string& name, int* target)
 
 #pragma endregion IOTypes
 
+#include <sstream>
+#include <iomanip>
+std::string Node::id_s()
+{
+	std::stringstream stream;
+	stream
+		<< std::setfill('0') << std::setw(sizeof(uint64_t) * 2)
+		<< std::hex << id;
+	return stream.str() + "_" + name;
+}
+
 void Node::Execute()
 {
 	for (const NodeInput& input : inputs)
@@ -250,7 +262,7 @@ float Node::getNormalWidth() const
 	for (const NodeOutput& output : outputs)
 		maxXOff = std::max(IOWidth(output.name), maxXOff);
 	maxXOff = std::max(minSpace.x, maxXOff);
-	maxXOff = std::max(IOWidth(name) + 8.0f, maxXOff);
+	maxXOff = std::max(IOWidth(title) + 8.0f, maxXOff);
 	return maxXOff;
 }
 
@@ -311,6 +323,57 @@ void Node::CheckTouchedStatus()
 	for (size_t i = 0; i < outputs.size(); i++)
 		if (outputs[i].touchedThisFrame == false)
 			outputs.erase(outputs.begin() + i);
+}
+
+void Node::LoadData(JSONType& data)
+{
+	position = v2(
+		(float)data.obj["pos"].arr[0].f,
+		(float)data.obj["pos"].arr[1].f
+	);
+	mini = data.obj["mini"].b;
+	for (JSONType& jinp : data.obj["inputs"].arr)
+	{
+		for (size_t i = 0; i < inputs.size(); i++)
+			if (inputs[i].name == jinp.obj["name"].s)
+			{
+				std::string src = jinp.obj["source"].s;
+				if (src != "")
+				{
+					Node* source = parent->GetNodeFromID(src);
+					if (source == nullptr)
+					{
+						Console::LogErr("Failed to find node from id '" + src + "'.");
+						continue;
+					}
+					Connect(i, source, source->GetOutputIndex(jinp.obj["sourceName"].s));
+				}
+			}
+	}
+
+	Load(data.obj["node"]);
+}
+
+JSONType Node::SaveData()
+{
+	// only need to store input data as it is all reconstructed afterwards
+	JSONType inputData{ JSONType::Array };
+
+	for (const NodeInput& i : inputs)
+		inputData.arr.push_back(JSONType({
+			{ "name", i.name },
+			{ "source", i.source == nullptr ? "" : i.source->id_s() },
+			{ "sourceName", i.sourceName }
+		}));
+
+	return JSONType({
+		{ "id", id_s() },
+		{ "pos", std::vector<JSONType>{ (double)position.x, (double)position.y }},
+		{ "mini", mini },
+		{ "inputs", inputData },
+		{ "name", name },
+		{ "node", Save() }
+	});
 }
 
 bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed)
@@ -458,7 +521,7 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 
 			cursor = position;
 			// draw node header
-			network->DrawHeader(cursor, name, size.x, headerHeight, mini, getNormalWidth() - miniTriangleOffset);
+			network->DrawHeader(cursor, title, size.x, headerHeight, mini, getNormalWidth() - miniTriangleOffset);
 			cursor.y += headerHeight + 4.0f;
 
 			// draw outputs
@@ -471,7 +534,7 @@ void Node::Draw(NodeNetwork* network, bool cullBody)
 		}
 		else
 		{
-			network->DrawHeader(cursor - v2(0.0f, (headerSize() - headerHeight) * 0.5f), name, size.x, headerSize(), mini, getNormalWidth() - miniTriangleOffset);
+			network->DrawHeader(cursor - v2(0.0f, (headerSize() - headerHeight) * 0.5f), title, size.x, headerSize(), mini, getNormalWidth() - miniTriangleOffset);
 			for (size_t i = 0; i < inputs.size(); i++)
 				network->DrawConnectionEndpoint(GetInputPos(i), network->GetCol(inputs[i].type), true, inputs[i].target == nullptr);
 			for (size_t i = 0; i < outputs.size(); i++)

@@ -262,9 +262,57 @@ void Canvas::CreateWindow()
     ImVec2 drag_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
     if (drag_delta.x == 0.0f && drag_delta.y == 0.0f)
         ImGui::OpenPopupOnItemClick("context", ImGuiPopupFlags_MouseButtonRight);
+    bool drawSavePopup = false;
+    bool drawLoadPopup = false;
     if (ImGui::BeginPopup("context"))
     {
         nodes->DrawContextMenu();
+
+        if (ImGui::MenuItem("Save Network"))
+            drawSavePopup = true;
+        if (ImGui::MenuItem("Load Network"))
+            drawLoadPopup = true;
+
+        ImGui::EndPopup();
+    }
+
+    if (drawSavePopup)
+        ImGui::OpenPopup("Save Me!");
+    if (drawLoadPopup)
+        ImGui::OpenPopup("Load Me!");
+
+    if (ImGui::BeginPopupModal("Save Me!"))
+    {
+        static char filename[64] = {};
+        ImGui::InputText("network name", filename, sizeof(char) * 64);
+
+        if (ImGui::Button("Save"))
+        {
+            nodes->SaveNetworkToFile("networks/" + std::string(filename) + ".nn");
+            memset(filename, 0, 64);
+            ImGui::CloseCurrentPopup();
+        }
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+    if (ImGui::BeginPopupModal("Load Me!"))
+    {
+        static char filename[64] = {};
+        ImGui::InputText("network name", filename, sizeof(char) * 64);
+
+        if (ImGui::Button("Load"))
+        {
+            if (nodes != nullptr)
+                delete nodes;
+            nodes = new NodeNetwork("networks/" + std::string(filename) + ".nn");
+            memset(filename, 0, 64);
+            ImGui::CloseCurrentPopup();
+        }
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
     }
 

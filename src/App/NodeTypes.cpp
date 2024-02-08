@@ -3,7 +3,8 @@
 
 void MathsNode::Init()
 {
-	name = "Maths Innit";
+	name = "MathsNode";
+	title = "Maths innit";
 	minSpace = v2(30, 40);
 }
 
@@ -17,9 +18,28 @@ void MathsNode::IO()
 	IntOutput("Result rounded", &resultRounded);
 }
 
+void MathsNode::Load(JSONType& data)
+{
+	a = data.obj["a"].f;
+	b = data.obj["b"].f;
+	c = data.obj["c"].i;
+	crazy = data.obj["crazy"].b;
+}
+
+JSONType MathsNode::Save()
+{
+	return JSONType({
+		{ "a", (double)a },
+		{ "b", (double)b },
+		{ "c", (long)c },
+		{ "crazy", crazy }
+	});
+}
+
 void LongNode::Init()
 {
-	name = "Long Node";
+	name = "LongNode";
+	title = "Long Node";
 }
 
 void LongNode::IO()

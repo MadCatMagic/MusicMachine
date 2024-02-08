@@ -15,6 +15,7 @@ public:
 	static void ExecuteCommand(std::vector<std::string> args);
 
 	NodeNetwork();
+	NodeNetwork(const std::string& nnFilePath);
 	~NodeNetwork();
 
 	void Draw(DrawList* drawList, class Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen);
@@ -38,12 +39,18 @@ public:
 
 	bool Execute();
 
+	void SaveNetworkToFile(const std::string& nnFilePath);
+
 	inline void ClearDrawList() { currentList = nullptr; }
 	inline void RecalculateDependencies() { recalculateDependencies = true; }
 
 	DrawColour GetCol(Node::NodeType type);
 
+	Node* GetNodeFromID(const std::string& id);
+
 private:
+
+	Node* CreateRawNode(const std::string& type);
 
 	// works out whether nodes have circular dependencies. will not calculate if circular dependencies exist.
 	struct AbstractNode
@@ -82,6 +89,7 @@ private:
 	Canvas* currentCanvas = nullptr;
 
 	std::vector<Node*> nodes;
+	std::unordered_map<std::string, Node*> nodeIDMap;
 
 	bool drawDebugInformation = false;
 };

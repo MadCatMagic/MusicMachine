@@ -7,6 +7,9 @@ protected:
 	virtual void Init() override;
 	virtual void IO() override;
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 	inline virtual void Work() override { result = a + b; resultRounded = (int)result + c; }
 
 private:
@@ -39,7 +42,7 @@ private:
 struct ConstNode : public Node
 {
 protected:
-	inline virtual void Init() override { name = "4.0f"; minSpace = 0.0f; }
+	inline virtual void Init() override { name = "ConstNode"; title = "4.0f"; minSpace = 0.0f; }
 	inline virtual void IO() override { FloatOutput("out", &out); }
 
 

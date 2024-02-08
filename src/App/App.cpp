@@ -2,13 +2,14 @@
 
 #include "imgui.h"
 #include "Engine/Console.h"
+#include "JSON/JSON.h"
 
 void App::Initialize()
 {
     n = new NodeNetwork();
     Node* b = n->AddNodeFromName("Node");
     b->IO();
-    Node* m = n->AddNodeFromName("Maths");
+    Node* m = n->AddNodeFromName("MathsNode");
     m->IO();
     if (m->Connect(0, b, 1))
         Console::Log("successfully connected nodes");
@@ -17,6 +18,7 @@ void App::Initialize()
     c.GenerateAllTextLODs();
     c.nodes = n;
     c.InitCanvas();
+    RegisterJSONCommands();
 }
 
 void App::Update()

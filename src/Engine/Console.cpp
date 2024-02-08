@@ -282,16 +282,19 @@ void Console::ExecuteCommand(const std::string& command)
     std::string commandArgs;
     if (wordLength < command.size())
         commandArgs = command.substr(wordLength + 1);
-
+ 
     // split up args into individual strings
     std::vector<std::string> args;
     args.push_back("");
+    bool inQuotes = false;
     for (size_t i = 0; i < commandArgs.size(); i++)
     {
         char c = commandArgs[i];
-        if (c == ' ' || c == ',' || c == ';' || c == '\t')
+        if (c == '\"' && (i == 0 || commandArgs[i - 1] != '\\'))
+            inQuotes = !inQuotes;
+        else if (!inQuotes && (c == ' ' || c == ',' || c == ';' || c == '\t'))
             args.push_back("");
-        else
+        else if (i == commandArgs.size() - 1 || !(c == '\\' && commandArgs[i + 1] == '\"'))
             args[args.size() - 1].push_back(c);
     }
   
