@@ -10,6 +10,8 @@
 
 Canvas::~Canvas()
 {
+    if (nodeRenderer != nullptr)
+        nodeRenderer->UnassignCanvas();
     if (nodes != nullptr)
         nodes->UnassignCanvas();
 }
@@ -18,6 +20,8 @@ void Canvas::InitCanvas()
 {
     drawList.SetConversionCallback([this](const v2& p) -> v2 { return this->ptcts(p); });
     drawList.InitColours();
+    nodes->AssignCanvas(this);
+    nodeRenderer = new NodeNetworkRenderer(nodes, this);
 }
 
 // a lot of this code is taken from the ImGui canvas example
@@ -307,6 +311,9 @@ void Canvas::CreateWindow()
             if (nodes != nullptr)
                 delete nodes;
             nodes = new NodeNetwork("networks/" + std::string(filename) + ".nn");
+            if (nodeRenderer != nullptr)
+                delete nodeRenderer;
+            nodeRenderer = new NodeNetworkRenderer(nodes, this);
             memset(filename, 0, 64);
             ImGui::CloseCurrentPopup();
         }
@@ -341,7 +348,8 @@ void Canvas::CreateWindow()
 
     ImGui::PushFont(textLODs[scalingLevel]);
     drawList.convertPosition = true;
-    nodes->Draw(&drawList, this, selectedStack, bbox2(stctp(canvasPixelPos), stctp(canvasBottomRight)));
+    nodes->Update();
+    nodeRenderer->Draw(&drawList, selectedStack, bbox2(stctp(canvasPixelPos), stctp(canvasBottomRight)));
 
     // draw dragged connection
     if (draggingConnection)
@@ -349,7 +357,7 @@ void Canvas::CreateWindow()
         if (isActive)
         {
             if (connectionReversed)
-                nodes->DrawConnection(
+                nodeRenderer->DrawConnection(
                     connectionOrigin->GetInputPos(connectionOriginName),
                     mousePos,
                     connectionOrigin->GetInputType(connectionOriginName),
@@ -357,7 +365,7 @@ void Canvas::CreateWindow()
                     nullptr
                 );
             else
-                nodes->DrawConnection(
+                nodeRenderer->DrawConnection(
                     mousePos,
                     connectionOrigin->GetOutputPos(connectionOriginName),
                     connectionOrigin->GetOutputType(connectionOriginName),
@@ -373,7 +381,6 @@ void Canvas::CreateWindow()
             draggingConnection = false;
         }
     }
-    nodes->ClearDrawList();
     
     // draw selection box
     if (selectingArea)

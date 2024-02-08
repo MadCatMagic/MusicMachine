@@ -11,15 +11,14 @@
 class NodeNetwork
 {
 public:
+	friend class NodeNetworkRenderer;
+
 	static NodeNetwork* context;
 	static void ExecuteCommand(std::vector<std::string> args);
 
 	NodeNetwork();
 	NodeNetwork(const std::string& nnFilePath);
 	~NodeNetwork();
-
-	void Draw(DrawList* drawList, class Canvas* canvas, std::vector<Node*>& selected, const bbox2& screen);
-	inline void UnassignCanvas() { currentCanvas = nullptr; }
 
 	Node* AddNodeFromName(const std::string& type, bool positionFromCursor = false);
 	Node* GetNodeAtPosition(const v2& pos, Node* currentSelection = nullptr, size_t offset = 0);
@@ -29,22 +28,16 @@ public:
 	void TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 	void DeleteNode(Node* node);
 
-	void DrawInput(const v2& cursor, const Node::NodeInput& inp, float width);
-	void DrawOutput(const v2& cursor, float xOffset, const Node::NodeOutput& out);
-	void DrawConnectionEndpoint(const v2& centre, DrawColour col, bool convertPosition = false, bool isNull = false);
-	void DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float miniTriOffset);
-	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type, Node* from, Node* to);
-
 	void DrawContextMenu();
 
 	bool Execute();
+	void Update();
 
 	void SaveNetworkToFile(const std::string& nnFilePath);
 
-	inline void ClearDrawList() { currentList = nullptr; }
 	inline void RecalculateDependencies() { recalculateDependencies = true; }
-
-	DrawColour GetCol(Node::NodeType type);
+	inline void UnassignCanvas() { currentCanvas = nullptr; }
+	inline void AssignCanvas(class Canvas* canvas) { currentCanvas = canvas; }
 
 	Node* GetNodeFromID(const std::string& id);
 
@@ -74,6 +67,28 @@ private:
 	NodeDependencyInformation* nodeDependencyInfoPersistent = nullptr;
 	bool recalculateDependencies = true;
 
+	std::vector<Node*> nodes;
+	std::unordered_map<std::string, Node*> nodeIDMap;
+
+	bool drawDebugInformation = false;
+
+	class Canvas* currentCanvas;
+};
+
+class NodeNetworkRenderer
+{
+public:
+	inline NodeNetworkRenderer(NodeNetwork* network, class Canvas* canvas) : canvas(canvas), network(network) { }
+	
+	void Draw(DrawList* drawList, std::vector<Node*>& selected, const bbox2& screen);
+	
+	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type, Node* from, Node* to);
+	
+	inline void UnassignCanvas() { canvas = nullptr; }
+
+private:
+	NodeNetwork* network;
+
 	// for drawing later
 	struct ConnectionToDraw
 	{
@@ -86,10 +101,15 @@ private:
 	std::vector<ConnectionToDraw> connectionsToDraw;
 
 	DrawList* currentList = nullptr;
-	Canvas* currentCanvas = nullptr;
-
-	std::vector<Node*> nodes;
-	std::unordered_map<std::string, Node*> nodeIDMap;
-
+	Canvas* canvas;
 	bool drawDebugInformation = false;
+
+	void DrawNode(Node* node, bool cullBody);
+
+	void DrawInput(const v2& cursor, const Node::NodeInput& inp, float width);
+	void DrawOutput(const v2& cursor, float xOffset, const Node::NodeOutput& out);
+	void DrawConnectionEndpoint(const v2& centre, DrawColour col, bool convertPosition = false, bool isNull = false);
+	void DrawHeader(const v2& cursor, const std::string& name, float width, float height, bool mini, float miniTriOffset);
+	
+	DrawColour GetCol(Node::NodeType type);
 };

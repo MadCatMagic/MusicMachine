@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="include\JSON\JSON.cpp" />
+    <ClCompile Include="src\App\NodeNetworkRenderer.cpp" />
     <ClCompile Include="src\Engine\DrawList.cpp" />
     <ClCompile Include="src\App\NodeTypes.cpp" />
     <ClCompile Include="src\App\Node.cpp" />

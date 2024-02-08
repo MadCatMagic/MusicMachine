@@ -35,6 +35,7 @@ public:
 	void GenerateAllTextLODs();
 
 	class NodeNetwork* nodes = nullptr;
+	class NodeNetworkRenderer* nodeRenderer = nullptr;
 	
 private:
 	// text stuff

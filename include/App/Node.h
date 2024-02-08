@@ -49,6 +49,7 @@ struct Node
 	};
 
 	friend class NodeNetwork;
+	friend class NodeNetworkRenderer;
 	virtual void IO();
 
 	v2 position = v2::zero;
@@ -142,7 +143,6 @@ private:
 	v2 GetOutputPos(size_t index) const;
 	size_t GetInputIndex(const std::string& name) const;
 	size_t GetOutputIndex(const std::string& name) const;
-	void Draw(class NodeNetwork* network, bool cullBody);
 	void UpdateDimensions();
 	float IOWidth(const std::string& text, size_t additionalWidth = 0) const;
 	float headerSize() const;

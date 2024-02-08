@@ -498,60 +498,6 @@ Node::NodeType Node::GetOutputType(const std::string& name) const
 	return NodeType::Bool;
 }
 
-void Node::Draw(NodeNetwork* network, bool cullBody)
-{
-	v2 cursor = position;
-	UpdateDimensions();
-	if (!cullBody)
-	{
-		if (!mini)
-		{
-			// leave spaces
-			cursor.y += headerHeight + 4.0f;
-			cursor.y += 16.0f * outputs.size();
-			cursor.y += minSpace.y;
-
-			// draw inputs
-			for (const NodeInput& input : inputs)
-			{
-				cursor.y += 8.0f;
-				network->DrawInput(cursor, input, size.x);
-				cursor.y += 8.0f;
-			}
-
-			cursor = position;
-			// draw node header
-			network->DrawHeader(cursor, title, size.x, headerHeight, mini, getNormalWidth() - miniTriangleOffset);
-			cursor.y += headerHeight + 4.0f;
-
-			// draw outputs
-			for (const NodeOutput& output : outputs)
-			{
-				cursor.y += 8.0f;
-				network->DrawOutput(cursor, size.x, output);
-				cursor.y += 8.0f;
-			}
-		}
-		else
-		{
-			network->DrawHeader(cursor - v2(0.0f, (headerSize() - headerHeight) * 0.5f), title, size.x, headerSize(), mini, getNormalWidth() - miniTriangleOffset);
-			for (size_t i = 0; i < inputs.size(); i++)
-				network->DrawConnectionEndpoint(GetInputPos(i), network->GetCol(inputs[i].type), true, inputs[i].target == nullptr);
-			for (size_t i = 0; i < outputs.size(); i++)
-				network->DrawConnectionEndpoint(GetOutputPos(i), network->GetCol(outputs[i].type), true, outputs[i].data == nullptr);
-		}
-	}
-
-	// draw connections
-	for (const NodeInput& inp : inputs)
-	{
-		if (inp.source != nullptr)
-		{
-			network->DrawConnection(GetInputPos(inp.name), inp.source->GetOutputPos(inp.sourceName), inp.type, this, inp.source);
-		}
-	}
-}
-
 void Node::UpdateDimensions()
 {
 	float maxXOff = getNormalWidth();
