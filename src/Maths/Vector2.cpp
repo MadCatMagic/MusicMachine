@@ -57,7 +57,7 @@ float v2::Distance(const v2& a, const v2& b)
 	return Magnitude(a - b);
 }
 
-static float kEpsilon = 0.00001f;
+static float kEpsilon = 0.000001f;
 v2 v2::Normalize(const v2& a)
 {
 	float mag = Magnitude(a);
@@ -81,6 +81,11 @@ bool v2::inBox(const v2& bottomLeft, const v2& topRight) const
 v2 v2::reciprocal() const
 {
 	return v2::Reciprocal(*this);
+}
+
+float v2::length() const
+{
+	return v2::Magnitude(*this);
 }
 
 v2 v2::operator+(const v2& a) const

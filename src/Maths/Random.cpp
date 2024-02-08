@@ -1,9 +1,6 @@
 #include "Random.h"
 #include <cstdlib>
 
-#define PI 3.14159265359f
-#define TWOPI 6.28318530718f
-
 namespace Random
 {
 	static float random()

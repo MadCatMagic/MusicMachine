@@ -96,19 +96,28 @@
     <ClCompile Include="src\App\App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\App\Canvas.cpp">
+    <ClCompile Include="src\App\Nodes\Canvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\App\NodeNetwork.cpp">
+    <ClCompile Include="src\App\Nodes\NodeNetwork.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\App\Node.cpp">
+    <ClCompile Include="src\App\Nodes\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\App\NodeTypes.cpp">
+    <ClCompile Include="src\App\Nodes\NodeTypes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Maths\BBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\DrawList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\App\JSON.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\App\Nodes\NodeNetworkRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -179,10 +188,28 @@
     <ClInclude Include="include\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\App\Canvas.h">
+    <ClInclude Include="include\App\Nodes\Canvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\App\Node.h">
+    <ClInclude Include="include\App\Nodes\Node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\Nodes\NodeNetwork.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\Nodes\NodeTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Engine\DrawList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\JSON.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\Nodes\NodeFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\App\NodeNetwork.h">

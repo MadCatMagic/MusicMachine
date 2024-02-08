@@ -2,13 +2,21 @@
 
 #include "imgui.h"
 #include "Engine/Console.h"
+#include "App/JSON.h"
+
+#include "App/Nodes/NodeFactory.h"
+#include "App/Nodes/NodeTypes.h"
 
 void App::Initialize()
 {
+    GetNodeFactory().Register("Node", "Base Node", NodeBuilder<Node>);
+    GetNodeFactory().Register("MathsNode", "Maths Node", NodeBuilder<MathsNode>);
+    GetNodeFactory().Register("LongNode", "Long Node", NodeBuilder<LongNode>);
+
     n = new NodeNetwork();
     Node* b = n->AddNodeFromName("Node");
     b->IO();
-    Node* m = n->AddNodeFromName("Maths");
+    Node* m = n->AddNodeFromName("MathsNode");
     m->IO();
     if (m->Connect(0, b, 1))
         Console::Log("successfully connected nodes");
@@ -16,6 +24,8 @@ void App::Initialize()
         Console::LogErr("failed to connect nodes");
     c.GenerateAllTextLODs();
     c.nodes = n;
+    c.InitCanvas();
+    RegisterJSONCommands();
 }
 
 void App::Update()
