@@ -1,5 +1,6 @@
 #include "App/Nodes/Node.h"
 #include "App/Nodes/NodeNetwork.h"
+#include "App/Nodes/NodeFactory.h"
 #include "Engine/Console.h"
 
 NodeClickResponse Node::HandleClick(const v2& nodePos)
@@ -143,10 +144,6 @@ void Node::Disconnect(size_t inputIndex)
 	i.sourceName = "";
 	i.target = nullptr;
 	parent->RecalculateDependencies();
-}
-
-void Node::Init()
-{
 }
 
 void Node::IO()

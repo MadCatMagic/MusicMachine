@@ -133,7 +133,7 @@ void NodeNetworkRenderer::Draw(DrawList* drawList, std::vector<Node*>& selected,
 		for (size_t i = 0; i < absNodes.size(); i++)
 		{
 			v2 origin = positions[i] + canvas->ScreenToCanvas(-100.0f);
-			ImColor col = absNodes[i]->isEndpoint ? DrawColour::Node_IOBool : DrawColour::Text;
+			DrawColour col = absNodes[i]->isEndpoint ? DrawColour::Node_IOBool : DrawColour::Text;
 			drawList->CircleFilled(origin, 4.0f, col);
 		}
 		drawList->convertPosition = true;

@@ -257,15 +257,6 @@ void RegisterJSONCommands()
 {
     Console::AddCommand(&TestJSONCommand, "json");
     Console::Log("<JSON>: registered json command");
-
-    JSONType jsonobj = JSONType({
-        { "dumb", JSONType((long)24)},
-        { "another", JSONType(12.0419483347)},
-        { "arr", JSONType({ JSONType((long)24), JSONType("string"), JSONType(true)})}
-    });
-    Console::Log("Test json object: " + jsonobj.ToString(false));
-    Console::Log("Test json object compressed: " + jsonobj.ToString(true));
-    TestJSONCommand({ jsonobj.ToString(false) });
 }
 
 void TestJSONCommand(std::vector<std::string> args)

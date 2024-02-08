@@ -349,6 +349,7 @@ void Canvas::CreateWindow()
     ImGui::PushFont(textLODs[scalingLevel]);
     drawList.convertPosition = true;
     nodes->Update();
+    nodeRenderer->drawDebugInformation = nodes->doIDrawDebug();
     nodeRenderer->Draw(&drawList, selectedStack, bbox2(stctp(canvasPixelPos), stctp(canvasBottomRight)));
 
     // draw dragged connection

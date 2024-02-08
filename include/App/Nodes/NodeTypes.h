@@ -38,14 +38,3 @@ private:
 	float in5 = 0.0f;
 	float in6 = 0.0f;
 };
-
-struct ConstNode : public Node
-{
-protected:
-	inline virtual void Init() override { name = "ConstNode"; title = "4.0f"; minSpace = 0.0f; }
-	inline virtual void IO() override { FloatOutput("out", &out); }
-
-
-private:
-	float out = 4.0f;
-};

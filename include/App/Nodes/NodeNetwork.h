@@ -38,12 +38,11 @@ public:
 	inline void RecalculateDependencies() { recalculateDependencies = true; }
 	inline void UnassignCanvas() { currentCanvas = nullptr; }
 	inline void AssignCanvas(class Canvas* canvas) { currentCanvas = canvas; }
+	inline bool doIDrawDebug() const { return drawDebugInformation; }
 
 	Node* GetNodeFromID(const std::string& id);
 
 private:
-
-	Node* CreateRawNode(const std::string& type);
 
 	// works out whether nodes have circular dependencies. will not calculate if circular dependencies exist.
 	struct AbstractNode
@@ -81,10 +80,11 @@ public:
 	inline NodeNetworkRenderer(NodeNetwork* network, class Canvas* canvas) : canvas(canvas), network(network) { }
 	
 	void Draw(DrawList* drawList, std::vector<Node*>& selected, const bbox2& screen);
-	
 	void DrawConnection(const v2& target, const v2& origin, Node::NodeType type, Node* from, Node* to);
 	
 	inline void UnassignCanvas() { canvas = nullptr; }
+
+	bool drawDebugInformation = false;
 
 private:
 	NodeNetwork* network;
@@ -102,7 +102,6 @@ private:
 
 	DrawList* currentList = nullptr;
 	Canvas* canvas;
-	bool drawDebugInformation = false;
 
 	void DrawNode(Node* node, bool cullBody);
 

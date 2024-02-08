@@ -4,8 +4,15 @@
 #include "Engine/Console.h"
 #include "App/JSON.h"
 
+#include "App/Nodes/NodeFactory.h"
+#include "App/Nodes/NodeTypes.h"
+
 void App::Initialize()
 {
+    GetNodeFactory().Register("Node", "Base Node", NodeBuilder<Node>);
+    GetNodeFactory().Register("MathsNode", "Maths Node", NodeBuilder<MathsNode>);
+    GetNodeFactory().Register("LongNode", "Long Node", NodeBuilder<LongNode>);
+
     n = new NodeNetwork();
     Node* b = n->AddNodeFromName("Node");
     b->IO();

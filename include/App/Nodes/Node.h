@@ -67,7 +67,7 @@ struct Node
 	NodeType GetOutputType(const std::string& name) const;
 
 protected:
-	virtual void Init();
+	inline virtual void Init() { }
 	inline virtual void Work() { }
 	inline virtual std::string Result() { return "Null"; }
 

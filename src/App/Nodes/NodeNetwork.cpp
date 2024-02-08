@@ -1,16 +1,19 @@
 #include "App/Nodes/NodeNetwork.h"
 #include "App/Nodes/Canvas.h"
-#include "imgui.h"
-#include <unordered_map>
+#include "App/Nodes/NodeFactory.h"
+#include "App/Nodes/NodeTypes.h"
+
+#include "App/JSON.h"
+
+#include "Engine/Console.h"
 #include "BBox.h"
 #include "Random.h"
 
-#include "App/JSON.h"
-#include "App/Nodes/NodeTypes.h"
+#include "imgui.h"
 
-#include "Engine/Console.h"
 #include <deque>
 #include <sstream>
+#include <unordered_map>
 
 NodeNetwork* NodeNetwork::context = nullptr;
 
@@ -49,7 +52,7 @@ NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 	auto& arr = res.first["nodes"].arr;
 	for (JSONType& t : arr)
 	{
-		Node* node = CreateRawNode(t.obj["name"].s);
+		Node* node = GetNodeFactory().Build(t.obj["name"].s);
 		if (node == nullptr)
 		{
 			Console::LogErr("Unrecognised node name '" + t.obj["name"].s + "'.");
@@ -75,6 +78,8 @@ NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 	// and also to create all the inputs and outputs required.
 	for (size_t i = 0; i < nodes.size(); i++)
 		nodes[i]->LoadData(arr[i]);
+
+	Console::Log("Loaded NodeNetwork from file <" + nnFilePath + ">.");
 }
 
 NodeNetwork::~NodeNetwork()
@@ -86,7 +91,7 @@ NodeNetwork::~NodeNetwork()
 
 Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCursor)
 {
-	Node* n = CreateRawNode(type);
+	Node* n = GetNodeFactory().Build(type);
 
 	if (n == nullptr)
 		return nullptr;
@@ -170,15 +175,9 @@ void NodeNetwork::DrawContextMenu()
 {
 	if (ImGui::BeginMenu("Nodes"))
 	{
-		const std::string nodeNames[] {
-			"Node",
-			"MathsNode",
-			"LongNode",
-			"ConstNode"
-		};
-		for (const std::string& name : nodeNames)
-			if (ImGui::MenuItem(name.c_str()))
-				AddNodeFromName(name, true);
+		for (auto& pair : GetNodeFactory().Names())
+			if (ImGui::MenuItem(pair.second.c_str()))
+				AddNodeFromName(pair.first, true);
 		ImGui::EndMenu();
 	}
 
@@ -189,19 +188,6 @@ Node* NodeNetwork::GetNodeFromID(const std::string& id)
 {
 	if (nodeIDMap.find(id) != nodeIDMap.end())
 		return nodeIDMap[id];
-	return nullptr;
-}
-
-Node* NodeNetwork::CreateRawNode(const std::string& type)
-{
-	if (type == "Node")
-		return new Node();
-	if (type == "MathsNode")
-		return new MathsNode();
-	if (type == "LongNode")
-		return new LongNode();
-	if (type == "ConstNode")
-		return new ConstNode();
 	return nullptr;
 }
 
