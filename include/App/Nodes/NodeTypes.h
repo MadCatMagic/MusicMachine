@@ -1,5 +1,5 @@
 #pragma once
-#include "App/Node.h"
+#include "App/Nodes/Node.h"
 
 struct MathsNode : public Node
 {

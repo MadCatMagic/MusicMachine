@@ -1,6 +1,6 @@
 #pragma once
-#include "Canvas.h"
-#include "NodeNetwork.h"
+#include "Nodes/Canvas.h"
+#include "Nodes/NodeNetwork.h"
 
 class App
 {

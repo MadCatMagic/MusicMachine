@@ -1,5 +1,5 @@
-#include "App/Canvas.h"
-#include "App/NodeNetwork.h"
+#include "App/Nodes/Canvas.h"
+#include "App/Nodes/NodeNetwork.h"
 #include "imgui.h"
 
 #include "Engine/Console.h"

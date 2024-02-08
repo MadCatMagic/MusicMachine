@@ -1,5 +1,5 @@
 #pragma once
-#include "Node.h"
+#include "App/Nodes/Node.h"
 #include "Engine/DrawList.h"
 
 #include <vector>
@@ -72,7 +72,7 @@ private:
 
 	bool drawDebugInformation = false;
 
-	class Canvas* currentCanvas;
+	class Canvas* currentCanvas = nullptr;
 };
 
 class NodeNetworkRenderer

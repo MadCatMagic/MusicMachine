@@ -1,5 +1,5 @@
-#include "App/Node.h"
-#include "App/NodeNetwork.h"
+#include "App/Nodes/Node.h"
+#include "App/Nodes/NodeNetwork.h"
 #include "Engine/Console.h"
 
 NodeClickResponse Node::HandleClick(const v2& nodePos)

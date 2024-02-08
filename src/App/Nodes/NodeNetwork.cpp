@@ -1,11 +1,12 @@
-#include "App/NodeNetwork.h"
-#include "App/Canvas.h"
+#include "App/Nodes/NodeNetwork.h"
+#include "App/Nodes/Canvas.h"
 #include "imgui.h"
 #include <unordered_map>
 #include "BBox.h"
 #include "Random.h"
 
-#include "JSON/JSON.h"
+#include "App/JSON.h"
+#include "App/Nodes/NodeTypes.h"
 
 #include "Engine/Console.h"
 #include <deque>
@@ -83,7 +84,6 @@ NodeNetwork::~NodeNetwork()
 	nodes.clear();
 }
 
-#include "App/NodeTypes.h"
 Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCursor)
 {
 	Node* n = CreateRawNode(type);

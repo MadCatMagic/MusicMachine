@@ -1,5 +1,5 @@
-#include "App/NodeNetwork.h"
-#include "App/Canvas.h"
+#include "App/Nodes/NodeNetwork.h"
+#include "App/Nodes/Canvas.h"
 #include "Random.h"
 #include <sstream>
 
