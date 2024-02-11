@@ -1,6 +1,9 @@
 #include <cmath>
 #include "Vector.h"
 
+v3::v3(const v4& wis1) : x(wis1.x), y(wis1.y), z(wis1.z) { }
+v3::v3(const v3i& i) : x((float)i.x), y((float)i.y), z((float)i.z) { }
+
 float v3::dot(const v3& a) const
 {
 	return x * a.x + y * a.y + z * a.z;

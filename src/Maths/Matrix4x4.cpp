@@ -353,10 +353,10 @@ std::string mat4x4::ToString()
 
 mat4x4 mat4x4::PointAt(const v3& pos, const v3& target, const v3& up)
 {
-	v3 newForward = v3::Normalize(target - pos);
-	v3 a = newForward * v3::Dot(up, newForward);
-	v3 newUp = v3::Normalize(up - a);
-	v3 newRight = v3::Cross(newUp, newForward);
+	v3 newForward = (target - pos).normalise();
+	v3 a = newForward * up.dot(newForward);
+	v3 newUp = (up - a).normalise();
+	v3 newRight = newUp.cross(newForward);
 	mat4x4 matrix = mat4x4(
 		v4(newRight.x, newRight.y, newRight.z, 0.0f),
 		v4(newUp.x, newUp.y, newUp.z, 0.0f),
@@ -368,10 +368,10 @@ mat4x4 mat4x4::PointAt(const v3& pos, const v3& target, const v3& up)
 
 mat4x4 mat4x4::LookAt(const v3& pos, const v3& target, const v3& up)
 {
-	v3 newForward = v3::Normalize(target - pos);
-	v3 a = newForward * v3::Dot(up, newForward);
-	v3 newUp = v3::Normalize(up - a);
-	v3 newRight = v3::Cross(newUp, newForward);
+	v3 newForward = (target - pos).normalise();
+	v3 a = newForward * up.dot(newForward);
+	v3 newUp = (up - a).normalise();
+	v3 newRight = newUp.cross(newForward);
 
 	/*
 	Matrix4x4 matrix = Matrix4x4(
@@ -385,7 +385,7 @@ mat4x4 mat4x4::LookAt(const v3& pos, const v3& target, const v3& up)
 		v4(newRight.x, newUp.x, newForward.x, 0.0f),
 		v4(newRight.y, newUp.y, newForward.y, 0.0f),
 		v4(newRight.z, newUp.z, newForward.z, 0.0f),
-		v4(-v3::Dot(pos, newRight), -v3::Dot(pos, newUp), -v3::Dot(pos, newForward), 1.0f)
+		v4(-pos.dot(newRight), -pos.dot(newUp), -pos.dot(newForward), 1.0f)
 	);
 	return matrix;
 }

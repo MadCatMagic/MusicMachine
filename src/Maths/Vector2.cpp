@@ -1,11 +1,9 @@
 #include "Vector.h"
 #include <cmath>
 #include "imgui.h"
-v2::v2(const ImVec2& v)
-{
-	x = v.x;
-	y = v.y;
-}
+
+v2::v2(const v2i& i) : x((float)i.x), y((float)i.y) { }
+v2::v2(const ImVec2& v) : x(v.x), y(v.y) { }
 
 ImVec2 v2::ImGui() const
 {
@@ -21,6 +19,11 @@ bool v2::inBox(const v2& bottomLeft, const v2& topRight) const
 float v2::dot(const v2& a) const
 {
 	return x * a.x + y * a.y;
+}
+
+float v2::cross(const v2& a) const
+{
+	return x * a.y - y * a.x;
 }
 
 v2 v2::reciprocal() const

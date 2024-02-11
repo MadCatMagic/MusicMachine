@@ -210,7 +210,7 @@ void Canvas::CreateWindow()
             {
                 v2 diff = v2(io.MouseDelta.x * scale.x, io.MouseDelta.y * scale.y);
                 n->position += diff;
-                draggingDistance += v2::Magnitude(v2(io.MouseDelta.x));
+                draggingDistance += v2(io.MouseDelta.x).length();
             }
         }
     }
@@ -259,7 +259,7 @@ void Canvas::CreateWindow()
         // position + (mousePosBefore = canvasPos * scaleBefore + position) - (mousePosAfter = canvasPos * scaleAfter + position)
         // position + canvasPos * (scaleBefore - scaleAfter)
         // somehow it has to be negative... I hate you linear algebra!!!
-        position -= v2::Scale(mouseCanvasPos, prevScale - scale);
+        position -= mouseCanvasPos.scale(prevScale - scale);
     }
 
     // Context menu (under default mouse threshold)
@@ -417,12 +417,12 @@ v2 Canvas::CanvasToScreen(const v2& pos) const // s = c - p
 
 v2 Canvas::CanvasToPosition(const v2& pos) const // position = offset - canvas * scale
 {
-    return position - v2::Scale(pos, scale);
+    return position - pos.scale(scale);
 }
 
 v2 Canvas::PositionToCanvas(const v2& pos) const // canvas = (offset - position) / scale
 {
-    return v2::Scale(position - pos, v2::Reciprocal(scale));
+    return (position - pos).scale(scale.reciprocal());
 }
 
 void Canvas::GenerateAllTextLODs()

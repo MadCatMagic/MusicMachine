@@ -20,13 +20,14 @@ struct v2
 	inline v2() : x(0.0f), y(0.0f) { }
 	inline v2(float a) : x(a), y(a) { }
 	inline v2(float x, float y) : x(x), y(y) { }
-	inline v2(v2i i) : x((float)i.x), y((float)i.y) { }
+	v2(const v2i& i);
 	
 	v2(const struct ImVec2& v);
 	ImVec2 ImGui() const;
 
 	bool inBox(const v2& bottomLeft, const v2& topRight) const;
 	float dot(const v2& a) const;
+	float cross(const v2& a) const;
 
 	v2 reciprocal() const;
 	v2 scale(const v2& a) const;
@@ -60,11 +61,11 @@ struct v3
 	float y;
 	float z;
 
-	v3() : x(0.0f), y(0.0f), z(0.0f) { }
-	v3(float a) : x(a), y(a), z(a) { }
-	v3(float x, float y, float z) : x(x), y(y), z(z) { }
-	v3(v4 wis1) : x(wis1.x), y(wis1.y), z(wis1.z) { }
-	v3(v3i i) : x((float)i.x), y((float)i.y), z((float)i.z) { }
+	inline v3() : x(0.0f), y(0.0f), z(0.0f) { }
+	inline v3(float a) : x(a), y(a), z(a) { }
+	inline v3(float x, float y, float z) : x(x), y(y), z(z) { }
+	v3(const v4& wis1);
+	v3(const v3i& i);
 
 	float dot(const v3& a) const;
 	v3 cross(const v3& a) const;
@@ -102,33 +103,34 @@ struct v4
 	float z;
 	float w;
 
-	v4();
-	v4(float x, float y, float z);
-	v4(float x, float y, float z, float w);
-	v4(v3 wtobe1);
-	v4(v4i i);
+	inline v4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) { }
+	inline v4(float x, float y, float z, float w = 1.0f) : x(x), y(y), z(z), w(w) { }
+	v4(const v3& wtobe1);
+	v4(const v4i& i);
 
-	static v4 Scale(const v4& a, const v4& b);
+	float dot(const v4& a) const;
 
-	static float Dot(const v4& a, const v4& b);
-	static float Magnitude(const v4& a);
-	static float Distance(const v4& a, const v4& b);
-	static v4 Normalize(const v4& a);
+	v4 reciprocal() const;
+	v4 scale(const v4& a) const;
 
-	v4 operator+(const v4& a) const;
-	v4 operator-() const;
-	v4 operator-(const v4& a) const;
-	v4 operator*(float a) const;
-	v4 operator/(float a) const;
+	v4 normalise() const;
+	float length() const;
+	float distanceTo(const v4& a) const;
+
+	inline v4 operator+(const v4& a) const { return v4(x + a.x, y + a.y, z + a.z, w + a.w); }
+	inline v4 operator-() const { return v4(-x, -y, -z, -w); }
+	inline v4 operator-(const v4& a) const { return v4(x - a.x, y - a.y, z - a.z, w - a.w); }
+	inline v4 operator*(float a) const { return v4(x * a, y * a, z * a, w * a); }
+	inline v4 operator/(float a) const { return v4(x / a, y / a, z / a, w / a); }
 	v4& operator+=(const v4& a);
 	v4& operator-=(const v4& a);
 	v4& operator*=(float a);
 	v4& operator/=(float a);
 
-	bool operator==(const v4& a) const;
-	bool operator!=(const v4& a) const;
+	inline bool operator==(const v4& a) const { return x == a.x && y == a.y && z == a.z && w == a.w; }
+	inline bool operator!=(const v4& a) const { return x != a.x || y != a.y || z != a.z && w != a.w; }
 
-	std::string ToString() const;
+	std::string str() const;
 
 	static v4 zero;
 	static v4 one;
@@ -139,25 +141,25 @@ struct v2i
 	int x;
 	int y;
 
-	v2i();
-	v2i(int a);
-	v2i(int x, int y);
-	explicit v2i(v2 f);
+	inline v2i() : x(0), y(0) { }
+	inline v2i(int a) : x(a), y(a) { }
+	inline v2i(int x, int y) : x(x), y(y) { }
+	inline explicit v2i(const v2& f) : x((int)f.x), y((int)f.y) { }
 
-	v2i operator+(const v2i& a) const;
-	v2i operator-() const;
-	v2i operator-(const v2i& a) const;
-	v2i operator*(int a) const;
-	v2i operator/(int a) const;
+	inline v2i operator+(const v2i& a) const { return v2i(x + a.x, y + a.y); }
+	inline v2i operator-() const { return v2i(-x, -y); }
+	inline v2i operator-(const v2i& a) const { return v2i(x - a.x, y - a.y); }
+	inline v2i operator*(int a) const { return v2i(x * a, y * a); }
+	inline v2i operator/(int a) const { return v2i(x / a, y / a); }
 	v2i& operator+=(const v2i& a);
 	v2i& operator-=(const v2i& a);
 	v2i& operator*=(int a);
 	v2i& operator/=(int a);
 
-	bool operator==(const v2i& a) const;
-	bool operator!=(const v2i& a) const;
+	inline bool operator==(const v2i& a) const { return x == a.x && y == a.y; }
+	inline bool operator!=(const v2i& a) const { return x != a.x || y != a.y; }
 
-	std::string ToString() const;
+	std::string str() const;
 
 	static v2i zero;
 	static v2i one;
@@ -169,26 +171,25 @@ struct v3i
 	int y;
 	int z;
 
-	v3i();
-	v3i(int a);
-	v3i(int x, int y);
-	v3i(int x, int y, int z);
-	explicit v3i(v3 f);
+	inline v3i() : x(0), y(0), z(0) { }
+	inline v3i(int a) : x(a), y(a), z(a) { }
+	inline v3i(int x, int y, int z) : x(x), y(y), z(z) { }
+	inline explicit v3i(const v3& f) : x((int)f.x), y((int)f.y), z((int)f.z) { }
 
-	v3i operator+(const v3i& a) const;
-	v3i operator-() const;
-	v3i operator-(const v3i& a) const;
-	v3i operator*(int a) const;
-	v3i operator/(int a) const;
+	inline v3i operator+(const v3i& a) const { return v3i(x + a.x, y + a.y, z + a.z); }
+	inline v3i operator-() const { return v3i(-x, -y, -z); }
+	inline v3i operator-(const v3i& a) const { return v3i(x - a.x, y - a.y, z - a.z); }
+	inline v3i operator*(int a) const { return v3i(x * a, y * a, z * a); }
+	inline v3i operator/(int a) const { return v3i(x / a, y / a, z / a); }
 	v3i& operator+=(const v3i& a);
 	v3i& operator-=(const v3i& a);
 	v3i& operator*=(int a);
 	v3i& operator/=(int a);
 
-	bool operator==(const v3i& a) const;
-	bool operator!=(const v3i& a) const;
+	inline bool operator==(const v3i& a) const { return x == a.x && y == a.y && z == a.z; }
+	inline bool operator!=(const v3i& a) const { return x != a.x || y != a.y || z != a.z; }
 
-	std::string ToString() const;
+	std::string str() const;
 
 	static v3i zero;
 	static v3i one;
@@ -201,25 +202,24 @@ struct v4i
 	int z;
 	int w;
 
-	v4i();
-	v4i(int x, int y, int z);
-	v4i(int x, int y, int z, int w);
-	explicit v4i(v4 f);
+	inline v4i() : x(0), y(0), z(0), w(0) { }
+	inline v4i(int x, int y, int z, int w) : x(x), y(y), z(z), w(w) { }
+	inline explicit v4i(const v4& f) : x((int)f.x), y((int)f.y), z((int)f.z), w((int)f.w) { }
 
-	v4i operator+(const v4i& a) const;
-	v4i operator-() const;
-	v4i operator-(const v4i& a) const;
-	v4i operator*(int a) const;
-	v4i operator/(int a) const;
+	inline v4i operator+(const v4i& a) const { return v4i(x + a.x, y + a.y, z + a.z, w + a.w); }
+	inline v4i operator-() const { return v4i(-x, -y, -z, -w); }
+	inline v4i operator-(const v4i& a) const { return v4i(x - a.x, y - a.y, z - a.z, w - a.w); }
+	inline v4i operator*(int a) const { return v4i(x * a, y * a, z * a, w * a); }
+	inline v4i operator/(int a) const { return v4i(x / a, y / a, z / a, w / a); }
 	v4i& operator+=(const v4i& a);
 	v4i& operator-=(const v4i& a);
 	v4i& operator*=(int a);
 	v4i& operator/=(int a);
 
-	bool operator==(const v4i& a) const;
-	bool operator!=(const v4i& a) const;
+	inline bool operator==(const v4i& a) const { return x == a.x && y == a.y && z == a.z && w == a.w; }
+	inline bool operator!=(const v4i& a) const { return x != a.x || y != a.y || z != a.z && w != a.w; }
 
-	std::string ToString() const;
+	std::string str() const;
 
 	static v4i zero;
 	static v4i one;
@@ -231,13 +231,33 @@ struct v4i
 namespace vecHash
 {
 	template<class vec, class vecType>
-	struct KeyHash {
+	struct KeyHash2 {
 		inline std::size_t operator()(const vec& k) const
 		{
 			return std::hash<vecType>()(k.x) ^
-				(std::hash<vecType>()(k.y) << 1);
+				(std::hash<vecType>()(k.y) << 32);
 		};
 	};
+	template<class vec, class vecType>
+	struct KeyHash3 {
+		inline std::size_t operator()(const vec& k) const
+		{
+			return std::hash<vecType>()(k.x) ^
+				(std::hash<vecType>()(k.y) << 16) ^
+				(std::hash<vecType>()(k.z) << 32);
+		};
+	};
+	template<class vec, class vecType>
+	struct KeyHash4 {
+		inline std::size_t operator()(const vec& k) const
+		{
+			return std::hash<vecType>()(k.x) ^
+				(std::hash<vecType>()(k.y) << 16) ^ 
+				(std::hash<vecType>()(k.z) << 32) ^
+				(std::hash<vecType>()(k.w) << 48);
+		};
+	};
+
 	template<class vec>
 	struct KeyEqual {
 		inline bool operator()(const vec& lhs, const vec& rhs) const
