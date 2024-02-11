@@ -17,40 +17,38 @@ struct v2
 	float x;
 	float y;
 
-	v2();
-	v2(float a);
-	v2(float x, float y);
-	v2(v2i i);
+	inline v2() : x(0.0f), y(0.0f) { }
+	inline v2(float a) : x(a), y(a) { }
+	inline v2(float x, float y) : x(x), y(y) { }
+	inline v2(v2i i) : x((float)i.x), y((float)i.y) { }
+	
 	v2(const struct ImVec2& v);
-
 	ImVec2 ImGui() const;
 
-	static v2 Scale(const v2& a, const v2& b);
-
-	static float Dot(const v2& a, const v2& b);
-	static float Magnitude(const v2& a);
-	static float Distance(const v2& a, const v2& b);
-	static v2 Normalize(const v2& a);
-	static v2 Reciprocal(const v2& a);
-
 	bool inBox(const v2& bottomLeft, const v2& topRight) const;
+	float dot(const v2& a) const;
+
 	v2 reciprocal() const;
+	v2 scale(const v2& a) const;
+
+	v2 normalise() const;
 	float length() const;
+	float distanceTo(const v2& a) const;
 	
-	v2 operator+(const v2& a) const;
-	v2 operator-() const;
-	v2 operator-(const v2& a) const;
-	v2 operator*(float a) const;
-	v2 operator/(float a) const;
+	inline v2 operator+(const v2& a) const { return v2(x + a.x, y + a.y); }
+	inline v2 operator-() const { return v2(-x, -y); }
+	inline v2 operator-(const v2& a) const { return v2(x - a.x, y - a.y); }
+	inline v2 operator*(float a) const { return v2(x * a, y * a); }
+	inline v2 operator/(float a) const { return v2(x / a, y / a); }
 	v2& operator+=(const v2& a);
 	v2& operator-=(const v2& a);
 	v2& operator*=(float a);
 	v2& operator/=(float a);
 
-	bool operator==(const v2& a) const;
-	bool operator!=(const v2& a) const;
+	inline bool operator==(const v2& a) const { return x == a.x && y == a.y; }
+	inline bool operator!=(const v2& a) const { return x != a.x || y != a.y; }
 	
-	std::string ToString() const;
+	std::string str() const;
 
 	static v2 zero;
 	static v2 one;
@@ -62,33 +60,36 @@ struct v3
 	float y;
 	float z;
 
-	v3();
-	v3(float a);
-	v3(float x, float y);
-	v3(float x, float y, float z);
-	v3(v4 wis1);
-	v3(v3i i);
+	v3() : x(0.0f), y(0.0f), z(0.0f) { }
+	v3(float a) : x(a), y(a), z(a) { }
+	v3(float x, float y, float z) : x(x), y(y), z(z) { }
+	v3(v4 wis1) : x(wis1.x), y(wis1.y), z(wis1.z) { }
+	v3(v3i i) : x((float)i.x), y((float)i.y), z((float)i.z) { }
 
-	static float Dot(const v3& a, const v3& b);
-	static float Magnitude(const v3& a);
-	static float Distance(const v3& a, const v3& b);
-	static v3 Normalize(const v3& a);
-	static v3 Cross(const v3& a, const v3& b);
+	float dot(const v3& a) const;
+	v3 cross(const v3& a) const;
 
-	v3 operator+(const v3& a) const;
-	v3 operator-() const;
-	v3 operator-(const v3& a) const;
-	v3 operator*(float a) const;
-	v3 operator/(float a) const;
+	v3 reciprocal() const;
+	v3 scale(const v3& a) const;
+
+	v3 normalise() const;
+	float length() const;
+	float distanceTo(const v3& a) const;
+
+	inline v3 operator+(const v3& a) const { return v3(x + a.x, y + a.y, z + a.z); }
+	inline v3 operator-() const { return v3(-x, -y, -z); }
+	inline v3 operator-(const v3& a) const { return v3(x - a.x, y - a.y, z - a.z); }
+	inline v3 operator*(float a) const { return v3(x * a, y * a, z * a); }
+	inline v3 operator/(float a) const { return v3(x / a, y / a, z / a); }
 	v3& operator+=(const v3& a);
 	v3& operator-=(const v3& a);
 	v3& operator*=(float a);
 	v3& operator/=(float a);
 
-	bool operator==(const v3& a) const;
-	bool operator!=(const v3& a) const;
+	inline bool operator==(const v3& a) const { return x == a.x && y == a.y && z == a.z; }
+	inline bool operator!=(const v3& a) const { return x != a.x || y != a.y || z != a.z; }
 	
-	std::string ToString() const;
+	std::string str() const;
 
 	static v3 zero;
 	static v3 one;
