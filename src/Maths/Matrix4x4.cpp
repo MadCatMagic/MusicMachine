@@ -38,7 +38,7 @@ mat4x4::~mat4x4()
 {
 }
 
-void mat4x4::SetColumn(const v4& data, int column)
+void mat4x4::setColumn(const v4& data, int column)
 {
 	m[0 + column] = data.x;
 	m[4 + column] = data.y;
@@ -46,7 +46,7 @@ void mat4x4::SetColumn(const v4& data, int column)
 	m[12 + column] = data.w;
 }
 
-void mat4x4::SetRow(const v4& data, int row)
+void mat4x4::setRow(const v4& data, int row)
 {
 	m[0 + row * 4] = data.x;
 	m[1 + row * 4] = data.y;
@@ -54,27 +54,27 @@ void mat4x4::SetRow(const v4& data, int row)
 	m[3 + row * 4] = data.w;
 }
 
-v4 mat4x4::GetColumn(int column)
+v4 mat4x4::getColumn(int column)
 {
 	return v4(m[0 + column], m[4 + column], m[8 + column], m[12 + column]);
 }
 
-v4 mat4x4::GetRow(int row)
+v4 mat4x4::getRow(int row)
 {
 	return v4(m[0 + row * 4], m[1 + row * 4], m[2 + row * 4], m[3 + row * 4]);
 }
 
-float mat4x4::GetValue(int column, int row)
+float mat4x4::getValue(int column, int row)
 {
 	return m[column + row * 4];
 }
 
-void mat4x4::SetValue(int column, int row, float value)
+void mat4x4::setValue(int column, int row, float value)
 {
 	m[column + row * 4] = value;
 }
 
-mat4x4 mat4x4::GetTranspose()
+mat4x4 mat4x4::transpose()
 {
 	mat4x4 M = mat4x4();
 	M.m[0] = m[0];
@@ -96,7 +96,7 @@ mat4x4 mat4x4::GetTranspose()
 }
 
 // expensive operation
-mat4x4 mat4x4::GetInverse()
+mat4x4 mat4x4::inverse()
 {
 	// https://stackoverflow.com/questions/1148309/inverting-a-4x4-matrix
 	float inv[16]{}, det;
@@ -226,7 +226,7 @@ mat4x4 mat4x4::GetInverse()
 	return out;
 }
 
-v4 mat4x4::GetDiagonal()
+v4 mat4x4::diagonal()
 {
 	return v4(m[0], m[5], m[10], m[15]);
 }

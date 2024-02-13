@@ -187,13 +187,13 @@ std::string Quaternion::ToString() const
 Quaternion Quaternion::identity = Quaternion();
 
 #define C_RadToPi 57.2957795131f;
-float RadiiToDegrees(float angle)
+float radToDeg(float angle)
 {
     return angle * C_RadToPi;
 }
 
 #define C_PiToRad 0.01745329251f;
-float DegreesToRadii(float angle)
+float degToRad(float angle)
 {
     return angle * C_PiToRad;
 }

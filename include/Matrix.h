@@ -10,16 +10,16 @@ struct mat4x4
 	mat4x4(const v4& c0, const v4& c1, const v4& c2, const v4& c3);
 	~mat4x4();
 
-	void SetColumn(const v4& data, int column);
-	void SetRow(const v4& data, int row);
-	v4 GetColumn(int column);
-	v4 GetRow(int row);
-	float GetValue(int column, int row);
-	void SetValue(int column, int row, float value);
+	void setColumn(const v4& data, int column);
+	void setRow(const v4& data, int row);
+	v4 getColumn(int column);
+	v4 getRow(int row);
+	float getValue(int column, int row);
+	void setValue(int column, int row, float value);
 
-	mat4x4 GetTranspose();
-	mat4x4 GetInverse();
-	v4 GetDiagonal();
+	mat4x4 transpose();
+	mat4x4 inverse();
+	v4 diagonal();
 
 	mat4x4 operator+(mat4x4 other) const;
 	mat4x4 operator-(mat4x4 other) const;
