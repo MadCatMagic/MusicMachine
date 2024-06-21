@@ -2,6 +2,9 @@
 #include "Nodes/Canvas.h"
 #include "Nodes/NodeNetwork.h"
 
+const int FRAME_TIME_MOVING_WINDOW_SIZE = 120;
+const int FRAME_TIME_AVERAGE_LENGTH = 10;
+
 class App
 {
 public:
@@ -9,11 +12,21 @@ public:
 	void Initialize();
 
 	void Update();
-	void UI(struct ImGuiIO* io);
+	void UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime);
 
 	void Release();
 
 private:
-	NodeNetwork* n;
+
+	DrawStyle drawStyle;
+
+	void DebugWindow(ImGuiIO* io, double lastFrameTime, double averageFrameTime);
+	bool showDebug = false;
+
+	float frameTimeWindow[FRAME_TIME_MOVING_WINDOW_SIZE]{ };
+	float averageTimeWindow[FRAME_TIME_MOVING_WINDOW_SIZE]{ };
+	int frameTimeI = 0;
+
+	NodeNetwork* n = nullptr;
 	Canvas c;
 };

@@ -13,6 +13,8 @@ void App::Initialize()
     GetNodeFactory().Register("MathsNode", "Maths Node", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("LongNode", "Long Node", NodeBuilder<LongNode>);
 
+    drawStyle.InitColours();
+
     n = new NodeNetwork();
     Node* b = n->AddNodeFromName("Node");
     b->IO();
@@ -30,9 +32,11 @@ void App::Initialize()
 
 void App::Update()
 {
+    // execute networks, send sound data off
+
 }
 
-void App::UI(struct ImGuiIO* io)
+void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -40,12 +44,16 @@ void App::UI(struct ImGuiIO* io)
         {
             if (ImGui::MenuItem("Console", NULL, Console::instance->enabled))
                 Console::instance->enabled = !Console::instance->enabled;
+            if (ImGui::MenuItem("Debug", NULL, showDebug))
+                showDebug = !showDebug;
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
     }
     
 	ImGui::DockSpaceOverViewport();
+
+    DebugWindow(io, lastFrameTime, averageFrameTime);
 	
 	ImGui::Begin("App");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
@@ -53,7 +61,33 @@ void App::UI(struct ImGuiIO* io)
 
 	ImGui::End();
 
-    c.CreateWindow();
+    c.CreateWindow(&drawStyle);
+}
+
+
+void App::DebugWindow(ImGuiIO* io, double lastFrameTime, double averageFrameTime)
+{
+    frameTimeWindow[frameTimeI] = (float)lastFrameTime;
+    averageTimeWindow[frameTimeI] = (float)averageFrameTime;
+    frameTimeI = (++frameTimeI) % FRAME_TIME_MOVING_WINDOW_SIZE;
+
+    if (!showDebug) return;
+    ImGui::Begin("Debug", &showDebug);
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
+    ImGui::Text("Update average %.3f ms/frame (%.1f potential FPS)", averageFrameTime, 1000.0f / averageFrameTime);
+    // draw graph
+    ImGui::PlotHistogram("frame times", frameTimeWindow, FRAME_TIME_MOVING_WINDOW_SIZE, 0, 0, 0.0f, 10.0f, ImVec2(0.0f, 40.0f));
+    ImGui::PlotHistogram("avg frame times", averageTimeWindow, FRAME_TIME_MOVING_WINDOW_SIZE, 0, 0, 0.0f, 10.0f, ImVec2(0.0f, 40.0f));
+
+    if (ImGui::BeginMenu("Colours"))
+    {
+        for (int i = 0; i < NUM_DRAW_COLOURS; i++)
+            ImGui::ColorEdit4(drawStyle.colours[i].name.c_str(), &drawStyle.colours[i].col.Value.x, ImGuiColorEditFlags_NoInputs);
+        ImGui::EndMenu();
+    }
+
+    ImGui::End();
 }
 
 void App::Release()

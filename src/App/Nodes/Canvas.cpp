@@ -19,21 +19,14 @@ Canvas::~Canvas()
 void Canvas::InitCanvas()
 {
     drawList.SetConversionCallback([this](const v2& p) -> v2 { return this->ptcts(p); });
-    drawList.InitColours();
     nodes->AssignCanvas(this);
     nodeRenderer = new NodeNetworkRenderer(nodes, this);
 }
 
 // a lot of this code is taken from the ImGui canvas example
-void Canvas::CreateWindow()
+void Canvas::CreateWindow(DrawStyle* drawStyle)
 {
     ImGui::Begin("Canvas");
-    if (ImGui::BeginMenu("Colours"))
-    {
-        for (int i = 0; i < NUM_DRAW_COLOURS; i++)
-            ImGui::ColorEdit4(drawList.colours[i].name.c_str(), &drawList.colours[i].col.Value.x, ImGuiColorEditFlags_NoInputs);
-        ImGui::EndMenu();
-    }
     ImGui::InputFloat2("position", &position.x);
 
     // Using InvisibleButton() as a convenience 
@@ -48,6 +41,7 @@ void Canvas::CreateWindow()
     // Draw border and background color
     ImGuiIO& io = ImGui::GetIO();
     drawList.dl = ImGui::GetWindowDrawList();
+    drawList.style = drawStyle;
     drawList.convertPosition = false;
     drawList.RectFilled(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_BG);
     drawList.Rect(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
@@ -427,9 +421,13 @@ v2 Canvas::PositionToCanvas(const v2& pos) const // canvas = (offset - position)
 
 void Canvas::GenerateAllTextLODs()
 {
-    // Init
+    static ImVector<ImWchar> ranges;
+    ImFontGlyphRangesBuilder builder;
+    builder.AddText("abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.<>/?;:'@#~[]{}()-_=+\\|*&^%$£\"!1234567890 ");                        // Add a string (here "Hello world" contains 7 unique characters)
+    builder.BuildRanges(&ranges);
+
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
     for (int i = 0; i < NUM_SCALING_LEVELS; i++)
-        textLODs[i] = io.Fonts->AddFontFromFileTTF("res/fonts/Cousine-Regular.ttf", 12.0f / GetSFFromScalingLevel(i));
+        textLODs[i] = io.Fonts->AddFontFromFileTTF("res/fonts/Cousine-Regular.ttf", 12.0f / GetSFFromScalingLevel(i), nullptr, ranges.Data);
 }

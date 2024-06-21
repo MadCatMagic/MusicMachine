@@ -20,6 +20,8 @@ void Engine::Mainloop(bool debugging)
 
     while (!glfwWindowShouldClose(window))
     {
+        double frameStartTime = glfwGetTime();
+
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         winSize = v2i(display_w, display_h);
@@ -32,9 +34,11 @@ void Engine::Mainloop(bool debugging)
         Input::scrollDiff = 0.0f;
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        
+        lastFrameTime[lastFrameTimeI] = (glfwGetTime() - frameStartTime) * 1000.0f;
+        lastFrameTimeI = (++lastFrameTimeI) % FRAME_TIME_MOVING_WINDOW_SIZE;
 
         glfwSwapBuffers(window);
-        FrameMark;
 
         glfwPollEvents();
     }
@@ -47,8 +51,6 @@ void Engine::Mainloop(bool debugging)
 
 bool Engine::CreateWindow(const v2i& windowSize, const std::string& name)
 {
-    ZoneScoped;
-
     this->winSize = windowSize;
 
     /* Initialize the library */
@@ -68,7 +70,7 @@ bool Engine::CreateWindow(const v2i& windowSize, const std::string& name)
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     GLenum err = glewInit();
     if (err != GLEW_OK)
@@ -82,8 +84,6 @@ bool Engine::CreateWindow(const v2i& windowSize, const std::string& name)
 
 void Engine::Initialize()
 {
-    ZoneScoped;
-
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -106,8 +106,6 @@ void Engine::Initialize()
 
 void Engine::Update()
 {
-    ZoneScoped;
-
     // actual stuff first
     app.Update();
 
@@ -119,8 +117,14 @@ void Engine::Update()
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    // average frame time over last 10 frames
+    // kinda finickery
+    double ft = 0.0f;
+    for (int i = 0; i < FRAME_TIME_AVERAGE_LENGTH; i++)
+        ft += lastFrameTime[(lastFrameTimeI - i - 1 + FRAME_TIME_MOVING_WINDOW_SIZE) % FRAME_TIME_MOVING_WINDOW_SIZE];
     
-    app.UI(io);
+    app.UI(io, ft / FRAME_TIME_AVERAGE_LENGTH, lastFrameTime[(lastFrameTimeI - 1 + FRAME_TIME_MOVING_WINDOW_SIZE) % FRAME_TIME_MOVING_WINDOW_SIZE]);
     console.GUI();
     ImGui::ShowDemoWindow();
 

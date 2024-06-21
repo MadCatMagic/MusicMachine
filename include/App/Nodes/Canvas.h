@@ -18,7 +18,7 @@ public:
 	~Canvas();
 
 	void InitCanvas();
-	void CreateWindow();
+	void CreateWindow(DrawStyle* drawStyle);
 
 	v2 ScreenToCanvas(const v2& pos) const;
 	v2 CanvasToScreen(const v2& pos) const;

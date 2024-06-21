@@ -3,8 +3,6 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "tracy/Tracy.hpp"
-
 #include "Engine/Console.h"
 #include "App/App.h"
 
@@ -18,6 +16,9 @@ public:
 	bool CreateWindow(const v2i& windowSize, const std::string& name);
 
 private:
+	double lastFrameTime[FRAME_TIME_MOVING_WINDOW_SIZE]{ };
+	int lastFrameTimeI = 0;
+
 	v2i winSize;
 
 	GLFWwindow* window = nullptr;
