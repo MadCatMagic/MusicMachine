@@ -3,8 +3,6 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "Engine/Renderer.h"
-
 #include "tracy/Tracy.hpp"
 
 #include "Engine/Console.h"

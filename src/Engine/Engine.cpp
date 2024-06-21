@@ -16,8 +16,6 @@ void Engine::Mainloop(bool debugging)
         return;
     }
 
-    Renderer::Init(debug, window);
-
     Initialize();
 
     while (!glfwWindowShouldClose(window))
@@ -33,7 +31,6 @@ void Engine::Mainloop(bool debugging)
         Update();
         Input::scrollDiff = 0.0f;
 
-        Renderer::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
@@ -42,7 +39,6 @@ void Engine::Mainloop(bool debugging)
         glfwPollEvents();
     }
 
-    Renderer::Release();
     Release();
 
     glfwDestroyWindow(window);
