@@ -159,8 +159,6 @@
     <ClCompile Include="src\Engine\Texture\Texture.cpp" />
     <ClCompile Include="src\Engine\Texture\Texture2D.cpp" />
     <ClCompile Include="src\Maths\BBox.cpp" />
-    <ClCompile Include="src\Maths\Matrix4x4.cpp" />
-    <ClCompile Include="src\Maths\Quaternion.cpp" />
     <ClCompile Include="src\Maths\Random.cpp" />
     <ClCompile Include="src\Maths\Vector2.cpp" />
     <ClCompile Include="src\Maths\Vector2i.cpp" />
@@ -197,8 +195,6 @@
     <ClInclude Include="include\Engine\Texture\Texture.h" />
     <ClInclude Include="include\Engine\Texture\Texture2D.h" />
     <ClInclude Include="include\App\JSON.h" />
-    <ClInclude Include="include\Matrix.h" />
-    <ClInclude Include="include\Quaternion.h" />
     <ClInclude Include="include\Random.h" />
     <ClInclude Include="include\Vector.h" />
   </ItemGroup>

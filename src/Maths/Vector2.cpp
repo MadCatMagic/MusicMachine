@@ -26,6 +26,16 @@ float v2::cross(const v2& a) const
 	return x * a.y - y * a.x;
 }
 
+float v2::angleTo(const v2& a) const
+{
+	return abs(atan2f(a.y * x - a.x * y, a.x * x + a.y * y));
+}
+
+v2 v2::reflect(const v2& axis) const
+{
+	return *this - axis * (this->dot(axis)) * 2.0f;
+}
+
 v2 v2::reciprocal() const
 {
 	return v2(1.0f / x, 1.0f / y);
@@ -49,6 +59,11 @@ v2 v2::normalise() const
 float v2::length() const
 {
 	return sqrt(x * x + y * y);
+}
+
+float v2::length2() const
+{
+	return x * x + y * y;
 }
 
 float v2::distanceTo(const v2& a) const

@@ -5,6 +5,8 @@
 #define PI 3.1415927f
 #define TWOPI 6.2831855f
 
+#define RAD_TO_DEG (180.0f / PI)
+
 struct v2;
 struct v3;
 struct v4;
@@ -21,21 +23,26 @@ struct v2
 	inline v2(float a) : x(a), y(a) { }
 	inline v2(float x, float y) : x(x), y(y) { }
 	v2(const v2i& i);
-	
+
 	v2(const struct ImVec2& v);
 	ImVec2 ImGui() const;
 
 	bool inBox(const v2& bottomLeft, const v2& topRight) const;
 	float dot(const v2& a) const;
 	float cross(const v2& a) const;
+	float angleTo(const v2& a) const;
+	// https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+	// assumes that 'this' is an incoming ray of incident light, the axis is the normal of the surface, and the result is the reflected ray of light
+	v2 reflect(const v2& axis) const;
 
 	v2 reciprocal() const;
 	v2 scale(const v2& a) const;
 
 	v2 normalise() const;
 	float length() const;
+	float length2() const;
 	float distanceTo(const v2& a) const;
-	
+
 	inline v2 operator+(const v2& a) const { return v2(x + a.x, y + a.y); }
 	inline v2 operator-() const { return v2(-x, -y); }
 	inline v2 operator-(const v2& a) const { return v2(x - a.x, y - a.y); }
@@ -48,7 +55,7 @@ struct v2
 
 	inline bool operator==(const v2& a) const { return x == a.x && y == a.y; }
 	inline bool operator!=(const v2& a) const { return x != a.x || y != a.y; }
-	
+
 	std::string str() const;
 
 	static v2 zero;
@@ -89,7 +96,7 @@ struct v3
 
 	inline bool operator==(const v3& a) const { return x == a.x && y == a.y && z == a.z; }
 	inline bool operator!=(const v3& a) const { return x != a.x || y != a.y || z != a.z; }
-	
+
 	std::string str() const;
 
 	static v3 zero;
@@ -252,7 +259,7 @@ namespace vecHash
 		inline std::size_t operator()(const vec& k) const
 		{
 			return std::hash<vecType>()(k.x) ^
-				(std::hash<vecType>()(k.y) << 16) ^ 
+				(std::hash<vecType>()(k.y) << 16) ^
 				(std::hash<vecType>()(k.z) << 32) ^
 				(std::hash<vecType>()(k.w) << 48);
 		};
