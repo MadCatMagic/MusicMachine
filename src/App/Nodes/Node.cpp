@@ -10,7 +10,7 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 	v2 centre = v2(getNormalWidth() - miniTriangleOffset, headerHeight * 0.5f);
 
 	// handle the minimise button
-	if (v2::Distance(nodePos, centre) <= 6.0f)
+	if (nodePos.distanceTo(centre) <= 6.0f)
 	{
 		mini = !mini;
 		r.type = NodeClickResponseType::Minimise;
@@ -25,7 +25,7 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		float minDist = FLT_MAX;
 		for (size_t i = 0; i < outputs.size(); i++)
 		{
-			float d = v2::Distance(GetOutputPos(i), worldPos);
+			float d = GetOutputPos(i).distanceTo(worldPos);
 			if (d <= minDist)
 			{
 				oi = i;
@@ -47,7 +47,7 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 		size_t inpI = 0;
 		for (size_t i = 0; i < inputs.size(); i++)
 		{
-			float d = v2::Distance(GetInputPos(i), worldPos);
+			float d = GetInputPos(i).distanceTo(worldPos);
 			if (d <= minDist)
 			{
 				minDist = d;
@@ -379,7 +379,7 @@ bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos
 	{
 		v2 firstOutput = GetOutputPos(0);
 		for (size_t i = 0; i < outputs.size(); i++)
-			if (v2::Distance(firstOutput + v2(0.0f, 16.0f * i), pos) <= 6.0f && origin->GetInputType(originName) == outputs[i].type)
+			if (pos.distanceTo(firstOutput + v2(0.0f, 16.0f * i)) <= 6.0f && origin->GetInputType(originName) == outputs[i].type)
 			{
 				origin->Connect(origin->GetInputIndex(originName), this, i);
 				return true;
@@ -389,7 +389,7 @@ bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos
 	{
 		v2 firstInput = GetInputPos(0);
 		for (size_t i = 0; i < inputs.size(); i++)
-			if (v2::Distance(firstInput + v2(0.0f, 16.0f * i), pos) <= 6.0f && origin->GetOutputType(originName) == inputs[i].type)
+			if (pos.distanceTo(firstInput + v2(0.0f, 16.0f * i)) <= 6.0f && origin->GetOutputType(originName) == inputs[i].type)
 			{
 				Connect(i, origin, origin->GetOutputIndex(originName));
 				return true;

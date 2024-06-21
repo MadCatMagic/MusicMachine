@@ -42,7 +42,7 @@ SpriteRenderer::SpriteRenderer(int drawlevel)
 
 	// need to ensure it is inserted at the correct level
 	int i = (int)renderers.size() - 1;
-	while (i > 0)
+	while (i > 1)
 	{
 		// if layer is the same or greater than us then break
 		if (renderers[i]->layer <= renderers[i - 1]->layer)
@@ -105,11 +105,11 @@ void SpriteRenderer::Render()
 	unsigned int src = GetTextureID();
 	v2i dimensions = GetTextureSize();
 	
-	v2 realscale = v2::Scale(v2((float)dimensions.x / (float)pixelScreenSize.x, (float)dimensions.y / (float)pixelScreenSize.y), scale);
+	v2 realscale = (v2((float)dimensions.x / (float)pixelScreenSize.x, (float)dimensions.y / (float)pixelScreenSize.y)).scale(scale);
 
 	// target position
 	// same as Editor::PixelToScreen
-	v2 realpos = realpos = v2::Scale(pos + v2::Scale((v2)pixelSize * 0.5f, scale), v2::Reciprocal(pixelScreenSize)) * 2.0f - v2::one;
+	v2 realpos = realpos = (pos + ((v2)pixelSize * 0.5f).scale(scale)).scale(((v2)pixelScreenSize).reciprocal()) * 2.0f - v2::one;
 
 	InstanceData obj = InstanceData(realpos, realscale, rotation, tint);
 
@@ -155,7 +155,7 @@ void SpriteRenderer::SetLayer(int l)
 	}
 
 	// move to correct location
-	while (i > 0 && i < renderers.size() - 1)
+	while (i > 1 && i < renderers.size() - 1)
 	{
 		// if needs to move down then swap
 		if (renderers[i]->layer > renderers[i - 1]->layer)
