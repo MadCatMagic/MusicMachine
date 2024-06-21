@@ -5,6 +5,9 @@
 const int FRAME_TIME_MOVING_WINDOW_SIZE = 120;
 const int FRAME_TIME_AVERAGE_LENGTH = 10;
 
+#define SAMPLE_RATE (44100)
+#include "portaudio.h"
+
 class App
 {
 public:
@@ -17,6 +20,7 @@ public:
 	void Release();
 
 private:
+	PaStream* stream;
 
 	DrawStyle drawStyle;
 
