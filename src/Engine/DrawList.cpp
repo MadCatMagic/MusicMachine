@@ -75,6 +75,11 @@ void DrawStyle::InitColours()
 			c.col = ImColor(0.2f, 0.7f, 0.6f);
 			break;
 
+		case DrawColour::Node_IOAudio:
+			c.name = "Node_IOAudio";
+			c.col = ImColor(1.0f, 0.7f, 0.1f);
+			break;
+
 		case DrawColour::Node_IO:
 			c.name = "Node_IO";
 			c.col = ImColor(0.1f, 0.1f, 0.1f);

@@ -4,7 +4,7 @@
 #include <functional>
 #include "imgui.h"
 
-const size_t NUM_DRAW_COLOURS = 21;
+const size_t NUM_DRAW_COLOURS = 22;
 enum DrawColour {
 	Text, TextFaded,
 
@@ -12,7 +12,7 @@ enum DrawColour {
 	Canvas_GridLinesHeavy, Canvas_GridLinesLight,
 
 	Node_BGFill, Node_BGOutline, Node_BGHeader,
-	Node_IOBool, Node_IOFloat, Node_IOInt,
+	Node_IOBool, Node_IOFloat, Node_IOInt, Node_IOAudio,
 	Node_IO, Node_IOSelected,
 	Node_Connector, Node_ConnectorInvalid,
 	Node_SelectedOutline, Node_TopSelectedOutline, Node_SelectedFill,

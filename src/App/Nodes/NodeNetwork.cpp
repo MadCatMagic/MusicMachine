@@ -17,24 +17,8 @@
 
 NodeNetwork* NodeNetwork::context = nullptr;
 
-void NodeNetwork::ExecuteCommand(std::vector<std::string> args)
-{
-	if (context == nullptr)
-		return;
-
-	Console::Log("Executing NodeNetwork...");
-	if (context->Execute())
-		Console::Log("success=true");
-	else
-		Console::Log("success=false");
-	for (Node* n : context->nodeDependencyInfoPersistent->endpoints)
-		Console::Log("Result: " + n->Result());
-}
-
 NodeNetwork::NodeNetwork()
 {
-	if (context == nullptr)
-		Console::AddCommand(ExecuteCommand, "exec");
 	context = this;
 }
 
@@ -193,6 +177,10 @@ Node* NodeNetwork::GetNodeFromID(const std::string& id)
 
 bool NodeNetwork::Execute()
 {
+	// help
+	if (nodeDependencyInfoPersistent == nullptr)
+		return false;
+
 	// dont execute if there is a dependency problem
 	if (nodeDependencyInfoPersistent->problemConnectionExists)
 		return false;
@@ -201,7 +189,10 @@ bool NodeNetwork::Execute()
 	for (Node* n : nodes)
 		n->hasBeenExecuted = false;
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
+	{
 		e->Execute();
+		audioStream->data = std::vector<v2>(e->Result()->data);
+	}
 	return true;
 }
 

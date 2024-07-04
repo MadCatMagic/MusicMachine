@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\AudioChannel.cpp" />
     <ClCompile Include="src\App\JSON.cpp" />
     <ClCompile Include="src\App\Nodes\NodeNetworkRenderer.cpp" />
     <ClCompile Include="src\Engine\DrawList.cpp" />
@@ -159,6 +160,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App\App.h" />
+    <ClInclude Include="include\App\AudioChannel.h" />
+    <ClInclude Include="include\App\AudioStream.h" />
     <ClInclude Include="include\App\Nodes\Canvas.h" />
     <ClInclude Include="include\App\Nodes\Node.h" />
     <ClInclude Include="include\App\Nodes\NodeFactory.h" />

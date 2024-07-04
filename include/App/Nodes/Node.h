@@ -4,6 +4,8 @@
 #include <vector>
 #include "App/JSON.h"
 
+#include "App/AudioChannel.h"
+
 struct Node;
 
 // underlying node structure
@@ -44,8 +46,10 @@ in Init assign 'name' and 'minSpace' do declare, respectively, the name of the n
 */
 struct Node
 {
+	inline virtual ~Node() { }
+
 	enum NodeType {
-		Bool, Float, Int
+		Bool, Float, Int, Audio
 	};
 
 	friend class NodeNetwork;
@@ -69,7 +73,7 @@ struct Node
 protected:
 	inline virtual void Init() { }
 	inline virtual void Work() { }
-	inline virtual std::string Result() { return "Null"; }
+	inline virtual AudioChannel* Result() { return nullptr; }
 
 	inline virtual JSONType Save() { return JSONType(JSONType::Object); }
 	inline virtual void Load(JSONType& data) { }
@@ -87,6 +91,9 @@ protected:
 
 	void IntInput(const std::string& name, int* target, int min = 0, int max = 127);
 	void IntOutput(const std::string& name, int* target);
+
+	void AudioInput(const std::string& name, AudioChannel* target);
+	void AudioOutput(const std::string& name, AudioChannel* target);
 
 private:
 	uint64_t id = 0;

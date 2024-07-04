@@ -7,12 +7,7 @@
 #include "App/Nodes/NodeFactory.h"
 #include "App/Nodes/NodeTypes.h"
 
-typedef struct
-{
-    float left_phase;
-    float right_phase;
-}
-paTestData;
+
 /* This routine will be called by the PortAudio engine when audio is needed.
  * It may called at interrupt level on some machines so don't do anything
  * that could mess up the system like calling malloc() or free().
@@ -24,22 +19,18 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     void* userData)
 {
     /* Cast data passed through stream to our structure. */
-    paTestData* data = (paTestData*)userData;
+    AudioStream* data = (AudioStream*)userData;
     float* out = (float*)outputBuffer;
     unsigned int i;
     (void)inputBuffer; /* Prevent unused variable warning. */
 
+    if (data->data.size() != framesPerBuffer)
+        return 0;
+
     for (i = 0; i < framesPerBuffer; i++)
     {
-        out[i] = data->left_phase;  /* left */
-        out[i] = data->right_phase;  /* right */
-        /* Generate simple sawtooth phaser that ranges between -1.0 and 1.0. */
-        data->left_phase += 0.01f;
-        /* When signal reaches top, drop back down. */
-        if (data->left_phase >= 1.0f) data->left_phase -= 2.0f;
-        /* higher pitch so we can distinguish left and right. */
-        data->right_phase += 0.03f;
-        if (data->right_phase >= 1.0f) data->right_phase -= 2.0f;
+        out[i]     = data->data[i].x;  /* left */
+        out[i] = data->data[i].y;  /* right */
     }
     return 0;
 }
@@ -48,7 +39,8 @@ void App::Initialize()
 {
     GetNodeFactory().Register("Node", "Base Node", NodeBuilder<Node>);
     GetNodeFactory().Register("MathsNode", "Maths Node", NodeBuilder<MathsNode>);
-    GetNodeFactory().Register("LongNode", "Long Node", NodeBuilder<LongNode>);
+    GetNodeFactory().Register("SawWave", "Saw Wave", NodeBuilder<SawWave>);
+    GetNodeFactory().Register("AudioOutputNode", "Audio Output Node", NodeBuilder<AudioOutputNode>);
 
     drawStyle.InitColours();
 
@@ -70,7 +62,7 @@ void App::Initialize()
     PaError err = Pa_Initialize();
     if (err != paNoError) goto error;
 
-    static paTestData data{ 0.0f, 0.5f };
+    //astream = AudioStream(SAMPLE_RATE);
 
     /* Open an audio I/O stream. */
     err = Pa_OpenDefaultStream(&stream,
@@ -78,7 +70,7 @@ void App::Initialize()
         2,          /* stereo output */
         paFloat32,  /* 32 bit floating point output */
         SAMPLE_RATE,
-        256,        /* frames per buffer, i.e. the number
+        BUFFER_SIZE,        /* frames per buffer, i.e. the number
                            of sample frames that PortAudio will
                            request from the callback. Many apps
                            may want to use
@@ -86,12 +78,14 @@ void App::Initialize()
                            tells PortAudio to pick the best,
                            possibly changing, buffer size.*/
         patestCallback, /* this is your callback function */
-        &data); /*This is a pointer that will be passed to
+        &astream); /*This is a pointer that will be passed to
                            your callback*/
     if (err != paNoError) goto error;
 
     err = Pa_StartStream(stream);
     if (err != paNoError) goto error;
+
+    n->audioStream = &astream;
 
     return;
 error:
@@ -102,7 +96,11 @@ error:
 void App::Update()
 {
     // execute networks, send sound data off
-
+    AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE);
+    if (n->Execute())
+        Console::Log("WORKED");
+    else
+        Console::LogWarn("FAILED");
 }
 
 void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)

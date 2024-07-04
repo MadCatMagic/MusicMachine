@@ -2,6 +2,8 @@
 #include "App/Nodes/Node.h"
 #include "Engine/DrawList.h"
 
+#include "App/AudioStream.h"
+
 #include <vector>
 #include "imgui.h"
 #include "BBox.h"
@@ -14,7 +16,6 @@ public:
 	friend class NodeNetworkRenderer;
 
 	static NodeNetwork* context;
-	static void ExecuteCommand(std::vector<std::string> args);
 
 	NodeNetwork();
 	NodeNetwork(const std::string& nnFilePath);
@@ -41,6 +42,8 @@ public:
 	inline bool doIDrawDebug() const { return drawDebugInformation; }
 
 	Node* GetNodeFromID(const std::string& id);
+
+	AudioStream* audioStream = nullptr;
 
 private:
 

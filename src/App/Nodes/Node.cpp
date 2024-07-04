@@ -213,6 +213,24 @@ void Node::IntOutput(const std::string& name, int* target)
 	TransferOutput(o);
 }
 
+void Node::AudioInput(const std::string& name, AudioChannel* target)
+{
+	NodeInput o;
+	o.name = name;
+	o.target = target;
+	o.type = NodeType::Audio;
+	TransferInput(o);
+}
+
+void Node::AudioOutput(const std::string& name, AudioChannel* target)
+{
+	NodeOutput o;
+	o.name = name;
+	o.data = target;
+	o.type = NodeType::Audio;
+	TransferOutput(o);
+}
+
 #pragma endregion IOTypes
 
 #include <sstream>
@@ -237,7 +255,14 @@ void Node::Execute()
 		size_t index = input.source->GetOutputIndex(input.sourceName);
 		// need to transfer data
 		if (input.target != nullptr && input.source->outputs[index].data != nullptr)
-			memcpy(input.target, input.source->outputs[index].data, DataSize(input.type));
+		{
+			if (input.type == NodeType::Audio)
+			{
+				((AudioChannel*)input.target)->data = ((AudioChannel*)input.source->outputs[index].data)->data;
+			}
+			else
+				memcpy(input.target, input.source->outputs[index].data, DataSize(input.type));
+		}
 	}
 
 	Work();
@@ -525,6 +550,10 @@ size_t Node::DataSize(NodeType type)
 		return sizeof(bool);
 	case NodeType::Float:
 		return sizeof(float);
+	case NodeType::Int:
+		return sizeof(int);
+	case NodeType::Audio:
+		return sizeof(AudioChannel*);
 	}
 	return 0;
 }

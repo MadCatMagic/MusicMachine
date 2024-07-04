@@ -16,6 +16,9 @@ void MathsNode::IO()
 	BoolInput("Freak out", &crazy);
 	FloatOutput("Result", &result);
 	IntOutput("Result rounded", &resultRounded);
+
+	AudioInput("ain", &ac);
+	AudioOutput("aout", &ac);
 }
 
 void MathsNode::Load(JSONType& data)
@@ -36,29 +39,53 @@ JSONType MathsNode::Save()
 	});
 }
 
-void LongNode::Init()
+void SawWave::Init()
 {
-	name = "LongNode";
-	title = "Long Node";
+	name = "SawWave";
+	title = "Saw Wave";
 }
 
-void LongNode::IO()
+void SawWave::IO()
 {
-	FloatInput("in 1", &in1);
-	FloatInput("in 2", &in2);
-	FloatInput("in 3", &in3);
-	FloatInput("in 4", &in4);
-	FloatInput("in 5", &in5);
-	FloatInput("in 6", &in6);
+	AudioOutput("aout", &c);
+	FloatInput("freq", &freq, 20.0f, 500.0f);
 }
 
-std::string LongNode::Result()
+void SawWave::Load(JSONType& data)
 {
-	return
-		std::to_string(in1) + ", " +
-		std::to_string(in2) + ", " +
-		std::to_string(in3) + ", " +
-		std::to_string(in4) + ", " +
-		std::to_string(in5) + ", " +
-		std::to_string(in6);
+	freq = (float)data.f;
+}
+
+JSONType SawWave::Save()
+{
+	return (double)freq;
+}
+
+void SawWave::Work()
+{
+	float samplesPerCycle = (c.sampleRate / freq);
+	float increment = 1.0f / samplesPerCycle;
+
+	for (size_t i = 0; i < c.bufferSize; i++)
+	{
+		kv += increment;
+		if (kv >= 1.0f) kv -= 2.0f;
+		c.data[i] = v2(kv, -kv);
+	}
+}
+
+void AudioOutputNode::Init()
+{
+	name = "AudioOutputNode";
+	title = "Audio Output Node";
+}
+
+void AudioOutputNode::IO()
+{
+	AudioInput("ain", &c);
+}
+
+AudioChannel* AudioOutputNode::Result()
+{
+	return &c;
 }

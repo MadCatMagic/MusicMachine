@@ -19,22 +19,33 @@ private:
 	int resultRounded = 0;
 	float result = 0.0f;
 	bool crazy = true;
+	AudioChannel ac;
 };
 
-struct LongNode : public Node
+struct SawWave : public Node
 {
 protected:
 	virtual void Init() override;
 	virtual void IO() override;
-	virtual std::string Result() override;
 
-	inline virtual void Work() override { }
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
+	virtual void Work() override;
 
 private:
-	float in1 = 0.0f;
-	float in2 = 0.0f;
-	float in3 = 0.0f;
-	float in4 = 0.0f;
-	float in5 = 0.0f;
-	float in6 = 0.0f;
+	AudioChannel c{ };
+	float kv = 0.0f;
+	float freq = 220.0f;
+};
+
+struct AudioOutputNode : public Node
+{
+protected:
+	virtual void Init() override;
+	virtual void IO() override;
+	virtual AudioChannel* Result() override;
+
+private:
+	AudioChannel c{ };
 };
