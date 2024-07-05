@@ -313,7 +313,7 @@ float Node::getNormalWidth() const
 	}
 	for (const NodeOutput& output : outputs)
 		maxXOff = std::max(IOWidth(output.name), maxXOff);
-	maxXOff = std::max(minSpace.x, maxXOff);
+	maxXOff = std::max(minSpace.x + 4.0f, maxXOff);
 	maxXOff = std::max(IOWidth(title) + 8.0f, maxXOff);
 	return maxXOff;
 }
@@ -561,7 +561,7 @@ void Node::UpdateDimensions()
 	else
 		size = v2(
 			maxXOff, 
-			headerHeight + 8.0f + minSpace.y + inputs.size() * 16.0f + outputs.size() * 16.0f
+			headerHeight + 8.0f + (minSpace.y + 4.0f) + inputs.size() * 16.0f + outputs.size() * 16.0f
 		);
 }
 

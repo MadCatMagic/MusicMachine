@@ -79,6 +79,8 @@ protected:
 	inline virtual void Work() { }
 	inline virtual AudioChannel* Result() { return nullptr; }
 
+	inline virtual void Render(const v2& topLeft, class DrawList* dl) { }
+
 	inline virtual JSONType Save() { return JSONType(JSONType::Object); }
 	inline virtual void Load(JSONType& data) { }
 

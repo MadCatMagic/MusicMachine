@@ -151,7 +151,12 @@ void NodeNetworkRenderer::DrawNode(Node* node, bool cullBody)
 			// leave spaces
 			cursor.y += node->headerHeight + 4.0f;
 			cursor.y += 16.0f * node->outputs.size();
-			cursor.y += node->minSpace.y;
+
+			// draw node and stuff
+			// 2px padding round the minspace
+			node->Render(cursor + v2(2.0f, 2.0f), currentList);
+
+			cursor.y += node->minSpace.y + 4.0f;
 
 			// draw inputs
 			for (const Node::NodeInput& input : node->inputs)
