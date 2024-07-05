@@ -6,7 +6,7 @@ const int FRAME_TIME_MOVING_WINDOW_SIZE = 120;
 const int FRAME_TIME_AVERAGE_LENGTH = 10;
 
 #define SAMPLE_RATE (44100)
-#define BUFFER_SIZE (256)
+#define BUFFER_SIZE (1024)
 #include "portaudio.h"
 
 #include "App/AudioStream.h"
@@ -34,6 +34,8 @@ private:
 	float frameTimeWindow[FRAME_TIME_MOVING_WINDOW_SIZE]{ };
 	float averageTimeWindow[FRAME_TIME_MOVING_WINDOW_SIZE]{ };
 	int frameTimeI = 0;
+
+	float t_fake = 0.0f;
 
 	NodeNetwork* n = nullptr;
 	Canvas c;

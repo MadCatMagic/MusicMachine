@@ -191,7 +191,7 @@ bool NodeNetwork::Execute()
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
 	{
 		e->Execute();
-		audioStream->data = std::vector<v2>(e->Result()->data);
+		audioStream->SetData(e->Result()->data);
 	}
 	return true;
 }

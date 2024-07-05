@@ -10,6 +10,7 @@ Console::Console()
     history.push_back("");
 
     AddCommand(&HelpCallback, "help");
+    AddCommand(&ClearCallback, "clear");
 }
 
 void Console::Log(const std::string& data)
@@ -316,4 +317,9 @@ void Console::HelpCallback(std::vector<std::string> arguments)
     AddRawText("Possible commands:");
     for (const Command& c : instance->commands)
         AddRawText(" - " + c.name);
+}
+
+void Console::ClearCallback(std::vector<std::string> arguments)
+{
+    instance->entries.clear();
 }

@@ -24,14 +24,33 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     unsigned int i;
     (void)inputBuffer; /* Prevent unused variable warning. */
 
-    if (data->data.size() != framesPerBuffer)
+    // check if any data is filled; if none is, something went wrong probably
+    if (data->NoData())
+    {
+        Console::LogWarn("NO DATA!!!");
         return 0;
+    }
+
+    std::vector<v2>& correctData = data->dataAFirst ? data->dataA : data->dataB;
 
     for (i = 0; i < framesPerBuffer; i++)
     {
-        out[i]     = data->data[i].x;  /* left */
-        out[i] = data->data[i].y;  /* right */
+        out[i * 2] = correctData[i].x;  /* left */
+        out[i * 2 + 1] = correctData[i].y;  /* right */
+        if (i % 8 == 0)
+        {
+            data->previousData[data->previousDataP++] = correctData[i].x;
+            data->previousDataP %= 1024;
+        }
     }
+
+    if (data->dataAFirst)
+        data->dataA = std::vector<v2>();
+    else
+        data->dataB = std::vector<v2>();
+
+    data->dataAFirst = !data->dataAFirst;
+
     return 0;
 }
 
@@ -41,6 +60,8 @@ void App::Initialize()
     GetNodeFactory().Register("MathsNode", "Maths Node", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("SawWave", "Saw Wave", NodeBuilder<SawWave>);
     GetNodeFactory().Register("AudioOutputNode", "Audio Output Node", NodeBuilder<AudioOutputNode>);
+    GetNodeFactory().Register("AudioAdder", "Audio Adder", NodeBuilder<AudioAdder>);
+    GetNodeFactory().Register("SequencerNode", "Sequencer Node", NodeBuilder<SequencerNode>);
 
     drawStyle.InitColours();
 
@@ -96,11 +117,11 @@ error:
 void App::Update()
 {
     // execute networks, send sound data off
-    AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE);
-    if (n->Execute())
-        Console::Log("WORKED");
-    else
-        Console::LogWarn("FAILED");
+    AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, t_fake, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
+    t_fake += (float)BUFFER_SIZE / (float)SAMPLE_RATE;
+    if (astream.dataA.size() == 0 || astream.dataB.size() == 0)
+        if (!n->Execute())
+            Console::LogWarn("NETWORK EXECUTING FAILED");
 }
 
 void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
@@ -125,6 +146,7 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 	ImGui::Begin("App");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
 
+    ImGui::PlotHistogram("previousSamplesLeft", astream.previousData, 1024, 0, 0, -1.0f, 1.0f, ImVec2(0.0f, 40.0f));
 
 	ImGui::End();
 

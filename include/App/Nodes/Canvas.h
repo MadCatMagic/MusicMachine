@@ -38,6 +38,7 @@ public:
 	class NodeNetworkRenderer* nodeRenderer = nullptr;
 	
 private:
+	inline float clamp(float f, float min, float max, bool doIt) { return doIt ? (f < min ? min : (f > max ? max : f)) : f; }
 	// text stuff
 	struct ImFont* textLODs[NUM_SCALING_LEVELS]{};
 

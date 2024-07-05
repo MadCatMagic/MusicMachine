@@ -62,4 +62,5 @@ private:
 
 	void ExecuteCommand(const std::string& command);
 	static void HelpCallback(std::vector<std::string> arguments);
+	static void ClearCallback(std::vector<std::string> arguments);
 };

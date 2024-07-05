@@ -48,29 +48,39 @@ void SawWave::Init()
 void SawWave::IO()
 {
 	AudioOutput("aout", &c);
-	FloatInput("freq", &freq, 20.0f, 500.0f);
-}
-
-void SawWave::Load(JSONType& data)
-{
-	freq = (float)data.f;
-}
-
-JSONType SawWave::Save()
-{
-	return (double)freq;
+	SequencerInput("sequence", &seq);
 }
 
 void SawWave::Work()
 {
-	float samplesPerCycle = (c.sampleRate / freq);
+	if (seq.length.size() == 0)
+		return;
+
+
+	int freq = 0;
+	size_t scounter = 0;
+
+	float samplesPerCycle = (c.sampleRate / seq.pitch[freq]);
 	float increment = 1.0f / samplesPerCycle;
 
 	for (size_t i = 0; i < c.bufferSize; i++)
 	{
+		if (scounter >= seq.length[freq])
+		{
+			scounter = 0;
+			freq++;
+			if (freq >= seq.length.size())
+				return;
+
+			samplesPerCycle = (c.sampleRate / seq.pitch[freq]);
+			increment = 1.0f / samplesPerCycle;
+		}
+
 		kv += increment;
 		if (kv >= 1.0f) kv -= 2.0f;
-		c.data[i] = v2(kv, -kv);
+		c.data[i] = v2(kv, kv) * seq.velocity[freq];
+
+		scounter++;
 	}
 }
 
@@ -88,4 +98,60 @@ void AudioOutputNode::IO()
 AudioChannel* AudioOutputNode::Result()
 {
 	return &c;
+}
+
+void AudioAdder::Init()
+{
+	name = "AudioAdder";
+	title = "Audio Adder";
+}
+
+void AudioAdder::IO()
+{
+	AudioInput("A", &ic1);
+	AudioInput("B", &ic2);
+	FloatInput("k", &lerp, 0.0f, 1.0f, true);
+	AudioOutput("O", &oc);
+}
+
+void AudioAdder::Load(JSONType& data)
+{
+	lerp = (float)data.f;
+}
+
+JSONType AudioAdder::Save()
+{
+	return JSONType((double)lerp);
+}
+
+void AudioAdder::Work()
+{
+	for (size_t i = 0; i < oc.bufferSize; i++)
+	{
+		oc.data[i] = ic1.data[i] * lerp + ic2.data[i] * (1.0f - lerp);
+	}
+}
+
+void SequencerNode::Init()
+{
+	name = "SequencerNode";
+	title = "Sequencer Node";
+}
+
+void SequencerNode::IO()
+{
+	SequencerOutput("sequence", &seq);
+}
+
+void SequencerNode::Work()
+{
+	seq.length = {
+		1024
+	};
+	seq.pitch = {
+		440.0f
+	};
+	seq.velocity = {
+		0.5f
+	};
 }

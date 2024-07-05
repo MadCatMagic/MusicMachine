@@ -96,6 +96,11 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 						r.sliderValue.i = (int*)inputs[i].target;
 						r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
 					}
+					r.sliderLocked = inputs[i].lock;
+					r.sliderMin = inputs[i].fmin;
+					r.sliderMax = inputs[i].fmax;
+					//if (inputs[i].lock)
+					//	r.sliderDelta = r.sliderDelta < 0.0f ? 0.0f : (r.sliderDelta > 1.0f ? 1.0f : r.sliderDelta);
 					return r;
 				}
 			}
@@ -173,7 +178,7 @@ void Node::BoolOutput(const std::string& name, bool* target)
 	TransferOutput(o);
 }
 
-void Node::FloatInput(const std::string& name, float* target, float min, float max)
+void Node::FloatInput(const std::string& name, float* target, float min, float max, bool lockToRange)
 {
 	NodeInput o;
 	o.name = name;
@@ -181,6 +186,7 @@ void Node::FloatInput(const std::string& name, float* target, float min, float m
 	o.type = NodeType::Float;
 	o.fmin = min;
 	o.fmax = max;
+	o.lock = lockToRange;
 	TransferInput(o);
 }
 
@@ -193,7 +199,7 @@ void Node::FloatOutput(const std::string& name, float* target)
 	TransferOutput(o);
 }
 
-void Node::IntInput(const std::string& name, int* target, int min, int max)
+void Node::IntInput(const std::string& name, int* target, int min, int max, bool lockToRange)
 {
 	NodeInput o;
 	o.name = name;
@@ -201,6 +207,7 @@ void Node::IntInput(const std::string& name, int* target, int min, int max)
 	o.type = NodeType::Int;
 	o.fmin = (float)min;
 	o.fmax = (float)max;
+	o.lock = lockToRange;
 	TransferInput(o);
 }
 
@@ -231,6 +238,25 @@ void Node::AudioOutput(const std::string& name, AudioChannel* target)
 	TransferOutput(o);
 }
 
+void Node::SequencerInput(const std::string& name, PitchSequencer* target)
+{
+	NodeInput o;
+	o.name = name;
+	o.target = target;
+	o.type = NodeType::Sequencer;
+	TransferInput(o);
+}
+
+void Node::SequencerOutput(const std::string& name, PitchSequencer* target)
+{
+	NodeOutput o;
+	o.name = name;
+	o.data = target;
+	o.type = NodeType::Sequencer;
+	TransferOutput(o);
+}
+
+
 #pragma endregion IOTypes
 
 #include <sstream>
@@ -246,7 +272,7 @@ std::string Node::id_s()
 
 void Node::Execute()
 {
-	for (const NodeInput& input : inputs)
+	for (NodeInput& input : inputs)
 	{
 		if (input.source == nullptr)
 			continue;
@@ -259,6 +285,10 @@ void Node::Execute()
 			if (input.type == NodeType::Audio)
 			{
 				((AudioChannel*)input.target)->data = ((AudioChannel*)input.source->outputs[index].data)->data;
+			}
+			else if (input.type == NodeType::Sequencer)
+			{
+				((PitchSequencer*)input.source->outputs[index].data)->CopyTo((PitchSequencer*)input.target);
 			}
 			else
 				memcpy(input.target, input.source->outputs[index].data, DataSize(input.type));
@@ -552,8 +582,6 @@ size_t Node::DataSize(NodeType type)
 		return sizeof(float);
 	case NodeType::Int:
 		return sizeof(int);
-	case NodeType::Audio:
-		return sizeof(AudioChannel*);
 	}
 	return 0;
 }

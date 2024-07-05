@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Sequencer.cpp" />
     <ClCompile Include="src\App\AudioChannel.cpp" />
     <ClCompile Include="src\App\JSON.cpp" />
     <ClCompile Include="src\App\Nodes\NodeNetworkRenderer.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="include\App\JSON.h" />
     <ClInclude Include="include\Random.h" />
     <ClInclude Include="include\Vector.h" />
+    <ClInclude Include="include\App\Sequencer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

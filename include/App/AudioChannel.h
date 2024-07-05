@@ -4,7 +4,7 @@
 
 struct AudioChannel
 {
-	static void Init(int sr, int bs);
+	static void Init(int sr, int bs, float _t, float _dt);
 
 	AudioChannel();
 	~AudioChannel();
@@ -15,6 +15,8 @@ struct AudioChannel
 	int channels = 2;
 	static int sampleRate;
 	static int bufferSize;
+	static float t;
+	static float dt;
 
 	// wasteful, just treat single value for mono channel
 	std::vector<v2> data = std::vector<v2>();

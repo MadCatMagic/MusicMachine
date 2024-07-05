@@ -347,5 +347,7 @@ DrawColour NodeNetworkRenderer::GetCol(Node::NodeType type)
 		return DrawColour::Node_IOInt;
 	else if (type == Node::NodeType::Audio)
 		return DrawColour::Node_IOAudio;
+	else if (type == Node::NodeType::Sequencer)
+		return DrawColour::Node_IOSequencer;
 	return DrawColour::Canvas_BG;
 }

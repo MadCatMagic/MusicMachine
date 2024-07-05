@@ -5,6 +5,7 @@
 #include "App/JSON.h"
 
 #include "App/AudioChannel.h"
+#include "App/Sequencer.h"
 
 struct Node;
 
@@ -27,6 +28,9 @@ struct NodeClickResponse
 		float* f;
 		int* i;
 	};
+	bool sliderLocked = false;
+	float sliderMin = 0.0f;
+	float sliderMax = 1.0f;
 
 	sliderValueType sliderValue = { };
 	float sliderDelta = 0.0f;
@@ -49,7 +53,7 @@ struct Node
 	inline virtual ~Node() { }
 
 	enum NodeType {
-		Bool, Float, Int, Audio
+		Bool, Float, Int, Audio, Sequencer
 	};
 
 	friend class NodeNetwork;
@@ -86,14 +90,17 @@ protected:
 	void BoolInput(const std::string& name, bool* target);
 	void BoolOutput(const std::string& name, bool* target);
 
-	void FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f);
+	void FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f, bool lockToRange = false);
 	void FloatOutput(const std::string& name, float* target);
 
-	void IntInput(const std::string& name, int* target, int min = 0, int max = 127);
+	void IntInput(const std::string& name, int* target, int min = 0, int max = 127, bool lockToRange = false);
 	void IntOutput(const std::string& name, int* target);
 
 	void AudioInput(const std::string& name, AudioChannel* target);
 	void AudioOutput(const std::string& name, AudioChannel* target);
+
+	void SequencerInput(const std::string& name, PitchSequencer* target);
+	void SequencerOutput(const std::string& name, PitchSequencer* target);
 
 private:
 	uint64_t id = 0;
@@ -125,6 +132,7 @@ private:
 
 		float fmin = 0.0f;
 		float fmax = 1.0f;
+		bool lock = false;
 
 		Node* source = nullptr;
 		std::string sourceName = "";

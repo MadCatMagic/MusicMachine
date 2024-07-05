@@ -3,12 +3,17 @@
 int AudioChannel::sampleRate = 0;
 int AudioChannel::bufferSize = 0;
 
+float AudioChannel::t = 0;
+float AudioChannel::dt = 0;
+
 std::vector<AudioChannel*> AudioChannel::livingChannels = std::vector<AudioChannel*>();
 
-void AudioChannel::Init(int sr, int bs)
+void AudioChannel::Init(int sr, int bs, float _t, float _dt)
 {
 	sampleRate = sr;
 	bufferSize = bs;
+	t = _t;
+	dt = _dt;
 
 	for (AudioChannel* channel : livingChannels)
 		channel->ResetData();
