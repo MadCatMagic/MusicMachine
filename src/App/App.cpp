@@ -28,6 +28,12 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     if (data->NoData())
     {
         Console::LogWarn("NO DATA!!!");
+        // wipe clean
+        for (i = 0; i < framesPerBuffer; i++)
+        {
+            out[i * 2] = 0.0f;
+            out[i * 2 + 1] = 0.0f;
+        }
         return 0;
     }
 

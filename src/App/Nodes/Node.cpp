@@ -13,7 +13,7 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 	if (nodePos.distanceTo(centre) <= 6.0f)
 	{
 		mini = !mini;
-		r.type = NodeClickResponseType::Minimise;
+		r.type = NodeClickResponseType::Interact;
 		return r;
 	}
 	
@@ -114,6 +114,14 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 				return r;
 			}
 		}
+	}
+
+	// handle node interactions itself
+	if (!mini && (nodePos - spaceOffset()).inBox(v2(), minSpace) && OnClick(nodePos - spaceOffset()))
+	{
+		r.handled = true;
+		r.type = NodeClickResponseType::Interact;
+		return r;
 	}
 
 	r.handled = false;
@@ -458,7 +466,7 @@ v2 Node::GetInputPos(size_t index) const
 {
 	if (!mini)
 	{
-		return position + v2(0.0f, headerHeight + 4.0f + 16.0f * outputs.size() + minSpace.y + 16.0f * index + 8.0f);
+		return position + v2(0.0f, headerHeight + 4.0f + 4.0f + 16.0f * outputs.size() + minSpace.y + 16.0f * index + 8.0f);
 	}
 	if (inputs.size() > 1)
 	{
@@ -508,6 +516,11 @@ v2 Node::GetOutputPos(size_t index) const
 		return position + constOffset + offset * hh;
 	}
 	return position + v2(size.x, headerHeight * 0.5f);
+}
+
+v2 Node::spaceOffset() const
+{
+	return v2(2.0f, headerHeight + 4.0f + 2.0f + 16.0f * outputs.size());
 }
 
 size_t Node::GetInputIndex(const std::string& name) const

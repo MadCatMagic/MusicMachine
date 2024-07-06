@@ -15,7 +15,7 @@ struct Node;
 // inside UI it should call functions similar to ImGui to be able to display that info
 
 enum NodeClickResponseType {
-	None, Minimise, BeginConnection, BeginConnectionReversed, 
+	None, Interact, BeginConnection, BeginConnectionReversed, 
 	InteractWithFloatSlider, InteractWithIntSlider, InteractWithBool
 };
 struct NodeClickResponse
@@ -80,6 +80,8 @@ protected:
 	inline virtual AudioChannel* Result() { return nullptr; }
 
 	inline virtual void Render(const v2& topLeft, class DrawList* dl) { }
+	// returns whether the click was used or not
+	inline virtual bool OnClick(const v2& clickPosition) { return false; }
 
 	inline virtual JSONType Save() { return JSONType(JSONType::Object); }
 	inline virtual void Load(JSONType& data) { }
@@ -158,6 +160,7 @@ private:
 	
 	v2 GetInputPos(size_t index) const;
 	v2 GetOutputPos(size_t index) const;
+	v2 spaceOffset() const;
 	size_t GetInputIndex(const std::string& name) const;
 	size_t GetOutputIndex(const std::string& name) const;
 	void UpdateDimensions();
