@@ -28,7 +28,8 @@ struct NodeClickResponse
 		float* f;
 		int* i;
 	};
-	bool sliderLocked = false;
+	bool sliderLockMin = false;
+	bool sliderLockMax = false;
 	float sliderMin = 0.0f;
 	float sliderMax = 1.0f;
 
@@ -94,10 +95,10 @@ protected:
 	void BoolInput(const std::string& name, bool* target);
 	void BoolOutput(const std::string& name, bool* target);
 
-	void FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f, bool lockToRange = false);
+	void FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f, bool lockMinToRange = false, bool lockMaxToRange = false);
 	void FloatOutput(const std::string& name, float* target);
 
-	void IntInput(const std::string& name, int* target, int min = 0, int max = 127, bool lockToRange = false);
+	void IntInput(const std::string& name, int* target, int min = 0, int max = 127, bool lockMinToRange = false, bool lockMaxToRange = false);
 	void IntOutput(const std::string& name, int* target);
 
 	void AudioInput(const std::string& name, AudioChannel* target);
@@ -136,7 +137,8 @@ private:
 
 		float fmin = 0.0f;
 		float fmax = 1.0f;
-		bool lock = false;
+		bool lockMin = false;
+		bool lockMax = false;
 
 		Node* source = nullptr;
 		std::string sourceName = "";

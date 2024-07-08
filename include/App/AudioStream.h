@@ -22,8 +22,5 @@ public:
 
 	bool dataAFirst = true;
 
-	float previousData[1024]{};
-	unsigned int previousDataP = 0;
-
 	PaStream* stream;
 };

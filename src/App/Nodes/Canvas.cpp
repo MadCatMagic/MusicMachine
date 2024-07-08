@@ -78,7 +78,8 @@ void Canvas::CreateWindow(DrawStyle* drawStyle)
 
     static float sliderMin = 0.0f;
     static float sliderMax = 1.0f;
-    static bool sliderLock = false;
+    static bool sliderLockMin = false;
+    static bool sliderLockMax = false;
 
     // Pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
@@ -131,7 +132,8 @@ void Canvas::CreateWindow(DrawStyle* drawStyle)
                 originalSliderValue = sliderIsInt ? (float)*sliderValue.i : *sliderValue.f;
                 sliderMin = r.sliderMin;
                 sliderMax = r.sliderMax;
-                sliderLock = r.sliderLocked;
+                sliderLockMin = r.sliderLockMin;
+                sliderLockMax = r.sliderLockMax;
             }
         }
         else if (!selectingArea)
@@ -227,9 +229,9 @@ void Canvas::CreateWindow(DrawStyle* drawStyle)
         {
             totalSliderMovement += sliderDelta * io.MouseDelta.x * scale.x * (io.KeyShift ? 0.2f : 1.0f);
             if (sliderIsInt)
-                *sliderValue.i = (int)clamp(originalSliderValue + totalSliderMovement, sliderMin, sliderMax, sliderLock);
+                *sliderValue.i = (int)clamp(originalSliderValue + totalSliderMovement, sliderMin, sliderMax, sliderLockMin, sliderLockMax);
             else
-                *sliderValue.f = clamp(originalSliderValue + totalSliderMovement, sliderMin, sliderMax, sliderLock);
+                *sliderValue.f = clamp(originalSliderValue + totalSliderMovement, sliderMin, sliderMax, sliderLockMin, sliderLockMax);
         }
     }
 

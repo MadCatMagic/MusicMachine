@@ -13,11 +13,13 @@ void App::Initialize()
     drawStyle.InitColours();
 
     n = new NodeNetwork();
-    Node* b = n->AddNodeFromName("Node");
+    Node* b = n->AddNodeFromName("AudioOutputNode");
+    b->position = v2(100.0f, 0.0f);
     b->IO();
-    Node* m = n->AddNodeFromName("MathsNode");
+    Node* m = n->AddNodeFromName("SawWave");
     m->IO();
-    if (m->Connect(0, b, 1))
+    m->position = v2(-10.0f, 0.0f);
+    if (b->Connect(0, m, 0))
         Console::Log("successfully connected nodes");
     else
         Console::LogErr("failed to connect nodes");
@@ -62,8 +64,6 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 	
 	ImGui::Begin("App");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
-
-    ImGui::PlotHistogram("previousSamplesLeft", astream.previousData, 1024, 0, 0, -1.0f, 1.0f, ImVec2(0.0f, 40.0f));
 
 	ImGui::End();
 

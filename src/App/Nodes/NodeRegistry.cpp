@@ -3,12 +3,15 @@
 #include "App/Nodes/NodeFactory.h"
 #include "App/Nodes/NodeTypes.h"
 
+#include "App/Nodes/SequencerNode.h"
+
 void RegisterNodes()
 {
-    GetNodeFactory().Register("Node", "Base Node", NodeBuilder<Node>);
-    GetNodeFactory().Register("MathsNode", "Maths Node", NodeBuilder<MathsNode>);
+    //GetNodeFactory().Register("Node", "Base Node", NodeBuilder<Node>);
+    //GetNodeFactory().Register("MathsNode", "Maths Node", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("SawWave", "Saw Wave", NodeBuilder<SawWave>);
     GetNodeFactory().Register("AudioOutputNode", "Audio Output Node", NodeBuilder<AudioOutputNode>);
-    GetNodeFactory().Register("AudioAdder", "Audio Adder", NodeBuilder<AudioAdder>);
+    GetNodeFactory().Register("AudioTransformer", "Audio Transformer", NodeBuilder<AudioTransformer>);
     GetNodeFactory().Register("SequencerNode", "Sequencer Node", NodeBuilder<SequencerNode>);
+    GetNodeFactory().Register("ADSRNode", "ADSR", NodeBuilder<ADSRNode>);
 }

@@ -38,11 +38,6 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     {
         out[i * 2] = correctData[i].x;  /* left */
         out[i * 2 + 1] = correctData[i].y;  /* right */
-        if (i % 8 == 0)
-        {
-            data->previousData[data->previousDataP++] = correctData[i].x;
-            data->previousDataP %= 1024;
-        }
     }
 
     if (data->dataAFirst)

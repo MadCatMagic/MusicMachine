@@ -96,7 +96,8 @@ NodeClickResponse Node::HandleClick(const v2& nodePos)
 						r.sliderValue.i = (int*)inputs[i].target;
 						r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
 					}
-					r.sliderLocked = inputs[i].lock;
+					r.sliderLockMin = inputs[i].lockMin;
+					r.sliderLockMax = inputs[i].lockMax;
 					r.sliderMin = inputs[i].fmin;
 					r.sliderMax = inputs[i].fmax;
 					//if (inputs[i].lock)
@@ -186,7 +187,7 @@ void Node::BoolOutput(const std::string& name, bool* target)
 	TransferOutput(o);
 }
 
-void Node::FloatInput(const std::string& name, float* target, float min, float max, bool lockToRange)
+void Node::FloatInput(const std::string& name, float* target, float min, float max, bool lockMinToRange, bool lockMaxToRange)
 {
 	NodeInput o;
 	o.name = name;
@@ -194,7 +195,8 @@ void Node::FloatInput(const std::string& name, float* target, float min, float m
 	o.type = NodeType::Float;
 	o.fmin = min;
 	o.fmax = max;
-	o.lock = lockToRange;
+	o.lockMin = lockMinToRange;
+	o.lockMax = lockMaxToRange;
 	TransferInput(o);
 }
 
@@ -207,7 +209,7 @@ void Node::FloatOutput(const std::string& name, float* target)
 	TransferOutput(o);
 }
 
-void Node::IntInput(const std::string& name, int* target, int min, int max, bool lockToRange)
+void Node::IntInput(const std::string& name, int* target, int min, int max, bool lockMinToRange, bool lockMaxToRange)
 {
 	NodeInput o;
 	o.name = name;
@@ -215,7 +217,8 @@ void Node::IntInput(const std::string& name, int* target, int min, int max, bool
 	o.type = NodeType::Int;
 	o.fmin = (float)min;
 	o.fmax = (float)max;
-	o.lock = lockToRange;
+	o.lockMin = lockMinToRange;
+	o.lockMax = lockMaxToRange;
 	TransferInput(o);
 }
 

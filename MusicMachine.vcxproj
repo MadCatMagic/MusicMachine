@@ -140,6 +140,7 @@
     <ClCompile Include="src\App\AudioChannel.cpp" />
     <ClCompile Include="src\App\JSON.cpp" />
     <ClCompile Include="src\App\Nodes\NodeNetworkRenderer.cpp" />
+    <ClCompile Include="src\App\Nodes\SequencerNode.cpp" />
     <ClCompile Include="src\Engine\DrawList.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes.cpp" />
     <ClCompile Include="src\App\Nodes\Node.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="include\App\Nodes\NodeNetwork.h" />
     <ClInclude Include="include\App\Nodes\NodeRegistry.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes.h" />
+    <ClInclude Include="include\App\Nodes\SequencerNode.h" />
     <ClInclude Include="include\BBox.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Engine\Console.h" />
