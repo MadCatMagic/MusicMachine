@@ -134,6 +134,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\AudioStream.cpp" />
+    <ClCompile Include="src\App\Nodes\NodeRegistry.cpp" />
     <ClCompile Include="src\App\Sequencer.cpp" />
     <ClCompile Include="src\App\AudioChannel.cpp" />
     <ClCompile Include="src\App\JSON.cpp" />
@@ -167,6 +169,7 @@
     <ClInclude Include="include\App\Nodes\Node.h" />
     <ClInclude Include="include\App\Nodes\NodeFactory.h" />
     <ClInclude Include="include\App\Nodes\NodeNetwork.h" />
+    <ClInclude Include="include\App\Nodes\NodeRegistry.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes.h" />
     <ClInclude Include="include\BBox.h" />
     <ClInclude Include="include\Engine.h" />
