@@ -36,6 +36,8 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl)
 bool SequencerNode::OnClick(const v2& clickPosition)
 {
 	v2i p = v2i(clickPosition / cellSize);
+	if (p.y == vertWidth || p.x == horizWidth)
+		return false;
 	p.y = vertWidth - 1 - p.y;
 	if (data[p.x].first != p.y)
 		data[p.x] = std::make_pair(p.y, 0.7f);
@@ -81,6 +83,40 @@ void SequencerNode::Work()
 		io++;
 	}
 
+}
+
+void SequencerNode::Load(JSONType& data)
+{
+	horizWidth = (int)data.obj["horizWidth"].i;
+	vertWidth = (int)data.obj["vertWidth"].i;
+	// load data
+	EnsureDataSize();
+	for (int i = 0; i < horizWidth; i++)
+	{
+		this->data[i] = {
+			data.obj["data"].arr[i].obj["p"].i,
+			data.obj["data"].arr[i].obj["v"].f
+		};
+	}
+
+}
+
+JSONType SequencerNode::Save()
+{
+	std::vector<JSONType> dataVec;
+	for (int i = 0; i < horizWidth; i++)
+	{
+		dataVec.push_back(JSONType({
+			{ "p", (long)data[i].first},
+			{ "v", (double)data[i].second}
+		}));
+	}
+
+	return JSONType({
+		{ "width", (long)horizWidth },
+		{ "height", (long)vertWidth },
+		{ "data", dataVec }
+	});
 }
 
 float SequencerNode::GetPitch(int i)

@@ -67,7 +67,7 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 
 	ImGui::End();
 
-    c.CreateWindow(&drawStyle);
+    c.CreateWindow(&drawStyle, this);
 }
 
 

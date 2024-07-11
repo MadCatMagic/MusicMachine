@@ -118,6 +118,16 @@ void AudioOutputNode::Work()
 	}
 }
 
+void AudioOutputNode::Load(JSONType& data)
+{
+	volume = (float)data.f;
+}
+
+JSONType AudioOutputNode::Save()
+{
+	return JSONType((double)volume);
+}
+
 void AudioTransformer::Init()
 {
 	name = "AudioAdder";
@@ -164,6 +174,20 @@ void AudioTransformer::Work()
 		for (size_t i = 0; i < oc.bufferSize; i++)
 			oc.data[i] = ic1.data[i].scale(ic2.data[i]);
 	}
+}
+
+void AudioTransformer::Load(JSONType& data)
+{
+	type = (TransformationType)data.obj["type"].i;
+	lerp = (float)data.obj["lerp"].f;
+}
+
+JSONType AudioTransformer::Save()
+{
+	return JSONType({
+		{ "type", (long)type },
+		{ "lerp", (double)lerp }
+	});
 }
 
 void ADSRNode::Init()
@@ -267,6 +291,22 @@ void Distortion::Work()
 	}
 }
 
+void Distortion::Load(JSONType& data)
+{
+	pregain = (float)data.obj["pregain"].f;
+	distortion = (float)data.obj["distortion"].f;
+	mix = (float)data.obj["mix"].f;
+}
+
+JSONType Distortion::Save()
+{
+	return JSONType({
+		{ "pregain", (double)pregain },
+		{ "distortion", (double)distortion },
+		{ "mix", (double)mix }
+	});
+}
+
 void AudioFilter::Init()
 {
 	name = "AudioFilter";
@@ -317,4 +357,74 @@ void AudioFilter::Work()
 			ochannel.data[i] = buf0 - buf1;
 		}
 	}
+}
+
+void AudioFilter::Load(JSONType& data)
+{
+	cutoff = (float)data.obj["cutoff"].f;
+	resonance = (float)data.obj["resonance"].f;
+	mode = (FilterType)data.obj["mode"].i;
+}
+
+JSONType AudioFilter::Save()
+{
+	return JSONType({
+		{ "cutoff", (double)cutoff },
+		{ "resonance", (double)resonance },
+		{ "mode", (long)mode }
+	});
+}
+
+void DelayNode::Init()
+{
+	name = "DelayNode";
+	title = "Delay";
+	minSpace = v2(102.4f, 20.0f);
+}
+
+void DelayNode::IO()
+{
+	AudioInput("inp", &ichannel);
+	AudioOutput("out", &ochannel);
+	FloatInput("feedback", &feedback, 0.0f, 1.0f, true, true);
+	FloatInput("mix", &mix, 0.0f, 1.0f, true, true);
+}
+
+void DelayNode::Render(const v2& topLeft, DrawList* dl)
+{
+	for (int i = 0; i < 255; i++)
+	{
+		dl->Line(topLeft + v2((float)i / 256.0f * 102.4f, 10.0f + queue[i * skipLength].x * 10.0f), topLeft + v2((float)(i + 1) / 256.0f * 102.4f, 10.0f + queue[i * skipLength + skipLength].x * 10.0f), ImColor(1.0f, 0.0f, 0.0f, 0.5f));
+		dl->Line(topLeft + v2((float)i / 256.0f * 102.4f, 10.0f + queue[i * skipLength].y * 10.0f), topLeft + v2((float)(i + 1) / 256.0f * 102.4f, 10.0f + queue[i * skipLength + skipLength].y * 10.0f), ImColor(0.0f, 1.0f, 0.0f, 0.5f));
+	}
+}
+
+bool DelayNode::OnClick(const v2& clickPosition)
+{
+	return false;
+}
+
+void DelayNode::Work()
+{
+	for (int i = 0; i < ichannel.bufferSize; i++)
+	{
+		queue[queuePointer] = queue[queuePointer] * feedback + ichannel.data[i] * (1.0f - feedback);
+		ochannel.data[i] = queue[queuePointer] * mix + ichannel.data[i] * (1.0f - mix);
+		queuePointer++;
+		queuePointer %= queueSize;
+	}
+}
+
+void DelayNode::Load(JSONType& data)
+{
+	feedback = (float)data.obj["feedback"].f;
+	mix = (float)data.obj["mix"].f;
+}
+
+JSONType DelayNode::Save()
+{
+	return JSONType({
+		{ "feedback", (double)feedback },
+		{ "mix", (double)mix }
+	});
 }

@@ -8,6 +8,8 @@
 #include "Engine/Input.h"
 #include "Engine/DrawList.h"
 
+#include "App/App.h"
+
 Canvas::~Canvas()
 {
     if (nodeRenderer != nullptr)
@@ -24,7 +26,7 @@ void Canvas::InitCanvas()
 }
 
 // a lot of this code is taken from the ImGui canvas example
-void Canvas::CreateWindow(DrawStyle* drawStyle)
+void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
 {
     ImGui::Begin("Canvas");
     ImGui::InputFloat2("position", &position.x);
@@ -319,6 +321,7 @@ void Canvas::CreateWindow(DrawStyle* drawStyle)
             nodeRenderer = new NodeNetworkRenderer(nodes, this);
             memset(filename, 0, 64);
             ImGui::CloseCurrentPopup();
+            appPointer->SetNodes(nodes);
         }
 
         if (ImGui::Button("Cancel"))

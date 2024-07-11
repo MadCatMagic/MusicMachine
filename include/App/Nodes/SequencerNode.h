@@ -10,10 +10,10 @@ protected:
 	virtual void Render(const v2& topLeft, class DrawList* dl) override;
 	virtual bool OnClick(const v2& clickPosition) override;
 
-	//virtual void Load(JSONType& data) override;
-	//virtual JSONType Save() override;
-
 	virtual void Work() override;
+
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
 
 private:
 	int horizWidth = 16;

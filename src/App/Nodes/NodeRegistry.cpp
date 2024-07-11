@@ -16,4 +16,5 @@ void RegisterNodes()
     GetNodeFactory().Register("ADSRNode", "ADSR", NodeBuilder<ADSRNode>);
     GetNodeFactory().Register("Distortion", "Distortion", NodeBuilder<Distortion>);
     GetNodeFactory().Register("AudioFilter", "Filter", NodeBuilder<AudioFilter>);
+    GetNodeFactory().Register("DelayNode", "Delay", NodeBuilder<DelayNode>);
 }

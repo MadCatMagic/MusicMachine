@@ -18,6 +18,8 @@ public:
 
 	void Release();
 
+	inline void SetNodes(NodeNetwork* nodes) { n = nodes; n->audioStream = &astream; }
+
 private:
 	AudioStream astream;
 

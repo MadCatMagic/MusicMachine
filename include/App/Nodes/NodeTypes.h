@@ -12,6 +12,9 @@ protected:
 
 	virtual void Work() override;
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 private:
 	enum TransformationType { Lerp, Multiply } type = TransformationType::Lerp;
 	const int numTypes = 2;
@@ -27,9 +30,6 @@ struct SawWave : public Node
 protected:
 	virtual void Init() override;
 	virtual void IO() override;
-
-	//virtual void Load(JSONType& data) override;
-	//virtual JSONType Save() override;
 
 	virtual void Work() override;
 
@@ -50,6 +50,9 @@ protected:
 	virtual void Render(const v2& topLeft, DrawList* dl) override;
 
 	virtual void Work() override;
+
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
 
 private:
 	v2 previousData[1024]{};
@@ -93,6 +96,9 @@ protected:
 
 	virtual void Work() override;
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 private:
 	AudioChannel ichannel{ };
 	AudioChannel ochannel{ };
@@ -113,6 +119,9 @@ protected:
 
 	virtual void Work() override;
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 private:
 	AudioChannel ichannel{ };
 	AudioChannel ochannel{ };
@@ -120,7 +129,7 @@ private:
 	float cutoff = 0.99f;
 	float resonance = 0.0f;
 	float feedbackAmount = 0.0f;
-	inline void CalculateFeedbackAmount() { feedbackAmount = resonance + resonance / (1.0 - cutoff); }
+	inline void CalculateFeedbackAmount() { feedbackAmount = resonance + resonance / (1.0f - cutoff); }
 	v2 buf0 = 0.0f;
 	v2 buf1 = 0.0f;
 
@@ -138,12 +147,18 @@ protected:
 
 	virtual void Work() override;
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 private:
 	AudioChannel ichannel{ };
 	AudioChannel ochannel{ };
 
-	const int size = 1024;
-	v2 queue[size]{};
-	int length = 0;
-	int begin = 0;
+	float feedback = 0.5f;
+	float mix = 0.5f;
+
+	const static int queueSize = 16384 * 2;
+	const static int skipLength = 64 * 2;
+	v2 queue[queueSize]{};
+	int queuePointer = 0;
 };

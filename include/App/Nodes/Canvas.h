@@ -18,7 +18,7 @@ public:
 	~Canvas();
 
 	void InitCanvas();
-	void CreateWindow(DrawStyle* drawStyle);
+	void CreateWindow(DrawStyle* drawStyle, class App* appPointer);
 
 	v2 ScreenToCanvas(const v2& pos) const;
 	v2 CanvasToScreen(const v2& pos) const;
