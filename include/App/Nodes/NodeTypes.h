@@ -81,3 +81,69 @@ private:
 	float sustain = 1.0f;
 	float release = 0.01f;
 };
+
+struct Distortion : public Node
+{
+protected:
+	virtual void Init() override;
+	virtual void IO() override;
+
+	virtual void Render(const v2& topLeft, DrawList* dl) override;
+	virtual bool OnClick(const v2& clickPosition) override;
+
+	virtual void Work() override;
+
+private:
+	AudioChannel ichannel{ };
+	AudioChannel ochannel{ };
+
+	float pregain = 1.0f;
+	float distortion = 0.5f;
+	float mix = 1.0f;
+};
+
+struct AudioFilter : public Node
+{
+protected:
+	virtual void Init() override;
+	virtual void IO() override;
+
+	virtual void Render(const v2& topLeft, DrawList* dl) override;
+	virtual bool OnClick(const v2& clickPosition) override;
+
+	virtual void Work() override;
+
+private:
+	AudioChannel ichannel{ };
+	AudioChannel ochannel{ };
+
+	float cutoff = 0.99f;
+	float resonance = 0.0f;
+	float feedbackAmount = 0.0f;
+	inline void CalculateFeedbackAmount() { feedbackAmount = resonance + resonance / (1.0 - cutoff); }
+	v2 buf0 = 0.0f;
+	v2 buf1 = 0.0f;
+
+	enum FilterType { LP, HP, BP } mode = FilterType::LP;
+};
+
+struct DelayNode : public Node
+{
+protected:
+	virtual void Init() override;
+	virtual void IO() override;
+
+	virtual void Render(const v2& topLeft, DrawList* dl) override;
+	virtual bool OnClick(const v2& clickPosition) override;
+
+	virtual void Work() override;
+
+private:
+	AudioChannel ichannel{ };
+	AudioChannel ochannel{ };
+
+	const int size = 1024;
+	v2 queue[size]{};
+	int length = 0;
+	int begin = 0;
+};
