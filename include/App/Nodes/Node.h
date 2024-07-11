@@ -54,7 +54,7 @@ struct Node
 	inline virtual ~Node() { }
 
 	enum NodeType {
-		Bool, Float, Int, Audio, Sequencer
+		Bool, Float, Db, Int, Audio, Sequencer
 	};
 
 	friend class NodeNetwork;

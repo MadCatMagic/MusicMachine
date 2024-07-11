@@ -89,7 +89,6 @@ AudioChannel* AudioOutputNode::Result()
 void AudioOutputNode::Render(const v2& topLeft, DrawList* dl)
 {
 	const float bw = 200.0f / 1024.0f;
-	dl->Line(topLeft + v2(0.0f, 25.0f), topLeft + v2(200.0f, 25.0f), ImColor(1.0f, 1.0f, 1.0f, 0.2f));
 	for (int i = 0; i < 1023; i++)
 	{
 		dl->Line(
@@ -196,4 +195,93 @@ bool ADSRNode::OnClick(const v2& clickPosition)
 
 void ADSRNode::Work()
 {
+}
+
+void Distortion::Init()
+{
+	name = "Distortion";
+	title = "Distortion";
+}
+
+void Distortion::IO()
+{
+	AudioInput("inp", &ichannel);
+	AudioOutput("out", &ochannel);
+	FloatInput("pregain", &pregain, 0.0f, 1.0f, true, false);
+	FloatInput("distortion", &distortion, 0.0f, 0.98f, true, true);
+	FloatInput("mix", &mix, 0.0f, 1.0f, true, true);
+}
+
+void Distortion::Render(const v2& topLeft, DrawList* dl)
+{
+}
+
+bool Distortion::OnClick(const v2& clickPosition)
+{
+	return false;
+}
+
+void Distortion::Work()
+{
+	for (size_t i = 0; i < ichannel.bufferSize; i++)
+	{
+		v2 pm = ichannel.data[i] * pregain;
+		v2 v = v2(
+			pm.x >= 0.0f ? powf(pm.x, 1.0f - distortion) : -powf(-pm.x, 1.0f - distortion),
+			pm.y >= 0.0f ? powf(pm.y, 1.0f - distortion) : -powf(-pm.y, 1.0f - distortion)
+		);
+		ochannel.data[i] = v * mix + ichannel.data[i] * (1.0f - mix);
+	}
+}
+
+void AudioFilter::Init()
+{
+	name = "AudioFilter";
+	title = "Filter";
+	minSpace = v2(60.0f, 20.0f);
+}
+
+void AudioFilter::IO()
+{
+	AudioInput("inp", &ichannel);
+	AudioOutput("out", &ochannel);
+	FloatInput("cutoff", &cutoff, 0.0f, 0.99f, true, true);
+	FloatInput("resonance", &resonance, 0.01f, 0.99f, true, true);
+}
+
+void AudioFilter::Render(const v2& topLeft, DrawList* dl)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		if ((int)mode == i)
+			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
+		else
+			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
+	}
+}
+
+bool AudioFilter::OnClick(const v2& clickPosition)
+{
+	int tcp = (int)(clickPosition.x / 20.0f);
+	mode = (FilterType)tcp;
+	return true;
+}
+
+void AudioFilter::Work()
+{
+	CalculateFeedbackAmount();
+
+	for (int i = 0; i < ichannel.bufferSize; i++)
+	{
+		buf0 += (ichannel.data[i] - buf0 + (buf0 - buf1) * feedbackAmount) * cutoff;
+		buf1 += (buf0 - buf1) * cutoff;
+		switch (mode) {
+		case FilterType::LP:
+			ochannel.data[i] = buf1; break;
+		case FilterType::HP:
+			ochannel.data[i] = ichannel.data[i] - buf0;
+		case FilterType::BP:
+			ochannel.data[i] = buf0 - buf1;
+		}
+	}
 }
