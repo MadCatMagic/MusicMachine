@@ -64,6 +64,7 @@ void SequencerNode::Work()
 
 		// number of samples the sound should play for *THIS* buffer
 		float exactI = fakeTime - (float)(int)fakeTime;
+		float exactIs = exactI;
 		if (io > 0)
 			exactI = 0.0f;
 		int t = (int)((1.0f - exactI) * pitchLength);
@@ -74,7 +75,7 @@ void SequencerNode::Work()
 		seq.length.push_back(t);
 		seq.velocity.push_back(data[(currentI + io) % horizWidth].second);
 		// dont think this actually works :)
-		seq.first.push_back(io > 0);
+		seq.cumSamples.push_back((int)(exactIs * AudioChannel::sampleRate));
 		currLength += t;
 
 		io++;

@@ -196,4 +196,37 @@ bool ADSRNode::OnClick(const v2& clickPosition)
 
 void ADSRNode::Work()
 {
+	if (isequencer.length.size() == 0)
+		return;
+
+	int freq = 0;
+	size_t scounter = 0;
+
+	for (size_t i = 0; i < ochannel.bufferSize; i++)
+	{
+		if (scounter >= isequencer.length[freq])
+		{
+			scounter = 0;
+			freq++;
+			if (freq >= isequencer.length.size())
+				return;
+		}
+
+		if (isequencer.pitch[freq] != 0.0f)
+			ochannel.data[i] = adsr(scounter + isequencer.cumSamples[freq]);
+
+		scounter++;
+	}
+}
+
+float ADSRNode::adsr(int sample) const
+{
+	float t = (float)sample / ochannel.sampleRate;
+	if (t <= attack)
+		return t / attack;
+	else if (t <= attack + decay)
+		return 1.0f - ((t - attack) / decay) * sustain;
+	else
+		return sustain;
+	return 0.0f;
 }

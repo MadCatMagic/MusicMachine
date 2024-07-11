@@ -74,6 +74,8 @@ private:
 	AudioChannel ochannel{ };
 	PitchSequencer isequencer{ };
 
+	float adsr(int sample) const;
+
 	float attack = 0.005f;
 	float decay = 0.0f;
 	float sustain = 1.0f;
