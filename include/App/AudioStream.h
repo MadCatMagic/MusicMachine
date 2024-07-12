@@ -12,15 +12,14 @@ class AudioStream
 public:
 	void SetData(std::vector<v2>& v);
 
-	inline bool NoData() const { return dataA.size() == 0 && dataB.size() == 0; }
+	inline bool NoData() const { return audioData.size() == 0; }
 
 	void Init();
 	void Release();
 
-	std::vector<v2> dataA;
-	std::vector<v2> dataB;
+	std::vector<v2> audioData;
 
-	bool dataAFirst = true;
+	class App* app = nullptr;
 
 	PaStream* stream;
 };

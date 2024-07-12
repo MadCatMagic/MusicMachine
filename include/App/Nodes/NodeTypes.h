@@ -55,7 +55,7 @@ protected:
 	virtual JSONType Save() override;
 
 private:
-	v2 previousData[1024]{};
+	v2 previousData[256]{};
 	unsigned int previousDataP = 0;
 
 	float volume = 0.2f;
@@ -156,9 +156,13 @@ private:
 
 	float feedback = 0.5f;
 	float mix = 0.5f;
+	float time = 0.3f;
 
-	const static int queueSize = 16384 * 2;
-	const static int skipLength = 64 * 2;
-	v2 queue[queueSize]{};
+	int queueSize = 16384 * 2;
+	int skipLength = queueSize / 128;
+
+	void EnsureQueueSize();
+
+	std::vector<v2> queue;
 	int queuePointer = 0;
 };

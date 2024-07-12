@@ -87,8 +87,8 @@ void SequencerNode::Work()
 
 void SequencerNode::Load(JSONType& data)
 {
-	horizWidth = (int)data.obj["horizWidth"].i;
-	vertWidth = (int)data.obj["vertWidth"].i;
+	horizWidth = (int)data.obj["width"].i;
+	vertWidth = (int)data.obj["height"].i;
 	// load data
 	EnsureDataSize();
 	for (int i = 0; i < horizWidth; i++)

@@ -29,18 +29,14 @@ void App::Initialize()
     RegisterJSONCommands();
 
     astream.Init();
+    astream.app = this;
 
     n->audioStream = &astream;
 }
 
 void App::Update()
 {
-    // execute networks, send sound data off
-    AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, t_fake, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
-    t_fake += (float)BUFFER_SIZE / (float)SAMPLE_RATE;
-    if (astream.dataA.size() == 0 || astream.dataB.size() == 0)
-        if (!n->Execute())
-            Console::LogWarn("NETWORK EXECUTING FAILED");
+    
 }
 
 void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
@@ -102,4 +98,18 @@ void App::Release()
 
     if (n != nullptr)
         delete n;
+}
+
+void App::GetAudio()
+{
+    // execute networks, send sound data off
+    AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, t_fake, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
+    if (n == nullptr || c.isDeletingNodes())
+    {
+        Console::LogWarn("NETWORK EXECUTING SKIPPED");
+        return;
+    }
+    t_fake += (float)BUFFER_SIZE / (float)SAMPLE_RATE;
+    if (!n->Execute())
+        Console::LogWarn("NETWORK EXECUTING FAILED");
 }

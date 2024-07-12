@@ -2,6 +2,7 @@
 #include "App/AudioStream.h"
 
 #include "Engine/Console.h"
+#include "App/App.h"
 
 /* This routine will be called by the PortAudio engine when audio is needed.
  * It may called at interrupt level on some machines so don't do anything
@@ -19,6 +20,7 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     unsigned int i;
     (void)inputBuffer; /* Prevent unused variable warning. */
 
+    data->app->GetAudio();
     // check if any data is filled; if none is, something went wrong probably
     if (data->NoData())
     {
@@ -32,40 +34,18 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
         return 0;
     }
 
-    std::vector<v2>& correctData = data->dataAFirst ? data->dataA : data->dataB;
-
     for (i = 0; i < framesPerBuffer; i++)
     {
-        out[i * 2] = correctData[i].x;  /* left */
-        out[i * 2 + 1] = correctData[i].y;  /* right */
+        out[i * 2] = data->audioData[i].x;  /* left */
+        out[i * 2 + 1] = data->audioData[i].y;  /* right */
     }
-
-    if (data->dataAFirst)
-        data->dataA = std::vector<v2>();
-    else
-        data->dataB = std::vector<v2>();
-
-    data->dataAFirst = !data->dataAFirst;
 
     return 0;
 }
 
 void AudioStream::SetData(std::vector<v2>& v)
 {
-    if (dataAFirst)
-    {
-        if (dataA.size() == 0)
-            dataA = v;
-        else
-            dataB = v;
-    }
-    else
-    {
-        if (dataB.size() == 0)
-            dataB = v;
-        else
-            dataA = v;
-    }
+    audioData = v;
 }
 
 void AudioStream::Init()
