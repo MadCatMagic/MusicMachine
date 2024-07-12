@@ -14,9 +14,11 @@ void NodeNetworkRenderer::Draw(DrawList* drawList, std::vector<Node*>& selected,
 		drawList->dl->ChannelsSetCurrent(currentChannel);
 
 		// make sure to add the correct node connections to the buffer
+		canvas->unsafe = true;
 		node->ResetTouchedStatus();
 		node->IO();
 		node->CheckTouchedStatus();
+		canvas->unsafe = false;
 		// automatically sets the size
 		bool dontCullNode = screen.overlaps(node->getBounds());
 		DrawNode(node, !dontCullNode);

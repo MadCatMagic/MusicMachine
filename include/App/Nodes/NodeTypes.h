@@ -151,6 +151,9 @@ protected:
 	virtual JSONType Save() override;
 
 private:
+
+	enum DelayType { Mono, PingPong } delayType = DelayType::Mono;
+
 	AudioChannel ichannel{ };
 	AudioChannel ochannel{ };
 

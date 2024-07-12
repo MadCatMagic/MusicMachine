@@ -104,7 +104,7 @@ void App::GetAudio()
 {
     // execute networks, send sound data off
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, t_fake, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
-    if (n == nullptr || c.isDeletingNodes())
+    if (n == nullptr || c.isDeletingNodes() || c.unsafe)
     {
         Console::LogWarn("NETWORK EXECUTING SKIPPED");
         return;

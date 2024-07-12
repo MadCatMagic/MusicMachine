@@ -2,24 +2,6 @@
 #include "Engine/Console.h"
 #include "Engine/DrawList.h"
 
-/*void MathsNode::Load(JSONType& data)
-{
-	a = (float)data.obj["a"].f;
-	b = (float)data.obj["b"].f;
-	c = (int)data.obj["c"].i;
-	crazy = data.obj["crazy"].b;
-}
-
-JSONType MathsNode::Save()
-{
-	return JSONType({
-		{ "a", (double)a },
-		{ "b", (double)b },
-		{ "c", (long)c },
-		{ "crazy", crazy }
-	});
-}*/
-
 void SawWave::Init()
 {
 	name = "SawWave";
@@ -158,6 +140,8 @@ void AudioTransformer::Render(const v2& topLeft, DrawList* dl)
 bool AudioTransformer::OnClick(const v2& clickPosition)
 {
 	int tcp = (int)(clickPosition.x / 20.0f);
+	if (tcp == (int)(minSpace.x / 20.0f))
+		return false;
 	type = (TransformationType)tcp;
 	return true;
 }
@@ -336,6 +320,8 @@ void AudioFilter::Render(const v2& topLeft, DrawList* dl)
 bool AudioFilter::OnClick(const v2& clickPosition)
 {
 	int tcp = (int)(clickPosition.x / 20.0f);
+	if (tcp == (int)(minSpace.x / 20.0f))
+		return false;
 	mode = (FilterType)tcp;
 	return true;
 }
@@ -379,7 +365,7 @@ void DelayNode::Init()
 {
 	name = "DelayNode";
 	title = "Delay";
-	minSpace = v2(64.0f, 20.0f);
+	minSpace = v2(64.0f, 40.0f);
 }
 
 void DelayNode::IO()
@@ -403,7 +389,11 @@ void DelayNode::Render(const v2& topLeft, DrawList* dl)
 
 bool DelayNode::OnClick(const v2& clickPosition)
 {
-	return false;
+	int tcp = (int)(clickPosition.x / 20.0f);
+	if (clickPosition.x >= 40.0f || clickPosition.y < 20.0f)
+		return false;
+	delayType = (DelayType)tcp;
+	return true;
 }
 
 void DelayNode::Work()
@@ -412,7 +402,8 @@ void DelayNode::Work()
 	for (int i = 0; i < ichannel.bufferSize; i++)
 	{
 		queue[queuePointer] = queue[queuePointer] * feedback + ichannel.data[i];
-		ochannel.data[i] = queue[queuePointer] * mix + ichannel.data[i] * (1.0f - mix);
+		ochannel.data[i].x = queue[queuePointer].x * mix + ichannel.data[i].x * (1.0f - mix);
+		ochannel.data[i].y = queue[(queuePointer + queueSize / 2) % queueSize].y * mix + ichannel.data[i].x * (1.0f - mix);
 		queuePointer++;
 		queuePointer %= queueSize;
 	}
@@ -438,7 +429,7 @@ void DelayNode::EnsureQueueSize()
 {
 	if (time < 0.1f)
 		time = 0.1f;
-	queueSize = time * ichannel.sampleRate;
+	queueSize = (int)(time * ichannel.sampleRate * (delayType == DelayType::PingPong ? 2.0f : 1.0f));
 	skipLength = queueSize / 256;
 	size_t s = queue.size();
 

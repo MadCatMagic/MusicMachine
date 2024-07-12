@@ -38,6 +38,7 @@ public:
 	class NodeNetworkRenderer* nodeRenderer = nullptr;
 
 	inline bool isDeletingNodes() const { return deletingNodes; }
+	bool unsafe = false;
 	
 private:
 	bool deletingNodes = false;
