@@ -295,14 +295,26 @@ void Node::Execute()
 		{
 			if (input.type == NodeType::Audio)
 			{
-				((AudioChannel*)input.target)->data = ((AudioChannel*)input.source->outputs[index].data)->data;
+				auto& testingData = ((AudioChannel*)input.source->outputs[index].data)->data;
+				//for (v2& pair : testingData)
+				//	assert(!isnan(pair.x) && !isnan(pair.y));
+				((AudioChannel*)input.target)->data = testingData;
 			}
 			else if (input.type == NodeType::Sequencer)
 			{
 				((PitchSequencer*)input.source->outputs[index].data)->CopyTo((PitchSequencer*)input.target);
 			}
 			else
+			{
 				memcpy(input.target, input.source->outputs[index].data, DataSize(input.type));
+				if (input.type == NodeType::Float)
+				{
+					if (input.lockMin)
+						(*(float*)input.target) = std::max((*(float*)input.target), input.fmin);
+					if (input.lockMax)
+						(*(float*)input.target) = std::min((*(float*)input.target), input.fmax);
+				}
+			}
 		}
 	}
 

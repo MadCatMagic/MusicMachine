@@ -188,6 +188,8 @@ bool NodeNetwork::Execute()
 	// backpropagate in a sensible manner
 	for (Node* n : nodes)
 		n->hasBeenExecuted = false;
+	if (nodeDependencyInfoPersistent->endpoints.size() > 1)
+		Console::LogWarn("Multiple endpoints exist, panic!");
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
 	{
 		e->Execute();

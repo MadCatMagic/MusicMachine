@@ -29,14 +29,13 @@ void App::Initialize()
     RegisterJSONCommands();
 
     astream.Init();
-    astream.app = this;
 
     n->audioStream = &astream;
 }
 
 void App::Update()
 {
-    
+    while (!astream.QueueFull() && GetAudio()) {}
 }
 
 void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
@@ -100,16 +99,19 @@ void App::Release()
         delete n;
 }
 
-void App::GetAudio()
+bool App::GetAudio()
 {
     // execute networks, send sound data off
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, t_fake, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
-    if (n == nullptr || c.isDeletingNodes() || c.unsafe)
+    if (n == nullptr)
     {
         Console::LogWarn("NETWORK EXECUTING SKIPPED");
-        return;
+        return false;
     }
     t_fake += (float)BUFFER_SIZE / (float)SAMPLE_RATE;
-    if (!n->Execute())
+    if (!n->Execute()) {
         Console::LogWarn("NETWORK EXECUTING FAILED");
+        return false;
+    }
+    return true;
 }

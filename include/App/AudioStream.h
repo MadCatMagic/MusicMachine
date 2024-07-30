@@ -11,15 +11,17 @@ class AudioStream
 {
 public:
 	void SetData(std::vector<v2>& v);
-
-	inline bool NoData() const { return audioData.size() == 0; }
+	std::vector<v2> GetData();
+	inline bool NoData() const { return audioQueueLength == 0; }
+	inline bool QueueFull() const { return audioQueueLength == maxQueueLength; }
 
 	void Init();
 	void Release();
 
-	std::vector<v2> audioData;
-
-	class App* app = nullptr;
+	const static int maxQueueLength = 4;
+	std::vector<v2> audioData[maxQueueLength]{};
+	int audioQueueStart = 0;
+	int audioQueueLength = 0;
 
 	PaStream* stream;
 };

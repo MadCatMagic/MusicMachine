@@ -18,7 +18,7 @@ public:
 
 	void Release();
 
-	void GetAudio();
+	bool GetAudio();
 
 	inline void SetNodes(NodeNetwork* nodes) { n = nodes; n->audioStream = &astream; }
 

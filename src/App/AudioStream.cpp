@@ -20,7 +20,6 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     unsigned int i;
     (void)inputBuffer; /* Prevent unused variable warning. */
 
-    data->app->GetAudio();
     // check if any data is filled; if none is, something went wrong probably
     if (data->NoData())
     {
@@ -34,10 +33,11 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
         return 0;
     }
 
+    auto audioData = data->GetData();
     for (i = 0; i < framesPerBuffer; i++)
     {
-        out[i * 2] = data->audioData[i].x;  /* left */
-        out[i * 2 + 1] = data->audioData[i].y;  /* right */
+        out[i * 2] = audioData[i].x;  /* left */
+        out[i * 2 + 1] = audioData[i].y;  /* right */
     }
 
     return 0;
@@ -45,7 +45,25 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
 
 void AudioStream::SetData(std::vector<v2>& v)
 {
-    audioData = v;
+    if (QueueFull())
+    {
+        Console::LogErr("Tried adding audio data queue while queue is full!");
+        return;
+    }
+    audioData[(audioQueueStart + (audioQueueLength++)) % maxQueueLength] = v;
+}
+
+std::vector<v2> AudioStream::GetData()
+{
+    if (NoData())
+    {
+        Console::LogErr("Tried getting audio data from queue while queue is empty!");
+        return {};
+    }
+    int qs = audioQueueStart++;
+    audioQueueStart %= maxQueueLength;
+    audioQueueLength--;
+    return audioData[qs];
 }
 
 void AudioStream::Init()

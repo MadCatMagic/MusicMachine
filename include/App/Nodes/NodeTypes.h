@@ -169,3 +169,27 @@ private:
 	std::vector<v2> queue;
 	int queuePointer = 0;
 };
+
+struct ApproxLFO : public Node
+{
+protected:
+	virtual void Init() override;
+	virtual void IO() override;
+
+	virtual void Render(const v2& topLeft, DrawList* dl) override;
+	virtual bool OnClick(const v2& clickPosition) override;
+
+	virtual void Work() override;
+
+	//virtual void Load(JSONType& data) override;
+	//virtual JSONType Save() override;
+
+private:
+
+	float GetPhase() const;
+
+	float output = 0.0f;
+
+	float frequency = 1.0f;
+
+};

@@ -220,7 +220,7 @@ void ADSRNode::Work()
 		}
 
 		if (isequencer.pitch[freq] != 0.0f)
-			ochannel.data[i] = adsr(scounter + isequencer.cumSamples[freq]);
+			ochannel.data[i] = adsr((int)scounter + isequencer.cumSamples[freq]);
 
 		scounter++;
 	}
@@ -330,6 +330,11 @@ void AudioFilter::Work()
 {
 	CalculateFeedbackAmount();
 
+	if (isnan(buf0.x) || isnan(buf0.y) || isnan(buf1.x) || isnan(buf1.y))
+	{
+		buf0 = 0.0f; buf1 = 0.0f;
+		Console::Log("Filter buffers turned to NaNs");
+	}
 	for (int i = 0; i < ichannel.bufferSize; i++)
 	{
 		buf0 += (ichannel.data[i] - buf0 + (buf0 - buf1) * feedbackAmount) * cutoff;
@@ -446,4 +451,47 @@ void DelayNode::EnsureQueueSize()
 		for (int i = 0; i < s - queueSize; i++)
 			queue.pop_back();
 	}
+}
+
+void ApproxLFO::Init()
+{
+	name = "ApproxLFO";
+	title = "Approx LFO";
+	minSpace = v2(100.0f, 50.0f);
+}
+
+void ApproxLFO::IO()
+{
+	FloatInput("frequency", &frequency, 0.05f, 5.0f, true, false);
+	FloatOutput("LFO", &output);
+}
+
+void ApproxLFO::Render(const v2& topLeft, DrawList* dl)
+{
+	for (int i = 0; i < 49; i++)
+	{
+		dl->Line(
+			topLeft + v2(i * 2.0f, 25.0f - 25.0f * sinf((float)i / 25.0f * PI)),
+			topLeft + v2(i * 2.0f + 2.0f, 25.0f - 25.0f * sinf((float)(i + 1) / 25.0f * PI)),
+			ImColor(0.0f, 1.0f, 1.0f)
+		);
+	}
+	float phase = GetPhase() * 100.0f;
+	dl->Line(topLeft + v2(phase, 0.0f), topLeft + v2(phase, 50.0f), ImColor(1.0f, 1.0f, 0.0f));
+}
+
+bool ApproxLFO::OnClick(const v2& clickPosition)
+{
+	return false;
+}
+
+void ApproxLFO::Work()
+{
+	output = sinf(2.0f * PI * GetPhase()) * 0.5f + 0.5f;
+}
+
+float ApproxLFO::GetPhase() const
+{
+	float length = 1.0f / frequency;
+	return fmodf(AudioChannel::t, length) / length;
 }

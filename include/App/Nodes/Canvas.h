@@ -36,13 +36,8 @@ public:
 
 	class NodeNetwork* nodes = nullptr;
 	class NodeNetworkRenderer* nodeRenderer = nullptr;
-
-	inline bool isDeletingNodes() const { return deletingNodes; }
-	bool unsafe = false;
 	
 private:
-	bool deletingNodes = false;
-
 	inline float clamp(float f, float min, float max, bool doMin, bool doMax) 
 	{ 
 		float dm = doMin && (f < min) ? min : f;

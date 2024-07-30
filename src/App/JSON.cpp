@@ -176,6 +176,8 @@ std::pair<std::unordered_map<std::string, JSONType>, bool> JSONConverter::Decode
         ss << stream.rdbuf(); // reading data
         f = ss.str();
     }
+    else
+        return { {}, false };
     stream.close();
     return Decode(f);
 }
@@ -191,6 +193,7 @@ std::pair<std::unordered_map<std::string, JSONType>, bool> JSONConverter::Decode
     {
         t = JSONType::FromTokens(tokens);
     }
+    // bad but whatever
     catch (...)
     {
         Console::LogErr("Failed to decode tokens in JSONDecoder::Decode");

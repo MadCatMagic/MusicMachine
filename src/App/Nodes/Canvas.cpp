@@ -313,7 +313,6 @@ void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
 
         if (ImGui::Button("Load"))
         {
-            deletingNodes = true;
             if (nodes != nullptr)
                 delete nodes;
             nodes = nullptr;
@@ -324,7 +323,6 @@ void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
             memset(filename, 0, 64);
             ImGui::CloseCurrentPopup();
             appPointer->SetNodes(nodes);
-            deletingNodes = false;
         }
 
         if (ImGui::Button("Cancel"))

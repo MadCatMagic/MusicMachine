@@ -17,4 +17,5 @@ void RegisterNodes()
     GetNodeFactory().Register("Distortion", "Distortion", NodeBuilder<Distortion>);
     GetNodeFactory().Register("AudioFilter", "Filter", NodeBuilder<AudioFilter>);
     GetNodeFactory().Register("DelayNode", "Delay", NodeBuilder<DelayNode>);
+    GetNodeFactory().Register("ApproxLFO", "Approx LFO", NodeBuilder<ApproxLFO>);
 }
