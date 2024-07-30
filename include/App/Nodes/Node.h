@@ -56,8 +56,10 @@ struct Node
 	inline virtual ~Node() { }
 
 	enum NodeType {
-		Bool, Float, Db, Int, Audio, Sequencer
+		Bool, Float, Int, Audio, Sequencer
 	};
+
+	enum FloatDisplayType { None, Db, Hz };
 
 	friend NodeNetwork;
 	friend class NodeNetworkRenderer;
@@ -97,7 +99,7 @@ protected:
 	void BoolInput(const std::string& name, bool* target);
 	void BoolOutput(const std::string& name, bool* target);
 
-	void FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f, bool lockMinToRange = false, bool lockMaxToRange = false);
+	void FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f, bool lockMinToRange = false, bool lockMaxToRange = false, FloatDisplayType displayType = FloatDisplayType::None);
 	void FloatOutput(const std::string& name, float* target);
 
 	void IntInput(const std::string& name, int* target, int min = 0, int max = 127, bool lockMinToRange = false, bool lockMaxToRange = false);
@@ -145,6 +147,8 @@ private:
 		Node* source = nullptr;
 		std::string sourceName = "";
 		bool touchedThisFrame = false;
+
+		FloatDisplayType displayType = FloatDisplayType::None;
 	};
 
 	std::vector<NodeInput> inputs;

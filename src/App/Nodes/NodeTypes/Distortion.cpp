@@ -12,7 +12,7 @@ void Distortion::IO()
 {
 	AudioInput("inp", &ichannel);
 	AudioOutput("out", &ochannel);
-	FloatInput("pregain", &pregain, 0.0f, 1.0f, true, false);
+	FloatInput("pregain", &pregain, 0.0f, 1.0f, true, false, Node::FloatDisplayType::Db);
 	FloatInput("distortion", &distortion, 0.0f, 0.98f, true, true);
 	FloatInput("mix", &mix, 0.0f, 1.0f, true, true);
 }

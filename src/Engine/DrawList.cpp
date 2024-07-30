@@ -257,6 +257,14 @@ void DrawList::Line(const v2& a, const v2& b, const ImColor& col, float thicknes
 	);
 }
 
+void DrawList::Lines(const std::vector<v2>& points, const ImColor& col, float thickness, ImDrawFlags flags)
+{
+	std::vector<ImVec2> v;
+	for (const v2& p : points)
+		v.push_back(convPos(p));
+	dl->AddPolyline(&v[0], (int)points.size(), col, flags, thickness);
+}
+
 void DrawList::BezierCubic(const v2& a, const v2& b, const v2& c, const v2& d, DrawColour col, float thickness)
 {
 	dl->AddBezierCubic(

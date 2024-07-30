@@ -59,6 +59,8 @@ public:
 	void Line(const v2& a, const v2& b, DrawColour col, float thickness = 1.0f);
 	void Line(const v2& a, const v2& b, const ImColor& col, float thickness = 1.0f);
 
+	void Lines(const std::vector<v2>& points, const ImColor& col, float thickness = 1.0f, ImDrawFlags flags = 0);
+
 	void BezierCubic(const v2& a, const v2& b, const v2& c, const v2& d, DrawColour col, float thickness = 1.0f);
 
 	struct ImDrawList* dl = nullptr;

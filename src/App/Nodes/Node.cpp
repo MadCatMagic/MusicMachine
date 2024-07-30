@@ -187,7 +187,7 @@ void Node::BoolOutput(const std::string& name, bool* target)
 	TransferOutput(o);
 }
 
-void Node::FloatInput(const std::string& name, float* target, float min, float max, bool lockMinToRange, bool lockMaxToRange)
+void Node::FloatInput(const std::string& name, float* target, float min, float max, bool lockMinToRange, bool lockMaxToRange, FloatDisplayType displayType)
 {
 	NodeInput o;
 	o.name = name;
@@ -197,6 +197,7 @@ void Node::FloatInput(const std::string& name, float* target, float min, float m
 	o.fmax = max;
 	o.lockMin = lockMinToRange;
 	o.lockMax = lockMaxToRange;
+	o.displayType = displayType;
 	TransferInput(o);
 }
 

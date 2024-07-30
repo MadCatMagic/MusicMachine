@@ -233,13 +233,18 @@ void NodeNetworkRenderer::DrawInput(const v2& cursor, const Node::NodeInput& inp
 				);
 				currentList->RectFilled(tl, br, DrawColour::Node_BGHeader, 4.0f / canvas->GetSF().x);
 			}
+			float renderedValue = value;
+			if (inp.displayType == Node::FloatDisplayType::Db)
+				renderedValue = log10f(value) * 20.0f;
 			// drawing the text displaying the value
 			std::ostringstream ss;
 			ss.precision(3);
 			if (inp.type == Node::NodeType::Float)
-				ss << value;
+				ss << renderedValue;
 			else
 				ss << *(int*)inp.target;
+			if (inp.displayType == Node::FloatDisplayType::Db)
+				ss << "dB";
 			std::string convertedString = ss.str();
 			v2 ftpos = cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f);
 			currentList->Text(

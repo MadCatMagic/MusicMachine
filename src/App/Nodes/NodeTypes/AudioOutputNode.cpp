@@ -12,7 +12,7 @@ void AudioOutputNode::Init()
 void AudioOutputNode::IO()
 {
 	AudioInput("ain", &c);
-	FloatInput("volume", &volume, 0.0f, 1.0f, true, true);
+	FloatInput("volume", &volume, 0.0f, 1.0f, true, true, Node::FloatDisplayType::Db);
 }
 
 AudioChannel* AudioOutputNode::Result()

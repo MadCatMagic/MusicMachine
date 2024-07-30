@@ -26,6 +26,20 @@ void AudioFilter::Render(const v2& topLeft, DrawList* dl)
 		else
 			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
 	}
+
+	const std::vector<std::vector<v2>> lineData = {
+		{ v2(-0.7f, 0.0f), v2(0.1f, 0.0f), v2(0.7f, 0.6f) },
+		{ v2(0.7f, 0.0f), v2(-0.1f, 0.0f), v2(-0.7f, 0.6f) },
+		{ v2(-0.7f, 0.6f), v2(-0.1f, 0.0f), v2(0.1f, 0.0f), v2(0.7f, 0.6f) }
+	};
+
+	for (int j = 0; j < 3; j++)
+	{
+		std::vector<v2> k;
+		for (const v2& v : lineData[j])
+			k.push_back(v * 10.0f + topLeft + v2(10.0f + j * 20.0f, 10.0f));
+		dl->Lines(k, ImColor(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
+	}
 }
 
 bool AudioFilter::OnClick(const v2& clickPosition)
@@ -41,11 +55,6 @@ void AudioFilter::Work()
 {
 	CalculateFeedbackAmount();
 
-	if (isnan(buf0.x) || isnan(buf0.y) || isnan(buf1.x) || isnan(buf1.y))
-	{
-		buf0 = 0.0f; buf1 = 0.0f;
-		Console::Log("Filter buffers turned to NaNs");
-	}
 	for (int i = 0; i < ichannel.bufferSize; i++)
 	{
 		buf0 += (ichannel.data[i] - buf0 + (buf0 - buf1) * feedbackAmount) * cutoff;
@@ -74,5 +83,5 @@ JSONType AudioFilter::Save()
 		{ "cutoff", (double)cutoff },
 		{ "resonance", (double)resonance },
 		{ "mode", (long)mode }
-		});
+	});
 }
