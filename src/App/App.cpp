@@ -16,7 +16,7 @@ void App::Initialize()
     Node* b = n->AddNodeFromName("AudioOutputNode");
     b->position = v2(100.0f, 0.0f);
     b->IO();
-    Node* m = n->AddNodeFromName("SawWave");
+    Node* m = n->AddNodeFromName("WaveformGenerator");
     m->IO();
     m->position = v2(-10.0f, 0.0f);
     if (b->Connect(0, m, 0))

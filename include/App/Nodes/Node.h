@@ -37,6 +37,8 @@ struct NodeClickResponse
 	float sliderDelta = 0.0f;
 };
 
+class NodeNetwork;
+
 /*
 -- Inheriting from the Node class --
 override 'void IO()' to create your own inputs and outputs.
@@ -57,7 +59,7 @@ struct Node
 		Bool, Float, Db, Int, Audio, Sequencer
 	};
 
-	friend class NodeNetwork;
+	friend NodeNetwork;
 	friend class NodeNetworkRenderer;
 	virtual void IO();
 

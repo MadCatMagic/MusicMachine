@@ -535,7 +535,7 @@ v2 Node::GetOutputPos(size_t index) const
 
 v2 Node::spaceOffset() const
 {
-	return v2(2.0f, headerHeight + 4.0f + 2.0f + 16.0f * outputs.size());
+	return v2((size.x - minSpace.x) * 0.5f, headerHeight + 4.0f + 2.0f + 16.0f * outputs.size());
 }
 
 size_t Node::GetInputIndex(const std::string& name) const

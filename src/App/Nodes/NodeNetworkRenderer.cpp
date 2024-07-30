@@ -154,7 +154,9 @@ void NodeNetworkRenderer::DrawNode(Node* node, bool cullBody)
 
 			// draw node and stuff
 			// 2px padding round the minspace
-			node->Render(cursor + v2(2.0f, 2.0f), currentList);
+			// centered horizontally too
+
+			node->Render(cursor + v2((node->size.x - node->minSpace.x) * 0.5f, 2.0f), currentList);
 
 			cursor.y += node->minSpace.y + 4.0f;
 

@@ -1,7 +1,6 @@
 #include "App/Nodes/NodeNetwork.h"
 #include "App/Nodes/Canvas.h"
 #include "App/Nodes/NodeFactory.h"
-#include "App/Nodes/NodeTypes.h"
 
 #include "App/JSON.h"
 

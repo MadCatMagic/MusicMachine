@@ -1,5 +1,5 @@
 #include "Engine/DrawList.h"
-#include "App/Nodes/SequencerNode.h"
+#include "App/Nodes/NodeTypes/SequencerNode.h"
 
 void SequencerNode::Init()
 {
@@ -94,8 +94,8 @@ void SequencerNode::Load(JSONType& data)
 	for (int i = 0; i < horizWidth; i++)
 	{
 		this->data[i] = {
-			data.obj["data"].arr[i].obj["p"].i,
-			data.obj["data"].arr[i].obj["v"].f
+			(int)data.obj["data"].arr[i].obj["p"].i,
+			(float)data.obj["data"].arr[i].obj["v"].f
 		};
 	}
 

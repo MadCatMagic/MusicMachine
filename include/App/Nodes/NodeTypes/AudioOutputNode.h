@@ -1,0 +1,24 @@
+#pragma once
+#include "App/Nodes/Node.h"
+
+struct AudioOutputNode : public Node
+{
+protected:
+	virtual void Init() override;
+	virtual void IO() override;
+	virtual AudioChannel* Result() override;
+
+	virtual void Render(const v2& topLeft, DrawList* dl) override;
+
+	virtual void Work() override;
+
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
+private:
+	v2 previousData[256]{};
+	unsigned int previousDataP = 0;
+
+	float volume = 0.2f;
+	AudioChannel c{ };
+};
