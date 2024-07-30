@@ -1,5 +1,4 @@
 #include "App/Nodes/NodeTypes/ApproxLFO.h"
-#include "Engine/Console.h"
 #include "Engine/DrawList.h"
 
 void ApproxLFO::Init()
@@ -12,16 +11,23 @@ void ApproxLFO::Init()
 void ApproxLFO::IO()
 {
 	FloatInput("frequency", &frequency, 0.05f, 5.0f, true, false);
+	FloatInput("shape", &shape, 0.0f, 4.0f, true, true);
 	FloatOutput("LFO", &output);
 }
 
 void ApproxLFO::Render(const v2& topLeft, DrawList* dl)
 {
-	for (int i = 0; i < 49; i++)
+	for (float i = 0; i < 32; i++)
 	{
 		dl->Line(
-			topLeft + v2(i * 2.0f, 25.0f - 25.0f * sinf((float)i / 25.0f * PI)),
-			topLeft + v2(i * 2.0f + 2.0f, 25.0f - 25.0f * sinf((float)(i + 1) / 25.0f * PI)),
+			topLeft + v2(
+				i / 33.0f * 100.0f,       
+				25.0f - 25.0f * (lfoWaveData[(int)floorf(shape)][(int)i] * (1.0f - fmodf(shape, 1.0f)) + lfoWaveData[(int)floorf(shape + 1.0f)][(int)i] * fmodf(shape, 1.0f))
+			),
+			topLeft + v2(
+				(i + 1) / 33.0f * 100.0f, 
+				25.0f - 25.0f * (lfoWaveData[(int)floorf(shape)][(int)i + 1] * (1.0f - fmodf(shape, 1.0f)) + lfoWaveData[(int)floorf(shape + 1.0f)][(int)i + 1] * fmodf(shape, 1.0f))
+			),
 			ImColor(0.0f, 1.0f, 1.0f)
 		);
 	}
@@ -36,7 +42,15 @@ bool ApproxLFO::OnClick(const v2& clickPosition)
 
 void ApproxLFO::Work()
 {
-	output = sinf(2.0f * PI * GetPhase()) * 0.5f + 0.5f;
+	// bilinear interpolation
+	float phase = GetPhase() * 32.0f;
+
+	float val1 = lfoWaveData[(int)floorf(shape)][(int)floorf(phase)] * (1.0f - fmodf(phase, 1.0f)) + lfoWaveData[(int)floorf(shape)][(int)floorf(phase + 1.0f)] * fmodf(phase, 1.0f);
+	float val2 = lfoWaveData[(int)floorf(shape + 1.0f)][(int)floorf(phase)] * (1.0f - fmodf(phase, 1.0f)) + lfoWaveData[(int)floorf(shape + 1.0f)][(int)floorf(phase + 1.0f)] * fmodf(phase, 1.0f);
+
+	output = val1 * (1.0f - fmodf(shape, 1.0f)) + val2 * fmodf(shape, 1.0f);
+	// make sure is in range 0-1
+	output = output * 0.5f + 0.5f;
 }
 
 float ApproxLFO::GetPhase() const
@@ -48,13 +62,13 @@ float ApproxLFO::GetPhase() const
 void ApproxLFO::Load(JSONType& data)
 {
 	frequency = (float)data.obj["frequency"].f;
-	shape = (LFOShape)data.obj["shape"].i;
+	shape = (float)data.obj["shape"].f;
 }
 
 JSONType ApproxLFO::Save()
 {
 	return { {
 		{ "frequency", (double)frequency },
-		{ "shape", (long)shape }
+		{ "shape", (double)shape }
 	} };
 }

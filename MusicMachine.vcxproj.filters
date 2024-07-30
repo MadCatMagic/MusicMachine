@@ -117,6 +117,9 @@
     <ClCompile Include="src\App\Nodes\NodeTypes\ApproxLFO.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\Nodes\NodeTypes\MathsNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App\App.h">
@@ -202,6 +205,9 @@
     </ClInclude>
     <ClInclude Include="include\App\Nodes\NodeTypes\ADSRNode.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\Nodes\NodeTypes\MathsNode.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

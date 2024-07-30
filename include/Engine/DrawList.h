@@ -65,6 +65,8 @@ public:
 	DrawStyle* style = nullptr;
 	bool convertPosition = true;
 
+	float scaleFactor = 1.0f;
+
 	inline void SetConversionCallback(std::function<v2(const v2&)> f) { positionCallback = f; }
 
 private:

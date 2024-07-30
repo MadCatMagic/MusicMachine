@@ -47,6 +47,7 @@ void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
     drawList.convertPosition = false;
     drawList.RectFilled(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_BG);
     drawList.Rect(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
+    drawList.scaleFactor = scale.x;
 
     // This will catch our interactions
     ImGui::InvisibleButton("canvas", canvasPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);

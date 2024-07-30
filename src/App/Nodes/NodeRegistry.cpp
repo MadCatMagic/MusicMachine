@@ -9,6 +9,7 @@
 #include "App/Nodes/NodeTypes/AudioTransformer.h"
 #include "App/Nodes/NodeTypes/DelayNode.h"
 #include "App/Nodes/NodeTypes/Distortion.h"
+#include "App/Nodes/NodeTypes/MathsNode.h"
 #include "App/Nodes/NodeTypes/SequencerNode.h"
 #include "App/Nodes/NodeTypes/WaveformGenerator.h"
 
@@ -21,6 +22,7 @@ void RegisterNodes()
     GetNodeFactory().Register("AudioTransformer", "Audio Transformer", NodeBuilder<AudioTransformer>);
     GetNodeFactory().Register("DelayNode", "Delay", NodeBuilder<DelayNode>);
     GetNodeFactory().Register("Distortion", "Distortion", NodeBuilder<Distortion>);
+    GetNodeFactory().Register("MathsNode", "Maths", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("SequencerNode", "Sequencer Node", NodeBuilder<SequencerNode>);
     GetNodeFactory().Register("WaveformGenerator",  "Waveform Generator",   NodeBuilder<WaveformGenerator>);
 }
