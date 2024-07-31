@@ -7,11 +7,19 @@ protected:
 	virtual void Init() override;
 	virtual void IO() override;
 
+	virtual void Render(const v2& topLeft, DrawList* dl) override;
+	virtual bool OnClick(const v2& clickPosition) override;
+
 	virtual void Work() override;
 
 private:
+	// Sine, Saw, Triangle, Square
+	enum Shape { Sine, Saw, Triangle, Square } shape = Shape::Saw;
+
 	AudioChannel c{ };
 	float kv = 0.0f;
+
+	float GetValue(float phase) const;
 
 	PitchSequencer seq;
 };

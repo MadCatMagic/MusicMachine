@@ -120,6 +120,9 @@
     <ClCompile Include="src\App\Nodes\NodeTypes\MathsNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\Nodes\NodeTypes\NoiseNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App\App.h">
@@ -207,6 +210,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="include\App\Nodes\NodeTypes\MathsNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\Nodes\NodeTypes\NoiseNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,7 @@
 #include "App/Nodes/Canvas.h"
 #include "Random.h"
 #include <sstream>
+#include <iomanip>
 
 void NodeNetworkRenderer::Draw(DrawList* drawList, std::vector<Node*>& selected, const bbox2& screen)
 {
@@ -236,15 +237,22 @@ void NodeNetworkRenderer::DrawInput(const v2& cursor, const Node::NodeInput& inp
 			float renderedValue = value;
 			if (inp.displayType == Node::FloatDisplayType::Db)
 				renderedValue = log10f(value) * 20.0f;
+			else if (inp.displayType == Node::FloatDisplayType::Hz)
+				renderedValue = value * 7214.4f; // experimentally obtained results
 			// drawing the text displaying the value
 			std::ostringstream ss;
-			ss.precision(3);
+			if (inp.displayType == Node::FloatDisplayType::Hz)
+				ss << std::fixed << std::setprecision(1);
+			else
+				ss.precision(3);
 			if (inp.type == Node::NodeType::Float)
 				ss << renderedValue;
 			else
 				ss << *(int*)inp.target;
 			if (inp.displayType == Node::FloatDisplayType::Db)
 				ss << "dB";
+			else if (inp.displayType == Node::FloatDisplayType::Hz)
+				ss << "Hz";
 			std::string convertedString = ss.str();
 			v2 ftpos = cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f);
 			currentList->Text(

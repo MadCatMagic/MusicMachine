@@ -15,6 +15,7 @@ void SequencerNode::IO()
 	FloatInput("bpm", &bpm, 10.0f, 600.0f, true, true);
 	IntInput("length", &horizWidth, 4, 32, true, true);
 	IntInput("height", &vertWidth, 12, 24, true, true);
+	IntInput("octave", &octaveShift, -2, 2);
 }
 
 void SequencerNode::Render(const v2& topLeft, DrawList* dl)
@@ -122,7 +123,7 @@ JSONType SequencerNode::Save()
 float SequencerNode::GetPitch(int i)
 {
 	const float mul = powf(2.0f, 1.0f / 12.0f);
-	float b = 220.0f;
+	float b = 220.0f * powf(2.0f, (float)octaveShift);
 	if (data[i].first == -1)
 		return 0.0f;
 

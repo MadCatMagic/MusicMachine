@@ -13,7 +13,7 @@ void AudioFilter::IO()
 {
 	AudioInput("inp", &ichannel);
 	AudioOutput("out", &ochannel);
-	FloatInput("cutoff", &cutoff, 0.0f, 0.99f, true, true);
+	FloatInput("cutoff", &cutoff, 0.0f, 0.99f, true, true, Node::FloatDisplayType::Hz);
 	FloatInput("resonance", &resonance, 0.01f, 0.99f, true, true);
 }
 

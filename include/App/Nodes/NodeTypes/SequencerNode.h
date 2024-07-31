@@ -12,6 +12,7 @@ protected:
 
 	virtual void Work() override;
 
+	// must add octaveShift
 	virtual void Load(JSONType& data) override;
 	virtual JSONType Save() override;
 
@@ -21,6 +22,8 @@ private:
 	const float cellSize = 10.0f;
 	std::vector<std::pair<int, float>> data;
 	PitchSequencer seq;
+
+	int octaveShift = 0;
 
 	float GetPitch(int i);
 

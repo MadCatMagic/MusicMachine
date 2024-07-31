@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Nodes\NodeTypes\NoiseNode.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\MathsNode.cpp" />
     <ClCompile Include="src\App\AudioStream.cpp" />
     <ClCompile Include="src\App\Nodes\NodeRegistry.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\DelayNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\Distortion.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\MathsNode.h" />
+    <ClInclude Include="include\App\Nodes\NodeTypes\NoiseNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\WaveformGenerator.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\SequencerNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\ADSRNode.h" />
