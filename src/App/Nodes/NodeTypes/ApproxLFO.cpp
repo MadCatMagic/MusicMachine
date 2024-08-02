@@ -36,11 +36,6 @@ void ApproxLFO::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	dl->Line(topLeft + v2(phase, 0.0f), topLeft + v2(phase, 50.0f), ImColor(1.0f, 1.0f, 0.0f));
 }
 
-bool ApproxLFO::OnClick(const v2& clickPosition)
-{
-	return false;
-}
-
 void ApproxLFO::Work()
 {
 	// bilinear interpolation

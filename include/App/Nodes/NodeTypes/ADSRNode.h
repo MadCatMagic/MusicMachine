@@ -8,7 +8,6 @@ protected:
 	virtual void IO() override;
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
-	virtual bool OnClick(const v2& clickPosition) override;
 
 	virtual void Work() override;
 
@@ -22,4 +21,6 @@ private:
 	float decay = 0.0f;
 	float sustain = 1.0f;
 	float release = 0.01f;
+
+	float lastSample = 0.0f;
 };

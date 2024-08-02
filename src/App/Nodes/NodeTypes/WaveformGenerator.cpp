@@ -45,9 +45,12 @@ void WaveformGenerator::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	}
 }
 
-bool WaveformGenerator::OnClick(const v2& clickPosition)
+bool WaveformGenerator::OnClick(const NodeClickInfo& info)
 {
-	int tcp = (int)(clickPosition.x / 20.0f);
+	if (info.isRight || info.interactionType != 0)
+		return false;
+
+	int tcp = (int)(info.pos.x / 20.0f);
 	shape = (Shape)tcp;
 	return true;
 }
@@ -64,6 +67,9 @@ void WaveformGenerator::Work()
 	float samplesPerCycle = (c.sampleRate / seq.pitch[freq]);
 	float increment = 1.0f / samplesPerCycle;
 
+	if (seq.cumSamples[0] == 0)
+		kv = 0.0f;
+
 	for (size_t i = 0; i < c.bufferSize; i++)
 	{
 		if (scounter >= seq.length[freq])
@@ -75,6 +81,9 @@ void WaveformGenerator::Work()
 
 			samplesPerCycle = (c.sampleRate / seq.pitch[freq]);
 			increment = 1.0f / samplesPerCycle;
+
+			if (seq.cumSamples[freq] == 0)
+				kv = 0.0f;
 		}
 
 		if (seq.pitch[freq] != 0.0f)

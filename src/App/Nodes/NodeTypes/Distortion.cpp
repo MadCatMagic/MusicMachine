@@ -21,11 +21,6 @@ void Distortion::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 }
 
-bool Distortion::OnClick(const v2& clickPosition)
-{
-	return false;
-}
-
 void Distortion::Work()
 {
 	for (size_t i = 0; i < ichannel.bufferSize; i++)

@@ -84,8 +84,46 @@ void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
     static bool sliderLockMin = false;
     static bool sliderLockMax = false;
 
+    // handle non-left click node interactions first
+    bool handledInteractionAlready = false;
+    if (isActive && !selectingArea && !draggingConnection)
+    {
+        Node* node = nodes->GetNodeAtPosition(mousePos, selectedStack.size() > 0 ? selectedStack[selectedStack.size() - 1] : nullptr, 0);
+        if (node == nullptr)
+            goto nodeInteractionsEscape;
+
+        // truly horrible code
+        NodeClickInfo info;
+        // handled later
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+            goto nodeInteractionsEscape;
+        else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+            info.isRight = true;
+        else if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+            info.interactionType = 1;
+        else if (ImGui::IsMouseDragging(ImGuiMouseButton_Right))
+        {
+            info.interactionType = 1;
+            info.isRight = true;
+        }
+        else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+            info.interactionType = 2;
+        else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+        {
+            info.interactionType = 2;
+            info.isRight = true;
+        }
+        else
+            goto nodeInteractionsEscape;
+        info.pos = mousePos - node->position;
+        NodeClickResponse r = node->HandleClick(info);
+        if (r.handled)
+            handledInteractionAlready = true;
+    }
+nodeInteractionsEscape:
+
     // Pan
-    if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
+    if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right) && !handledInteractionAlready)
     {
         position.x -= io.MouseDelta.x * scale.x;
         position.y -= io.MouseDelta.y * scale.y;
@@ -96,7 +134,9 @@ void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
         Node* node = nodes->GetNodeAtPosition(mousePos, selectedStack.size() > 0 ? selectedStack[selectedStack.size() - 1] : nullptr, 0);
         if (node != nullptr)
         {
-            NodeClickResponse r = node->HandleClick(mousePos - node->position);
+            NodeClickInfo info;
+            info.pos = mousePos - node->position;
+            NodeClickResponse r = node->HandleClick(info);
             // dragging a node
             if (!r.handled && !selectingArea)
             {

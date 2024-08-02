@@ -39,6 +39,16 @@ struct NodeClickResponse
 
 class NodeNetwork;
 
+struct NodeClickInfo
+{
+	v2 pos;
+	// 0 is on click
+	// 1 is on hold
+	// 2 is on release
+	int interactionType = 0;
+	bool isRight = false;
+};
+
 /*
 -- Inheriting from the Node class --
 override 'void IO()' to create your own inputs and outputs.
@@ -69,7 +79,7 @@ struct Node
 	// please don't set me! thanks xx
 	v2 size = v2::zero;
 
-	NodeClickResponse HandleClick(const v2& nodePos);
+	NodeClickResponse HandleClick(const NodeClickInfo& info);
 
 	bool Connect(size_t inputIndex, Node* origin, size_t originIndex);
 	void Disconnect(size_t inputIndex);
@@ -86,7 +96,7 @@ protected:
 
 	inline virtual void Render(const v2& topLeft, class DrawList* dl, bool lodOn) { }
 	// returns whether the click was used or not
-	inline virtual bool OnClick(const v2& clickPosition) { return false; }
+	inline virtual bool OnClick(const NodeClickInfo& info) { return false; }
 
 	inline virtual JSONType Save() { return JSONType(JSONType::Object); }
 	inline virtual void Load(JSONType& data) { }

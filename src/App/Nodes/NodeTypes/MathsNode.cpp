@@ -59,9 +59,12 @@ void MathsNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	}
 }
 
-bool MathsNode::OnClick(const v2& clickPosition)
+bool MathsNode::OnClick(const NodeClickInfo& info)
 {
-	int tcp = (int)(clickPosition.x / 20.0f);
+	if (info.isRight || info.interactionType != 0)
+		return false;
+
+	int tcp = (int)(info.pos.x / 20.0f);
 	op = (Operation)tcp;
 	return true;
 }

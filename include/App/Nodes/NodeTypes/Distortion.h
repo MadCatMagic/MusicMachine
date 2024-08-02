@@ -8,7 +8,6 @@ protected:
 	virtual void IO() override;
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
-	virtual bool OnClick(const v2& clickPosition) override;
 
 	virtual void Work() override;
 

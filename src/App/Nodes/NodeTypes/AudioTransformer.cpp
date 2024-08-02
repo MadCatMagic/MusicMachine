@@ -29,11 +29,12 @@ void AudioTransformer::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	}
 }
 
-bool AudioTransformer::OnClick(const v2& clickPosition)
+bool AudioTransformer::OnClick(const NodeClickInfo& info)
 {
-	int tcp = (int)(clickPosition.x / 20.0f);
-	if (tcp == (int)(minSpace.x / 20.0f))
+	if (info.isRight || info.interactionType != 0)
 		return false;
+
+	int tcp = (int)(info.pos.x / 20.0f);
 	type = (TransformationType)tcp;
 	return true;
 }

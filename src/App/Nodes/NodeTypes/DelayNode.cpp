@@ -41,10 +41,12 @@ void DelayNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	}
 }
 
-bool DelayNode::OnClick(const v2& clickPosition)
+bool DelayNode::OnClick(const NodeClickInfo& info)
 {
-	if (clickPosition.y >= 40.0f) return false;
-	int tcp = (int)(clickPosition.x / 64.0f);
+	if (info.isRight || info.interactionType != 0 || info.pos.y >= 40.0f) 
+		return false;
+
+	int tcp = (int)(info.pos.x / 64.0f);
 	delayType = (DelayType)tcp;
 	return true;
 }

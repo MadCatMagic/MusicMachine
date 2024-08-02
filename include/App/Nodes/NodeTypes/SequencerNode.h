@@ -8,7 +8,7 @@ protected:
 	virtual void IO() override;
 
 	virtual void Render(const v2& topLeft, class DrawList* dl, bool lodOn) override;
-	virtual bool OnClick(const v2& clickPosition) override;
+	virtual bool OnClick(const NodeClickInfo& info) override;
 
 	virtual void Work() override;
 
@@ -17,8 +17,8 @@ protected:
 	virtual JSONType Save() override;
 
 private:
-	int horizWidth = 16;
-	int vertWidth = 12;
+	int width = 16;
+	int height = 12;
 	const float cellSize = 10.0f;
 	std::vector<std::pair<int, float>> data;
 	PitchSequencer seq;

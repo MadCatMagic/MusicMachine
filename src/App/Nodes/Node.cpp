@@ -3,122 +3,130 @@
 #include "App/Nodes/NodeFactory.h"
 #include "Engine/Console.h"
 
-NodeClickResponse Node::HandleClick(const v2& nodePos)
+NodeClickResponse Node::HandleClick(const NodeClickInfo& info)
 {
 	NodeClickResponse r;
 	r.handled = true;
 	v2 centre = v2(getNormalWidth() - miniTriangleOffset, headerHeight * 0.5f);
 
-	// handle the minimise button
-	if (nodePos.distanceTo(centre) <= 6.0f)
+	// only care about left clicks for this whole section
+	if (info.interactionType == 0 && !info.isRight)
 	{
-		mini = !mini;
-		r.type = NodeClickResponseType::Interact;
-		return r;
-	}
-	
-	// handle outputs and inputs interactions
-	v2 worldPos = nodePos + position;
-	if (outputs.size() > 0)
-	{
-		size_t oi = 0;
-		float minDist = FLT_MAX;
-		for (size_t i = 0; i < outputs.size(); i++)
+		// handle the minimise button
+		if (info.pos.distanceTo(centre) <= 6.0f)
 		{
-			float d = GetOutputPos(i).distanceTo(worldPos);
-			if (d <= minDist)
-			{
-				oi = i;
-				minDist = d;
-			}
-		}
-		if (minDist <= 8.0f)
-		{
-			r.type = NodeClickResponseType::BeginConnection;
-			r.originName = outputs[oi].name;
-			r.origin = this;
-			return r;
-		}
-	}
-	
-	if (inputs.size() > 0)
-	{
-		float minDist = FLT_MAX;
-		size_t inpI = 0;
-		for (size_t i = 0; i < inputs.size(); i++)
-		{
-			float d = GetInputPos(i).distanceTo(worldPos);
-			if (d <= minDist)
-			{
-				minDist = d;
-				inpI = i;
-			}
-		}
-		if (minDist <= 8.0f)
-		{
-			NodeInput& inp = inputs[inpI];
-			if (inp.source != nullptr)
-			{
-				r.type = NodeClickResponseType::BeginConnection;
-				r.originName = inp.sourceName;
-				r.origin = inp.source;
-				Disconnect(inpI);
-			}
-			else
-			{
-				r.type = NodeClickResponseType::BeginConnectionReversed;
-				r.originName = inp.name;
-				r.origin = this;
-			}
+			mini = !mini;
+			r.type = NodeClickResponseType::Interact;
 			return r;
 		}
 
-		// handle the sliders
-		for (size_t i = 0; i < inputs.size(); i++)
+		// handle outputs and inputs interactions
+		v2 worldPos = info.pos + position;
+		if (outputs.size() > 0)
 		{
-			if (inputs[i].target == nullptr || inputs[i].source != nullptr)
-				continue;
-			v2 p = GetInputPos(i);
-			if (inputs[i].type == NodeType::Int || inputs[i].type == NodeType::Float)
+			size_t oi = 0;
+			float minDist = FLT_MAX;
+			for (size_t i = 0; i < outputs.size(); i++)
 			{
-				bbox2 bb = bbox2(p - v2(0.0f, 8.0f), p + v2(size.y, 8.0f));
-				if (bb.contains(worldPos))
+				float d = GetOutputPos(i).distanceTo(worldPos);
+				if (d <= minDist)
 				{
-					if (inputs[i].type == NodeType::Float)
-					{
-						r.type = NodeClickResponseType::InteractWithFloatSlider;
-						r.sliderValue.f = (float*)inputs[i].target;
-						r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
-					}
-					else
-					{
-						r.type = NodeClickResponseType::InteractWithIntSlider;
-						r.sliderValue.i = (int*)inputs[i].target;
-						r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
-					}
-					r.sliderLockMin = inputs[i].lockMin;
-					r.sliderLockMax = inputs[i].lockMax;
-					r.sliderMin = inputs[i].fmin;
-					r.sliderMax = inputs[i].fmax;
-					//if (inputs[i].lock)
-					//	r.sliderDelta = r.sliderDelta < 0.0f ? 0.0f : (r.sliderDelta > 1.0f ? 1.0f : r.sliderDelta);
-					return r;
+					oi = i;
+					minDist = d;
 				}
 			}
-			else if (inputs[i].type == NodeType::Bool)
+			if (minDist <= 8.0f)
 			{
-				v2 centre = p + v2(size.x - 10.0f, 0.0f);
-				if ((centre - worldPos).length() > 6.0f)
-					continue;
-				*(bool*)inputs[i].target = !(*(bool*)inputs[i].target);
-				r.type = NodeClickResponseType::InteractWithBool;
+				r.type = NodeClickResponseType::BeginConnection;
+				r.originName = outputs[oi].name;
+				r.origin = this;
 				return r;
+			}
+		}
+
+		if (inputs.size() > 0)
+		{
+			float minDist = FLT_MAX;
+			size_t inpI = 0;
+			for (size_t i = 0; i < inputs.size(); i++)
+			{
+				float d = GetInputPos(i).distanceTo(worldPos);
+				if (d <= minDist)
+				{
+					minDist = d;
+					inpI = i;
+				}
+			}
+			if (minDist <= 8.0f)
+			{
+				NodeInput& inp = inputs[inpI];
+				if (inp.source != nullptr)
+				{
+					r.type = NodeClickResponseType::BeginConnection;
+					r.originName = inp.sourceName;
+					r.origin = inp.source;
+					Disconnect(inpI);
+				}
+				else
+				{
+					r.type = NodeClickResponseType::BeginConnectionReversed;
+					r.originName = inp.name;
+					r.origin = this;
+				}
+				return r;
+			}
+
+			// handle the sliders
+			for (size_t i = 0; i < inputs.size(); i++)
+			{
+				if (inputs[i].target == nullptr || inputs[i].source != nullptr)
+					continue;
+				v2 p = GetInputPos(i);
+				if (inputs[i].type == NodeType::Int || inputs[i].type == NodeType::Float)
+				{
+					bbox2 bb = bbox2(p - v2(0.0f, 8.0f), p + v2(size.y, 8.0f));
+					if (bb.contains(worldPos))
+					{
+						if (inputs[i].type == NodeType::Float)
+						{
+							r.type = NodeClickResponseType::InteractWithFloatSlider;
+							r.sliderValue.f = (float*)inputs[i].target;
+							r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+						}
+						else
+						{
+							r.type = NodeClickResponseType::InteractWithIntSlider;
+							r.sliderValue.i = (int*)inputs[i].target;
+							r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+						}
+						r.sliderLockMin = inputs[i].lockMin;
+						r.sliderLockMax = inputs[i].lockMax;
+						r.sliderMin = inputs[i].fmin;
+						r.sliderMax = inputs[i].fmax;
+						//if (inputs[i].lock)
+						//	r.sliderDelta = r.sliderDelta < 0.0f ? 0.0f : (r.sliderDelta > 1.0f ? 1.0f : r.sliderDelta);
+						return r;
+					}
+				}
+				else if (inputs[i].type == NodeType::Bool)
+				{
+					v2 centre = p + v2(size.x - 10.0f, 0.0f);
+					if ((centre - worldPos).length() > 6.0f)
+						continue;
+					*(bool*)inputs[i].target = !(*(bool*)inputs[i].target);
+					r.type = NodeClickResponseType::InteractWithBool;
+					return r;
+				}
 			}
 		}
 	}
 
 	// handle node interactions itself
-	if (!mini && (nodePos - spaceOffset()).inBox(v2(), minSpace) && OnClick(nodePos - spaceOffset()))
+	NodeClickInfo localNodeInfo;
+	localNodeInfo.interactionType = info.interactionType;
+	localNodeInfo.isRight = info.isRight;
+	localNodeInfo.pos = info.pos - spaceOffset();
+	if (!mini && (info.pos - spaceOffset()).inBox(v2(), minSpace) && OnClick(localNodeInfo))
 	{
 		r.handled = true;
 		r.type = NodeClickResponseType::Interact;
