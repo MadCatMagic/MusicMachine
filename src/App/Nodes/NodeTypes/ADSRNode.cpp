@@ -20,7 +20,7 @@ void ADSRNode::IO()
 	AudioOutput("adsr", &ochannel);
 }
 
-void ADSRNode::Render(const v2& topLeft, DrawList* dl)
+void ADSRNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 }
 

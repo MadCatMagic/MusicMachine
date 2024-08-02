@@ -18,7 +18,7 @@ void SequencerNode::IO()
 	IntInput("octave", &octaveShift, -2, 2);
 }
 
-void SequencerNode::Render(const v2& topLeft, DrawList* dl)
+void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 	EnsureDataSize();
 	// STUFF

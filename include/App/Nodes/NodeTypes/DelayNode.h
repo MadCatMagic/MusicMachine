@@ -7,7 +7,7 @@ protected:
 	virtual void Init() override;
 	virtual void IO() override;
 
-	virtual void Render(const v2& topLeft, DrawList* dl) override;
+	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 	virtual bool OnClick(const v2& clickPosition) override;
 
 	virtual void Work() override;
@@ -16,6 +16,7 @@ protected:
 	virtual JSONType Save() override;
 
 private:
+	v2 queueLerp(float index) const;
 
 	enum DelayType { Mono, PingPong } delayType = DelayType::Mono;
 
@@ -25,6 +26,7 @@ private:
 	float feedback = 0.5f;
 	float mix = 0.5f;
 	float time = 0.3f;
+	float stereoWideness = 1.0f;
 
 	int queueSize = 16384 * 2;
 	int skipLength = queueSize / 128;

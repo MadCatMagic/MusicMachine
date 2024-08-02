@@ -13,9 +13,10 @@ bbox2::bbox2(const v2& p1, const v2& p2)
 
 bool bbox2::overlaps(const bbox2& o) const
 {
-	return 
-		(a.x <= o.a.x && o.a.x <= b.x || a.x <= o.b.x && o.b.x <= b.x) &&
-		(a.y <= o.a.y && o.a.y <= b.y || a.y <= o.b.y && o.b.y <= b.y);
+	v2 dd = b - a + o.b - o.a;
+	return
+		abs(a.x + b.x - o.a.x - o.b.x) <= dd.x &&
+		abs(a.y + b.y - o.a.y - o.b.y) <= dd.y;
 }
 
 bool bbox2::contains(const v2& p) const

@@ -20,23 +20,23 @@ AudioChannel* AudioOutputNode::Result()
 	return &c;
 }
 
-void AudioOutputNode::Render(const v2& topLeft, DrawList* dl)
+void AudioOutputNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
+	int skip = lodOn ? 4 : 1;
 	const float bw = 200.0f / 256.0f;
-	for (int i = 0; i < 255; i++)
+	for (int i = 0; i < 255; i += skip)
 	{
 		dl->Line(
 			topLeft + v2(bw * i, 25.0f + previousData[i].x * 25.0f),
-			topLeft + v2(bw * i + bw, 25.0f + previousData[i + 1].x * 25.0f),
+			topLeft + v2(bw * i + bw * skip, 25.0f + previousData[i + skip].x * 25.0f),
 			ImColor(1.0f, 0.0f, 0.0f, 0.5f)
 		);
 		dl->Line(
 			topLeft + v2(bw * i, 25.0f + previousData[i].y * 25.0f),
-			topLeft + v2(bw * i + bw, 25.0f + previousData[i + 1].y * 25.0f),
+			topLeft + v2(bw * i + bw * skip, 25.0f + previousData[i + skip].y * 25.0f),
 			ImColor(0.0f, 1.0f, 0.0f, 0.5f)
 		);
 	}
-	//ImGui::PlotHistogram("previousSamplesLeft", astream.previousData, 1024, 0, 0, -1.0f, 1.0f, ImVec2(0.0f, 40.0f));
 }
 
 void AudioOutputNode::Work()

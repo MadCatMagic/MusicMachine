@@ -17,7 +17,7 @@ void Distortion::IO()
 	FloatInput("mix", &mix, 0.0f, 1.0f, true, true);
 }
 
-void Distortion::Render(const v2& topLeft, DrawList* dl)
+void Distortion::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 }
 

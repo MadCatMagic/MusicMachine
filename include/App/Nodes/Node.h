@@ -84,7 +84,7 @@ protected:
 	inline virtual void Work() { }
 	inline virtual AudioChannel* Result() { return nullptr; }
 
-	inline virtual void Render(const v2& topLeft, class DrawList* dl) { }
+	inline virtual void Render(const v2& topLeft, class DrawList* dl, bool lodOn) { }
 	// returns whether the click was used or not
 	inline virtual bool OnClick(const v2& clickPosition) { return false; }
 

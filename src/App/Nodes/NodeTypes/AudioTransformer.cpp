@@ -18,7 +18,7 @@ void AudioTransformer::IO()
 	AudioOutput("O", &oc);
 }
 
-void AudioTransformer::Render(const v2& topLeft, DrawList* dl)
+void AudioTransformer::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 	for (int i = 0; i < numTypes; i++)
 	{

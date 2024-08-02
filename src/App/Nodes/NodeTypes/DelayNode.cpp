@@ -6,7 +6,7 @@ void DelayNode::Init()
 {
 	name = "DelayNode";
 	title = "Delay";
-	minSpace = v2(64.0f, 40.0f);
+	minSpace = v2(128.0f, 80.0f);
 }
 
 void DelayNode::IO()
@@ -16,23 +16,35 @@ void DelayNode::IO()
 	FloatInput("feedback", &feedback, 0.0f, 1.0f, true, true);
 	FloatInput("mix", &mix, 0.0f, 1.0f, true, true);
 	FloatInput("delay", &time, 0.1f, 1.0f, true, false);
+	if (delayType == DelayType::PingPong)
+		FloatInput("stereonity", &stereoWideness, -1.0f, 1.0f, true, true);
 }
 
-void DelayNode::Render(const v2& topLeft, DrawList* dl)
+void DelayNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 	EnsureQueueSize();
-	for (int i = 0; i < 127; i++)
+	int skip = lodOn ? 4 : 1;
+	for (int i = 0; i < 127; i += skip)
 	{
-		dl->Line(topLeft + v2((float)i / 128.0f * 64.0f, 10.0f + queue[i * skipLength].x * 10.0f), topLeft + v2((float)(i + 1) / 128.0f * 64.0f, 10.0f + queue[i * skipLength + skipLength].x * 10.0f), ImColor(1.0f, 0.0f, 0.0f, 0.5f));
-		dl->Line(topLeft + v2((float)i / 128.0f * 64.0f, 10.0f + queue[i * skipLength].y * 10.0f), topLeft + v2((float)(i + 1) / 128.0f * 64.0f, 10.0f + queue[i * skipLength + skipLength].y * 10.0f), ImColor(0.0f, 1.0f, 0.0f, 0.5f));
+		v2 va = queueLerp((float)i / 128.0f * queueSize);
+		v2 vb = queueLerp((float)(i + skip) / 128.0f * queueSize);
+		dl->Line(topLeft + v2((float)i, 50.0f + va.x * 10.0f), topLeft + v2((float)(i + skip), 50.0f + vb.x * 10.0f), ImColor(1.0f, 0.0f, 0.0f, 0.5f));
+		dl->Line(topLeft + v2((float)i, 50.0f + va.y * 10.0f), topLeft + v2((float)(i + skip), 50.0f + vb.y * 10.0f), ImColor(0.0f, 1.0f, 0.0f, 0.5f));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		if ((int)delayType == i)
+			dl->RectFilled(topLeft + v2(i * 64.0f, 0.0f), topLeft + v2(i * 64.0f + 64.0f, 20.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
+		else
+			dl->RectFilled(topLeft + v2(i * 64.0f, 0.0f), topLeft + v2(i * 64.0f + 64.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
 	}
 }
 
 bool DelayNode::OnClick(const v2& clickPosition)
 {
-	int tcp = (int)(clickPosition.x / 20.0f);
-	if (clickPosition.x >= 40.0f || clickPosition.y < 20.0f)
-		return false;
+	if (clickPosition.y >= 40.0f) return false;
+	int tcp = (int)(clickPosition.x / 64.0f);
 	delayType = (DelayType)tcp;
 	return true;
 }
@@ -40,14 +52,34 @@ bool DelayNode::OnClick(const v2& clickPosition)
 void DelayNode::Work()
 {
 	EnsureQueueSize();
-	for (int i = 0; i < ichannel.bufferSize; i++)
-	{
-		queue[queuePointer] = queue[queuePointer] * feedback + ichannel.data[i];
-		ochannel.data[i].x = queue[queuePointer].x * mix + ichannel.data[i].x * (1.0f - mix);
-		ochannel.data[i].y = queue[(queuePointer + queueSize / 2) % queueSize].y * mix + ichannel.data[i].x * (1.0f - mix);
-		queuePointer++;
-		queuePointer %= queueSize;
-	}
+	float wideness = stereoWideness * 0.5f + 0.5f;
+	if (delayType == DelayType::Mono)
+		for (int i = 0; i < ichannel.bufferSize; i++)
+		{
+			queue[queuePointer] = queue[queuePointer] * feedback + ichannel.data[i];
+			ochannel.data[i].x = queue[queuePointer].x * mix + ichannel.data[i].x * (1.0f - mix);
+			ochannel.data[i].y = queue[queuePointer].y * mix + ichannel.data[i].y * (1.0f - mix);
+			queuePointer++;
+			queuePointer %= queueSize;
+		}
+	else
+		for (int i = 0; i < ichannel.bufferSize; i++)
+		{
+			queue[queuePointer] = queue[queuePointer] * feedback + ichannel.data[i];
+			// need to take wideness into account somehow
+			v2 lr = v2(
+				queue[queuePointer].x, 
+				queue[(queuePointer + queueSize / 2) % queueSize].y
+			);
+			lr = v2(
+				lr.x * wideness + lr.y * (1.0f - wideness),
+				lr.y * wideness + lr.x * (1.0f - wideness)
+			);
+
+			ochannel.data[i] = lr * mix + ichannel.data[i] * (1.0f - mix);
+			queuePointer++;
+			queuePointer %= queueSize;
+		}
 }
 
 void DelayNode::Load(JSONType& data)
@@ -55,6 +87,8 @@ void DelayNode::Load(JSONType& data)
 	feedback = (float)data.obj["feedback"].f;
 	mix = (float)data.obj["mix"].f;
 	time = (float)data.obj["time"].f;
+	delayType = (DelayType)data.obj["type"].i;
+	stereoWideness = (float)data.obj["stereo"].f;
 }
 
 JSONType DelayNode::Save()
@@ -62,8 +96,16 @@ JSONType DelayNode::Save()
 	return JSONType({
 		{ "feedback", (double)feedback },
 		{ "mix", (double)mix },
-		{ "time", (double)time }
-		});
+		{ "time", (double)time },
+		{ "type", (long)delayType },
+		{ "stereo", (long)stereoWideness }
+	});
+}
+
+v2 DelayNode::queueLerp(float index) const
+{
+	float lv = fmodf(index, 1.0f);
+	return queue[(int)index % queueSize] * lv + queue[(int)(index + 1.0f) % queueSize] * (1.0f - lv);
 }
 
 void DelayNode::EnsureQueueSize()

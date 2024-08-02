@@ -8,7 +8,7 @@ protected:
 	virtual void IO() override;
 	virtual AudioChannel* Result() override;
 
-	virtual void Render(const v2& topLeft, DrawList* dl) override;
+	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 
 	virtual void Work() override;
 

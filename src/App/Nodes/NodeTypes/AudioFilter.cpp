@@ -17,7 +17,7 @@ void AudioFilter::IO()
 	FloatInput("resonance", &resonance, 0.01f, 0.99f, true, true);
 }
 
-void AudioFilter::Render(const v2& topLeft, DrawList* dl)
+void AudioFilter::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 	for (int i = 0; i < 3; i++)
 	{
@@ -26,6 +26,9 @@ void AudioFilter::Render(const v2& topLeft, DrawList* dl)
 		else
 			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
 	}
+
+	if (lodOn)
+		return;
 
 	const std::vector<std::vector<v2>> lineData = {
 		{ v2(-0.7f, 0.0f), v2(0.1f, 0.0f), v2(0.7f, 0.6f) },
