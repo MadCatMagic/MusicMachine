@@ -17,7 +17,7 @@ void App::Initialize()
     b->position = v2(100.0f, 0.0f);
     b->IO();
 
-    Node* m = n->AddNodeFromName("ADSRNode");
+    Node* m = n->AddNodeFromName("Distortion");
     m->IO();
     m->position = v2(-20.0f, 0.0f);
     if (b->Connect(0, m, 0))
@@ -25,10 +25,18 @@ void App::Initialize()
     else
         Console::LogErr("failed to connect nodes");
 
+    Node* wg = n->AddNodeFromName("WaveformGenerator");
+    wg->IO();
+    wg->position = v2(-200.0f, 0.0f);
+    if (m->Connect(0, wg, 0))
+        Console::Log("successfully connected nodes");
+    else
+        Console::LogErr("failed to connect nodes");
+
     Node* sn = n->AddNodeFromName("SequencerNode");
     sn->IO();
-    sn->position = v2(-200.0f, 0.0f);
-    if (m->Connect(0, sn, 0))
+    sn->position = v2(-400.0f, 0.0f);
+    if (wg->Connect(0, sn, 0))
         Console::Log("successfully connected nodes");
     else
         Console::LogErr("failed to connect nodes");

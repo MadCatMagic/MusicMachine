@@ -1,7 +1,7 @@
 #pragma once
 #include "App/Nodes/Node.h"
 
-struct AudioTransformer : public Node
+struct MixNode : public Node
 {
 protected:
 	virtual void Init() override;
@@ -16,11 +16,12 @@ protected:
 	virtual JSONType Save() override;
 
 private:
-	enum TransformationType { Lerp, Multiply } type = TransformationType::Lerp;
+	enum TransformationType { WeightedAdd, Multiply } type = TransformationType::WeightedAdd;
 	const int numTypes = 2;
 
 	AudioChannel ic1{ };
 	AudioChannel ic2{ };
 	AudioChannel oc{ };
-	float lerp = 0.5f;
+	float weight1 = 1.0f;
+	float weight2 = 1.0f;
 };

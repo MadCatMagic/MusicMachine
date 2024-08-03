@@ -6,6 +6,7 @@ void ADSRNode::Init()
 {
 	name = "ADSRNode";
 	title = "ADSR";
+	minSpace = v2(100.0f, 50.0f);
 }
 
 // TODOODODODODODOD
@@ -13,7 +14,7 @@ void ADSRNode::IO()
 {
 	SequencerInput("sequence", &isequencer);
 	FloatInput("attack", &attack, 0.001f, 0.2f, true, false);
-	FloatInput("decay", &decay, 0.0f, 1.0f, true, false);
+	FloatInput("decay", &decay, 0.001f, 1.0f, true, false);
 	FloatInput("sustain", &sustain, 0.0f, 1.0f, true, true);
 	FloatInput("release", &release, 0.005f, 1.0f, true, false);
 
@@ -22,6 +23,16 @@ void ADSRNode::IO()
 
 void ADSRNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
+	float k = minSpace.x / (attack + decay * 1.5f + release);
+
+	std::vector<v2> curve = {
+		topLeft + v2(0.0f, minSpace.y),
+		topLeft + v2(k * attack, 0.0f),
+		topLeft + v2(k * (attack + decay), minSpace.y * (1.0f - sustain)),
+		topLeft + v2(k * (attack + decay * 1.5f), minSpace.y * (1.0f - sustain)),
+		topLeft + minSpace
+	};
+	dl->Lines(curve, ImColor(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
 }
 
 void ADSRNode::Work()
@@ -43,6 +54,7 @@ void ADSRNode::Work()
 			freq++;
 			if (freq >= isequencer.length.size())
 				return;
+			timer = 0.0f;
 		}
 
 		if (isequencer.pitch[freq] != 0.0f)
@@ -58,6 +70,8 @@ void ADSRNode::Work()
 
 		scounter++;
 	}
+
+	timer += ochannel.dt;
 }
 
 float ADSRNode::adsr(int sample) const

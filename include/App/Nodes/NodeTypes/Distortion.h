@@ -8,6 +8,7 @@ protected:
 	virtual void IO() override;
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
+	virtual bool OnClick(const NodeClickInfo& info) override;
 
 	virtual void Work() override;
 
@@ -18,7 +19,14 @@ private:
 	AudioChannel ichannel{ };
 	AudioChannel ochannel{ };
 
+	enum Mode { SoftClip, HardClip, Bitcrush, Sinfold } mode = Mode::SoftClip;
+
+	float convert(float v) const;
+	inline float clamp(float v, float min, float max) const { return v >= max ? max : (v <= min ? min : v); }
+
 	float pregain = 1.0f;
 	float distortion = 0.5f;
 	float mix = 1.0f;
+
+	float tanConstant = 1.0f;
 };

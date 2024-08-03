@@ -4,55 +4,45 @@
 
 void WaveformGenerator::Init()
 {
+	// generate waveformData
+	if (waveformData.size() == 0)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			std::vector<float> dump = std::vector<float>(1024);
+			for (int i = 0; i < 1024; i++)
+				dump[i] = GetValue((float)i / 1024.0f, j);
+			waveformData.push_back(dump);
+		}
+	}
+
 	name = "WaveformGenerator";
 	title = "Waveform Generator";
-	minSpace = v2(80.0f, 20.0f);
+	minSpace = v2(100.0f, 50.0f);
 }
 
 void WaveformGenerator::IO()
 {
 	AudioOutput("aout", &c);
 	SequencerInput("sequence", &seq);
+	FloatInput("shape", &shape, 0.0f, 3.0f, true, true);
 }
 
 void WaveformGenerator::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
-	for (int i = 0; i < 4; i++)
-	{
-		if ((int)shape == i)
-			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
-		else
-			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
-	}
-
-	if (lodOn)
-		return;
-
-	// Sine, Saw, Triangle, Square
-	const std::vector<std::vector<v2>> lineData = {
-		{ v2(-0.7f, 0.0f), v2(-0.525f, -0.495f), v2(-0.4375f, -0.6467f), v2(-0.35f, -0.7f), v2(-0.2625f, -0.6467f), v2(-0.175f, -0.495f), v2(0.0f, 0.0f), v2(0.175f, 0.495f), v2(0.2625f, 0.6467f), v2(0.35f, 0.7f), v2(0.4375f, 0.6467f), v2(0.525f, 0.495f), v2(0.7f, 0.0f) },
-		{ v2(-0.7f, 0.0f), v2(-0.7f, -0.7f), v2(0.7f, 0.7f), v2(0.7f, 0.0f) },
-		{ v2(-0.7f, 0.0f), v2(-0.35f, -0.7f), v2(0.35f, 0.7f), v2(0.7f, 0.0f) },
-		{ v2(-0.7f, 0.0f), v2(-0.7f, -0.7f), v2(0.0f, -0.7f), v2(0.0f, 0.7f), v2(0.7f, 0.7f), v2(0.7f, 0.0f) }
-	};
-
-	for (int j = 0; j < 4; j++)
-	{
-		std::vector<v2> k;
-		for (const v2& v : lineData[j])
-			k.push_back(v * 10.0f + topLeft + v2(10.0f + j * 20.0f, 10.0f));
-		dl->Lines(k, ImColor(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
-	}
-}
-
-bool WaveformGenerator::OnClick(const NodeClickInfo& info)
-{
-	if (info.isRight || info.interactionType != 0)
-		return false;
-
-	int tcp = (int)(info.pos.x / 20.0f);
-	shape = (Shape)tcp;
-	return true;
+	int skip = lodOn ? 2 : 1;
+	for (float i = 0.0f; i < 31.0f; i += (float)skip)
+		dl->Line(
+			topLeft + v2(
+				i / 32.0f * 100.0f,
+				25.0f - 25.0f * Bilinear(i / 32.0f)
+			),
+			topLeft + v2(
+				(i + (float)skip) / 32.0f * 100.0f,
+				25.0f - 25.0f * Bilinear((i + (float)skip) / 32.0f)
+			),
+			ImColor(0.0f, 1.0f, 1.0f)
+		);
 }
 
 void WaveformGenerator::Work()
@@ -90,7 +80,7 @@ void WaveformGenerator::Work()
 		{
 			kv += increment;
 			if (kv >= 1.0f) kv -= 1.0f;
-			c.data[i] = GetValue(kv) * seq.velocity[freq];
+			c.data[i] = Bilinear(kv) * seq.velocity[freq];
 		}
 
 		scounter++;
@@ -98,17 +88,38 @@ void WaveformGenerator::Work()
 }
 
 // phase is from 0 to 1
-float WaveformGenerator::GetValue(float phase) const
+float WaveformGenerator::GetValue(float phase, int shape) const
 {
+	// bilinear interpolation again
+
 	switch (shape)
 	{
-	case Shape::Sine: return sinf(phase * 2.0f * PI);
+	case 0: return sinf(phase * 2.0f * PI);
 	// downsaw
-	case Shape::Saw: return 1.0f - 2.0f * phase;
-	case Shape::Square: return (phase < 0.5f) ? 1.0f : -1.0f;
-	case Shape::Triangle:
+	case 3: return 1.0f - 2.0f * phase;
+	case 2: return (phase < 0.5f) ? 1.0f : -1.0f;
+	case 1:
 		if (phase < 0.25f) return phase * 4.0f;
 		else if (phase < 0.75f) return 2.0f - phase * 4.0f;
 		else return 4.0f * phase - 4.0f;
 	}
+	return 0.0f;
 }
+
+// phase is still from 0 to 1
+float WaveformGenerator::Bilinear(float phase) const
+{
+	int i1 = (int)(phase * 1024.0f) % 1024;
+	int i2 = (i1 + 1) % 1024;
+	float lerp = phase * 1024.0f - floorf(phase * 1024.0f);
+
+	int wave1 = (int)(shape);
+	int wave2 = (wave1 + 1) % 4;
+	float wavelerp = shape - floorf(shape);
+
+	return 
+		(waveformData[wave1][i1] * (1.0f - lerp) + waveformData[wave1][i2] * lerp) * (1.0f - wavelerp) + 
+		(waveformData[wave2][i1] * (1.0f - lerp) + waveformData[wave2][i2] * lerp) * wavelerp;
+}
+
+std::vector<std::vector<float>> WaveformGenerator::waveformData = {};

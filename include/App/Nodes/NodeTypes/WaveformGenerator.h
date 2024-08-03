@@ -8,18 +8,21 @@ protected:
 	virtual void IO() override;
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
-	virtual bool OnClick(const NodeClickInfo& info) override;
 
 	virtual void Work() override;
 
 private:
-	// Sine, Saw, Triangle, Square
-	enum Shape { Sine, Saw, Triangle, Square } shape = Shape::Saw;
+	// Sine, Triangle, Square, Saw
+	// 0 - 3
+	float shape = 0.0f;
 
 	AudioChannel c{ };
 	float kv = 0.0f;
 
-	float GetValue(float phase) const;
+	float GetValue(float phase, int shape) const;
+	float Bilinear(float phase) const;
+
+	static std::vector<std::vector<float>> waveformData;
 
 	PitchSequencer seq;
 };

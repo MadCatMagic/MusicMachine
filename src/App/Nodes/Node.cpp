@@ -340,7 +340,9 @@ float Node::getNormalWidth() const
 	float maxXOff = 0.0f;
 	for (const NodeInput& input : inputs)
 	{
-		size_t additionalWidth = (input.type == NodeType::Float || input.type == NodeType::Int) ? 5 : 0;
+		size_t additionalWidth = (input.type == NodeType::Int) ? 5 : 0;
+		additionalWidth = (input.type == NodeType::Float) ? 6 : additionalWidth;
+		additionalWidth = (input.displayType != FloatDisplayType::None) ? 8 : additionalWidth;
 		maxXOff = std::max(IOWidth(input.name, additionalWidth), maxXOff);
 	}
 	for (const NodeOutput& output : outputs)

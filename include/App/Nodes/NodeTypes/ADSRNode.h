@@ -18,9 +18,10 @@ private:
 	float adsr(int sample) const;
 
 	float attack = 0.005f;
-	float decay = 0.0f;
+	float decay = 0.001f;
 	float sustain = 1.0f;
 	float release = 0.01f;
 
 	float lastSample = 0.0f;
+	float timer = 0.0f;
 };

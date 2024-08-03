@@ -43,7 +43,7 @@ void AudioOutputNode::Work()
 {
 	for (size_t i = 0; i < c.bufferSize; i++)
 	{
-		if (i % 128 == 0)
+		if (i % 32 == 0)
 		{
 			previousData[previousDataP++] = -c.data[i];
 			previousDataP %= 256;
