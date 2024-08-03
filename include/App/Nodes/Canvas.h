@@ -20,6 +20,10 @@ public:
 	void InitCanvas();
 	void CreateWindow(DrawStyle* drawStyle, class App* appPointer);
 
+	void SaveLoadWindows(bool beginSaveAs, bool beginLoad, App* appPointer);
+	void SaveState(const std::string& filepath);
+	void LoadState(const std::string& filepath, App* appPointer);
+
 	v2 ScreenToCanvas(const v2& pos) const;
 	v2 CanvasToScreen(const v2& pos) const;
 	v2 CanvasToPosition(const v2& pos) const;
@@ -54,4 +58,6 @@ private:
 	v2 canvasPixelSize;
 
 	DrawList drawList;
+
+	std::string currentFilepath = "";
 };

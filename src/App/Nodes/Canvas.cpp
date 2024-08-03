@@ -10,6 +10,8 @@
 
 #include "App/App.h"
 
+#include <filesystem>
+
 Canvas::~Canvas()
 {
     if (nodeRenderer != nullptr)
@@ -312,64 +314,29 @@ nodeInteractionsEscape:
     ImVec2 drag_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
     if (drag_delta.x == 0.0f && drag_delta.y == 0.0f)
         ImGui::OpenPopupOnItemClick("context", ImGuiPopupFlags_MouseButtonRight);
-    bool drawSavePopup = false;
-    bool drawLoadPopup = false;
+    bool beginSaveAs = false;
+    bool beginLoad = false;
     if (ImGui::BeginPopup("context"))
     {
         nodes->DrawContextMenu();
 
-        if (ImGui::MenuItem("Save Network"))
-            drawSavePopup = true;
-        if (ImGui::MenuItem("Load Network"))
-            drawLoadPopup = true;
-
-        ImGui::EndPopup();
-    }
-
-    if (drawSavePopup)
-        ImGui::OpenPopup("Save Me!");
-    if (drawLoadPopup)
-        ImGui::OpenPopup("Load Me!");
-
-    if (ImGui::BeginPopupModal("Save Me!"))
-    {
-        static char filename[64] = {};
-        ImGui::InputText("network name", filename, sizeof(char) * 64);
-
-        if (ImGui::Button("Save"))
+        // save
+        if (ImGui::MenuItem("Save"))
         {
-            nodes->SaveNetworkToFile("networks/" + std::string(filename) + ".nn");
-            memset(filename, 0, 64);
-            ImGui::CloseCurrentPopup();
+            if (currentFilepath != "")
+                SaveState(currentFilepath);
+            else
+                beginSaveAs = true;
         }
+        if (ImGui::MenuItem("Save As"))
+            beginSaveAs = true;
+        if (ImGui::MenuItem("Load"))
+            beginLoad = true;
 
-        if (ImGui::Button("Cancel"))
-            ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
     }
-    if (ImGui::BeginPopupModal("Load Me!"))
-    {
-        static char filename[64] = {};
-        ImGui::InputText("network name", filename, sizeof(char) * 64);
 
-        if (ImGui::Button("Load"))
-        {
-            if (nodes != nullptr)
-                delete nodes;
-            nodes = nullptr;
-            nodes = new NodeNetwork("networks/" + std::string(filename) + ".nn");
-            if (nodeRenderer != nullptr)
-                delete nodeRenderer;
-            nodeRenderer = new NodeNetworkRenderer(nodes, this);
-            memset(filename, 0, 64);
-            ImGui::CloseCurrentPopup();
-            appPointer->SetNodes(nodes);
-        }
-
-        if (ImGui::Button("Cancel"))
-            ImGui::CloseCurrentPopup();
-        ImGui::EndPopup();
-    }
+    SaveLoadWindows(beginSaveAs, beginLoad, appPointer);
 
     // Draw grid + all lines in the canvas
     drawList.dl->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
@@ -443,6 +410,151 @@ nodeInteractionsEscape:
     drawList.dl->PopClipRect();
 
     ImGui::End();
+}
+
+void Canvas::SaveLoadWindows(bool beginSaveAs, bool beginLoad, App* appPointer)
+{
+    ////////////
+    // SAVING //
+    ////////////
+    static char buf[64] = { 0 };
+    if (beginSaveAs)
+    {
+        ImGui::OpenPopup("Save As");
+        memset(buf, 0, 64);
+    }
+
+    // Always center this window when appearing
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("Save As", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::InputText("name", buf, 64);
+
+        // disable if filename is empty
+        ImGui::BeginDisabled(buf[0] == '\0');
+        if (ImGui::Button("Save"))
+        {
+            // check file does not exist, if so, complain
+            std::string filepath = "networks/" + std::string(buf) + ".nn";
+            if (std::filesystem::exists(filepath))
+                ImGui::OpenPopup("Overwriting File");
+
+            else
+            {
+                // save file
+                SaveState(filepath);
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::EndDisabled();
+
+        ImGui::SetItemDefaultFocus();
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) { ImGui::CloseCurrentPopup(); }
+
+        bool closeBoth = false;
+        if (ImGui::BeginPopupModal("Overwriting File", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("There already exists a file by this name,\nare you sure you want to overwrite it?");
+            if (ImGui::Button("Yes!"))
+            {
+                SaveState("networks/" + std::string(buf) + ".nn");
+                ImGui::CloseCurrentPopup();
+                closeBoth = true;
+            }
+            if (ImGui::Button("no..."))
+                ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+        }
+
+        if (closeBoth)
+            ImGui::CloseCurrentPopup();
+
+        ImGui::EndPopup();
+    }
+
+    /////////////
+    // LOADING //
+    /////////////
+    static std::vector<std::string> files;
+    static int selected = -1;
+    if (beginLoad)
+    {
+        ImGui::OpenPopup("Load");
+        files.clear();
+        selected = -1;
+        for (const auto& entry : std::filesystem::directory_iterator("networks"))
+        {
+            std::string fp = entry.path().string().substr(9);
+            if (fp.size() < 3 || fp.substr(fp.size() - 3, 3) != ".nn")
+            {
+                Console::LogWarn("Odd filename found in /networks/: " + fp);
+                continue;
+            }
+            files.push_back(fp.substr(0, fp.size() - 3));
+        }
+    }
+
+    if (ImGui::BeginPopupModal("Load", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        if (ImGui::BeginTable("3ways", 1, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody))
+        {
+            // The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 300.0f);
+            ImGui::TableHeadersRow();
+
+            for (int i = 0; i < files.size(); i++)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+                if (selected == i)
+                    flags |= ImGuiTreeNodeFlags_Selected;
+                ImGui::TreeNodeEx((void*)(intptr_t)i, flags, files[i].c_str(), i);
+                if (ImGui::IsItemClicked())
+                {
+                    if (selected == i)
+                        selected = -1;
+                    else
+                        selected = i;
+                }
+            }
+
+            ImGui::EndTable();
+        }
+
+        ImGui::BeginDisabled(selected == -1);
+        if (ImGui::Button("Load"))
+        {
+            LoadState("networks/" + files[selected] + ".nn", appPointer);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndDisabled();
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+}
+
+void Canvas::SaveState(const std::string& filepath)
+{
+    nodes->SaveNetworkToFile(std::string(filepath));
+    currentFilepath = filepath;
+}
+
+void Canvas::LoadState(const std::string& filepath, App* appPointer)
+{
+    if (nodes != nullptr)
+        delete nodes;
+    nodes = new NodeNetwork(std::string(filepath));
+    if (nodeRenderer != nullptr)
+        delete nodeRenderer;
+    nodeRenderer = new NodeNetworkRenderer(nodes, this);
+    appPointer->SetNodes(nodes);
+    currentFilepath = filepath;
 }
 
 float Canvas::GetSFFromScalingLevel(int scaling)
