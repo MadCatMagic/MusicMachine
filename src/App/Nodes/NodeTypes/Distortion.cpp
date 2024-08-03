@@ -114,6 +114,7 @@ void Distortion::Load(JSONType& data)
 	pregain = (float)data.obj["pregain"].f;
 	distortion = (float)data.obj["distortion"].f;
 	mix = (float)data.obj["mix"].f;
+	mode = (Mode)data.obj["mode"].i;
 }
 
 JSONType Distortion::Save()
@@ -121,8 +122,9 @@ JSONType Distortion::Save()
 	return JSONType({
 		{ "pregain", (double)pregain },
 		{ "distortion", (double)distortion },
-		{ "mix", (double)mix }
-		});
+		{ "mix", (double)mix },
+		{ "mode", (long)mode }
+	});
 }
 
 float Distortion::convert(float v) const

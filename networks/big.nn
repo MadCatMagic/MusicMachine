@@ -1,0 +1,835 @@
+{
+  "nodes": [
+    {
+      "inputs": [
+        {
+          "name": "sequence",
+          "source": "0000000072ae0007_SequencerNode",
+          "sourceName": "sequence"
+        },
+        {
+          "name": "attack",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "decay",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "sustain",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "release",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000069520008_ADSRNode",
+      "pos": [ -240, 144 ],
+      "mini": false,
+      "name": "ADSRNode",
+      "node": {
+        "decay": 0.08832520991563797,
+        "attack": 0.004999999888241291,
+        "sustain": 0,
+        "release": 0.009999999776482582
+      }
+    },
+    {
+      "id": "0000000018be0002_WaveformGenerator",
+      "inputs": [
+        {
+          "name": "sequence",
+          "source": "0000000067840003_SequencerNode",
+          "sourceName": "sequence"
+        },
+        {
+          "name": "shape",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ -424, -88 ],
+      "mini": false,
+      "name": "WaveformGenerator",
+      "node": { "shape": 2.601488828659058 }
+    },
+    {
+      "inputs": [
+        {
+          "name": "bpm",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "length",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "height",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "octave",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000067840003_SequencerNode",
+      "pos": [ -568, -88 ],
+      "mini": false,
+      "name": "SequencerNode",
+      "node": {
+        "bpm": 200,
+        "width": 6,
+        "height": 12,
+        "data": [
+          {
+            "p": 0,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 2,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 3,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 6,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 8,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 10,
+            "v": 0.699999988079071
+          }
+        ],
+        "octave": 1
+      }
+    },
+    {
+      "id": "0000000072ae0007_SequencerNode",
+      "inputs": [
+        {
+          "name": "bpm",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "length",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "height",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "octave",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ -416, 80 ],
+      "mini": false,
+      "name": "SequencerNode",
+      "node": {
+        "bpm": 400,
+        "width": 4,
+        "height": 12,
+        "octave": 0,
+        "data": [
+          {
+            "p": 7,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 7,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 7,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 7,
+            "v": 0.699999988079071
+          }
+        ]
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "A source",
+          "source": "0000000048230001_Distortion",
+          "sourceName": "out"
+        },
+        {
+          "name": "B source",
+          "source": "0000000069520008_ADSRNode",
+          "sourceName": "adsr"
+        }
+      ],
+      "id": "000000005f900009_MixNode",
+      "pos": [ -72, 0 ],
+      "mini": false,
+      "name": "MixNode",
+      "node": {
+        "w1": 1,
+        "type": 1,
+        "w2": 1
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "0000000018be0002_WaveformGenerator",
+          "sourceName": "aout"
+        },
+        {
+          "name": "pregain",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "distortion",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "mix",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000048230001_Distortion",
+      "pos": [ -240, -96 ],
+      "mini": false,
+      "name": "Distortion",
+      "node": {
+        "mix": 1,
+        "pregain": 1,
+        "mode": 3,
+        "distortion": 0.8844375610351562
+      }
+    },
+    {
+      "id": "000000006df1000a_MixNode",
+      "inputs": [
+        {
+          "name": "A source",
+          "source": "0000000041bb0009_DelayNode",
+          "sourceName": "out"
+        },
+        {
+          "name": "B source",
+          "source": "0000000012db000e_Distortion",
+          "sourceName": "out"
+        },
+        {
+          "name": "a volume",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "b volume",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 328, 32 ],
+      "mini": false,
+      "name": "MixNode",
+      "node": {
+        "type": 0,
+        "w1": 0.653312623500824,
+        "w2": 0.8266563415527344
+      }
+    },
+    {
+      "id": "0000000041bb0009_DelayNode",
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "0000000016490009_AudioFilter",
+          "sourceName": "out"
+        },
+        {
+          "name": "feedback",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "mix",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "delay",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "stereonity",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 176, -72 ],
+      "mini": false,
+      "name": "DelayNode",
+      "node": {
+        "feedback": 0.5,
+        "mix": 0.4931128025054932,
+        "time": 0.3309917747974396,
+        "type": 1,
+        "stereo": 0
+      }
+    },
+    {
+      "id": "0000000016490009_AudioFilter",
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "000000005f900009_MixNode",
+          "sourceName": "O"
+        },
+        {
+          "name": "cutoff",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "resonance",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 32, -16 ],
+      "mini": false,
+      "name": "AudioFilter",
+      "node": {
+        "cutoff": 0.2926856875419617,
+        "resonance": 0.2011192440986633,
+        "mode": 1
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "sequence",
+          "source": "000000000bb3000c_SequencerNode",
+          "sourceName": "sequence"
+        },
+        {
+          "name": "shape",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000001eb000b_WaveformGenerator",
+      "pos": [ -328, 368 ],
+      "mini": false,
+      "name": "WaveformGenerator",
+      "node": { "shape": 1.913043260574341 }
+    },
+    {
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "0000000001eb000b_WaveformGenerator",
+          "sourceName": "aout"
+        },
+        {
+          "name": "feedback",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "mix",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "delay",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "stereonity",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000026e9000a_DelayNode",
+      "pos": [ -112, 272 ],
+      "mini": false,
+      "name": "DelayNode",
+      "node": {
+        "feedback": 0.3991666436195374,
+        "mix": 0.5,
+        "time": 0.3726000487804413,
+        "stereo": 0,
+        "type": 1
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "bpm",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "length",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "height",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "octave",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "000000000bb3000c_SequencerNode",
+      "pos": [ -576, 360 ],
+      "mini": false,
+      "name": "SequencerNode",
+      "node": {
+        "width": 12,
+        "height": 12,
+        "bpm": 600,
+        "data": [
+          {
+            "p": 0,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 0,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 0,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 0,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 3,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 3,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 3,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 3,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 6,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 6,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 6,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 6,
+            "v": 0.699999988079071
+          }
+        ],
+        "octave": -2
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "0000000026e9000a_DelayNode",
+          "sourceName": "out"
+        },
+        {
+          "name": "cutoff",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "resonance",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "000000002ea6000d_AudioFilter",
+      "pos": [ 56, 264 ],
+      "mini": false,
+      "name": "AudioFilter",
+      "node": {
+        "cutoff": 0.0441962257027626,
+        "resonance": 0,
+        "mode": 0
+      }
+    },
+    {
+      "id": "0000000012db000e_Distortion",
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "000000002ea6000d_AudioFilter",
+          "sourceName": "out"
+        },
+        {
+          "name": "pregain",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "distortion",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "mix",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 184, 160 ],
+      "mini": false,
+      "name": "Distortion",
+      "node": {
+        "pregain": 1,
+        "mix": 1,
+        "distortion": 0.5,
+        "mode": 0
+      }
+    },
+    {
+      "id": "0000000000290000_AudioOutputNode",
+      "inputs": [
+        {
+          "name": "ain",
+          "source": "00000000390c0010_MixNode",
+          "sourceName": "O"
+        },
+        {
+          "name": "volume",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 624, -8 ],
+      "mini": false,
+      "name": "AudioOutputNode",
+      "node": 0.2000000029802322
+    },
+    {
+      "id": "00000000390c0010_MixNode",
+      "inputs": [
+        {
+          "name": "A source",
+          "source": "000000006df1000a_MixNode",
+          "sourceName": "O"
+        },
+        {
+          "name": "B source",
+          "source": "00000000305e0014_MixNode",
+          "sourceName": "O"
+        },
+        {
+          "name": "a volume",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "b volume",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 488, 48 ],
+      "mini": false,
+      "name": "MixNode",
+      "node": {
+        "type": 0,
+        "w1": 1,
+        "w2": 0.3319228887557983
+      }
+    },
+    {
+      "id": "00000000153c000f_AudioFilter",
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "cutoff",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "resonance",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 536, 368 ],
+      "mini": false,
+      "name": "AudioFilter",
+      "node": {
+        "cutoff": 0.9900000095367432,
+        "resonance": 0,
+        "mode": 0
+      }
+    },
+    {
+      "id": "00000000305e0014_MixNode",
+      "inputs": [
+        {
+          "name": "A source",
+          "source": "0000000000990012_WaveformGenerator",
+          "sourceName": "aout"
+        },
+        {
+          "name": "B source",
+          "source": "0000000001240013_ADSRNode",
+          "sourceName": "adsr"
+        }
+      ],
+      "pos": [ 432, 232 ],
+      "mini": false,
+      "name": "MixNode",
+      "node": {
+        "type": 1,
+        "w1": 1,
+        "w2": 1
+      }
+    },
+    {
+      "id": "0000000000990012_WaveformGenerator",
+      "inputs": [
+        {
+          "name": "sequence",
+          "source": "000000000f3e0011_SequencerNode",
+          "sourceName": "sequence"
+        },
+        {
+          "name": "shape",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 272, 384 ],
+      "mini": false,
+      "name": "WaveformGenerator",
+      "node": { "shape": 3 }
+    },
+    {
+      "inputs": [
+        {
+          "name": "sequence",
+          "source": "00000000440d0015_SequencerNode",
+          "sourceName": "sequence"
+        },
+        {
+          "name": "attack",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "decay",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "sustain",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "release",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000001240013_ADSRNode",
+      "pos": [ 368, 528 ],
+      "mini": false,
+      "name": "ADSRNode",
+      "node": {
+        "decay": 0.3677659928798676,
+        "attack": 0.001000000047497451,
+        "sustain": 0.7767004370689392,
+        "release": 1.788901805877686
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "bpm",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "length",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "height",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "octave",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "000000000f3e0011_SequencerNode",
+      "pos": [ 72, 432 ],
+      "mini": false,
+      "name": "SequencerNode",
+      "node": {
+        "width": 10,
+        "height": 16,
+        "bpm": 200,
+        "data": [
+          {
+            "p": 0,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 10,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 12,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 15,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 15,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 15,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 15,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 15,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 15,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 15,
+            "v": 0.699999988079071
+          }
+        ],
+        "octave": 0
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "bpm",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "length",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "height",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "octave",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "00000000440d0015_SequencerNode",
+      "pos": [ 216, 568 ],
+      "mini": false,
+      "name": "SequencerNode",
+      "node": {
+        "width": 6,
+        "height": 12,
+        "bpm":  300,
+        "data": [
+          {
+            "p": 6,
+            "v": 0.699999988079071
+          },
+          {
+            "p": -1,
+            "v": 0
+          },
+          {
+            "p": -1,
+            "v": 0
+          },
+          {
+            "p": 6,
+            "v": 0.699999988079071
+          },
+          {
+            "p": -1,
+            "v": 0
+          },
+          {
+            "p": -1,
+            "v": 0
+          }
+        ],
+        "octave": 0
+      }
+    }
+  ],
+  "dummy": false
+}

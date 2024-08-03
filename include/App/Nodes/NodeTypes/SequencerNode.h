@@ -12,7 +12,6 @@ protected:
 
 	virtual void Work() override;
 
-	// must add octaveShift
 	virtual void Load(JSONType& data) override;
 	virtual JSONType Save() override;
 

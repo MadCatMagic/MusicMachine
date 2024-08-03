@@ -74,6 +74,24 @@ void ADSRNode::Work()
 	timer += ochannel.dt;
 }
 
+void ADSRNode::Load(JSONType& data)
+{
+	attack = (float)data.obj["attack"].f;
+	decay = (float)data.obj["decay"].f;
+	sustain = (float)data.obj["sustain"].f;
+	release = (float)data.obj["release"].f;
+}
+
+JSONType ADSRNode::Save()
+{
+	return JSONType({
+		{ "attack", (double)attack },
+		{ "decay", (double)decay },
+		{ "sustain", (double)sustain },
+		{ "release", (double)release }
+	});
+}
+
 float ADSRNode::adsr(int sample) const
 {
 	float t = (float)sample / ochannel.sampleRate;

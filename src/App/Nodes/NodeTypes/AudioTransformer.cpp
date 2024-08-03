@@ -94,5 +94,5 @@ JSONType MixNode::Save()
 		{ "type", (long)type },
 		{ "w1", (double)weight1 },
 		{ "w2", (double)weight2 }
-		});
+	});
 }

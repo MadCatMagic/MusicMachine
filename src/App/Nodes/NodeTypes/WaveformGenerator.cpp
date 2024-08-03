@@ -87,6 +87,18 @@ void WaveformGenerator::Work()
 	}
 }
 
+void WaveformGenerator::Load(JSONType& data)
+{
+	shape = (float)data.obj["shape"].f;
+}
+
+JSONType WaveformGenerator::Save()
+{
+	auto map = std::unordered_map<std::string, JSONType>();
+	map["shape"] = (double)shape;
+	return map;
+}
+
 // phase is from 0 to 1
 float WaveformGenerator::GetValue(float phase, int shape) const
 {

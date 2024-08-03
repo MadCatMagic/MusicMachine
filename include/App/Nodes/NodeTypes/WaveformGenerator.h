@@ -11,6 +11,9 @@ protected:
 
 	virtual void Work() override;
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 private:
 	// Sine, Triangle, Square, Saw
 	// 0 - 3

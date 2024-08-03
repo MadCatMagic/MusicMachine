@@ -127,6 +127,8 @@ void SequencerNode::Load(JSONType& data)
 {
 	width = (int)data.obj["width"].i;
 	height = (int)data.obj["height"].i;
+	octaveShift = (int)data.obj["octave"].i;
+	bpm = (float)data.obj["bpm"].f;
 	// load data
 	EnsureDataSize();
 	for (int i = 0; i < width; i++)
@@ -153,6 +155,8 @@ JSONType SequencerNode::Save()
 	return JSONType({
 		{ "width", (long)width },
 		{ "height", (long)height },
+		{ "octave", (long)octaveShift },
+		{ "bpm", (double)bpm },
 		{ "data", dataVec }
 	});
 }

@@ -98,10 +98,16 @@ void MathsNode::Work()
 
 void MathsNode::Load(JSONType& data)
 {
-	op = (Operation)data.i;
+	inputA = (float)data.obj["a"].f;
+	inputB = (float)data.obj["b"].f;
+	op = (Operation)data.obj["op"].i;
 }
 
 JSONType MathsNode::Save()
 {
-    return (long)op;
+	return JSONType({
+		{ "a", (double)inputA },
+		{ "b", (double)inputB },
+		{ "op", (long)op },
+	});
 }
