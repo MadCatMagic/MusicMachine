@@ -51,9 +51,8 @@ private:
 	struct AbstractNode
 	{
 		unsigned int id = -1;
+		bool onStack = false;
 		// all index references to the master vector
-		std::vector<size_t> markedBy;
-		std::vector<size_t> outputs;
 		std::vector<size_t> inputs;
 		bool isEndpoint = false;
 	};
@@ -66,6 +65,7 @@ private:
 		bool problemConnectionExists = false;
 	};
 	NodeDependencyInformation* CheckForCircularDependency();
+	std::pair<bool, std::pair<size_t, size_t>> TarjanSCCSearch(size_t node, std::vector<size_t>& stack, std::vector<AbstractNode*>& nodes);
 	NodeDependencyInformation* nodeDependencyInfoPersistent = nullptr;
 	bool recalculateDependencies = true;
 

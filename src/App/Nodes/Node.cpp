@@ -292,6 +292,7 @@ std::string Node::id_s()
 
 void Node::Execute()
 {
+	hasBeenExecuted = true;
 	for (NodeInput& input : inputs)
 	{
 		if (input.source == nullptr)

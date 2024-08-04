@@ -118,7 +118,7 @@ void NodeNetworkRenderer::Draw(DrawList* drawList, std::vector<Node*>& selected,
 			{
 				v2 endpoint = positions[j] + canvas->ScreenToCanvas(-100.0f);
 				ImColor col = ImColor(1.0f, 0.0f, 1.0f);
-				if (std::find(absNodes[j]->markedBy.begin(), absNodes[j]->markedBy.end(), i) != absNodes[j]->markedBy.end())
+				if (std::find(absNodes[j]->inputs.begin(), absNodes[j]->inputs.end(), i) != absNodes[j]->inputs.end())
 					col = ImColor(0.0f, 1.0f, 1.0f);
 				if (
 					network->nodeDependencyInfoPersistent->problemConnectionExists &&

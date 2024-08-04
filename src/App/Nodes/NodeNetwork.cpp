@@ -237,7 +237,7 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 	// lookup table for increased speed
 	std::unordered_map<Node*, size_t> nodeMap;
 
-	std::deque<std::pair<size_t, bool>> queue;
+	std::vector<size_t> endpointIDs;
 
 	for (size_t i = 0; i < nodes.size(); i++)
 	{
@@ -257,7 +257,7 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 				break;
 			}
 		if (isUnusedEndpoint)
-			queue.push_back(std::make_pair(i, false));
+			endpointIDs.push_back(i);
 			
 		absNodes.push_back(n);
 
@@ -268,74 +268,50 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 	for (size_t i = 0; i < nodes.size(); i++)
 		for (Node::NodeInput& k : nodes[i]->inputs)
 			if (k.source != nullptr && std::find(absNodes[i]->inputs.begin(), absNodes[i]->inputs.end(), nodeMap[k.source]) == absNodes[i]->inputs.end())
-			{
 				absNodes[i]->inputs.push_back(nodeMap[k.source]);
-				absNodes[nodeMap[k.source]]->outputs.push_back(i);
-			}
-
-	// backpropagate, marking nodes as you go, using the endpoints 'queue'
 
 	NodeDependencyInformation* nodeDependencyInformation = new NodeDependencyInformation();
 	nodeDependencyInformation->nodes = absNodes;
 	nodeDependencyInformation->endpoints = endpoints;
-
-	while (queue.size() > 0)
+	
+	// use TarjanSCC algorithm on all endpoints, making sure to clean the absNodes pile each time
+	for (size_t endpoint : endpointIDs)
 	{
-		auto& pair = queue.front();
-		size_t currentI = pair.first;
-		AbstractNode* current = absNodes[currentI];
-		queue.pop_front();
-
-		for (size_t i = 0; i < current->inputs.size(); i++)
+		std::vector<size_t> stack;
+		auto result = TarjanSCCSearch(endpoint, stack, absNodes);
+		if (result.first)
 		{
-			size_t inputI = current->inputs[i];
-			AbstractNode* input = absNodes[inputI];
-			// should not need to check whether outputIndex is actually valid, should always be
-			if (std::find(input->markedBy.begin(), input->markedBy.end(), currentI) != input->markedBy.end())
-			{
-				if (pair.second)
-				{
-					// means that the loop is the next connection down kinda
-					size_t error = 0;
-					for (size_t connection : input->outputs)
-						if (std::find(input->markedBy.begin(), input->markedBy.end(), connection) == input->markedBy.end())
-						{
-							error = connection;
-							break;
-						}
-					nodeDependencyInformation->problemConnectionExists = true;
-					nodeDependencyInformation->problemConnection = std::make_pair(inputI, error);
-					return nodeDependencyInformation;
-				}
-				// panic! there is some circular shit going on
-				nodeDependencyInformation->problemConnectionExists = true;
-				nodeDependencyInformation->problemConnection = std::make_pair(inputI, currentI);
-				return nodeDependencyInformation;
-			}
-			input->markedBy.push_back(currentI);
-			// only add the new node if it is full of outputs
-			if (input->markedBy.size() == input->outputs.size())
-				queue.push_back(std::make_pair(inputI, false));
-			else if (queue.size() == 0)
-			{
-				// panic! impossible to activate node
-				// have to find erroneous connection :sadpenisbee:
-				size_t error = 0;
-				for (size_t connection : input->outputs)
-					if (std::find(input->markedBy.begin(), input->markedBy.end(), connection) == input->markedBy.end())
-					{
-						error = connection;
-						break;
-					}
-				nodeDependencyInformation->problemConnectionExists = true;
-				nodeDependencyInformation->problemConnection = std::make_pair(inputI, error);
-				return nodeDependencyInformation;
-			}
-			else
-				queue.push_back(std::make_pair(currentI, true));
+			nodeDependencyInformation->problemConnectionExists = true;
+			nodeDependencyInformation->problemConnection = result.second;
+			return nodeDependencyInformation;
 		}
+		for (AbstractNode* n : absNodes)
+			n->onStack = false;
 	}
+	
 	return nodeDependencyInformation;
+}
+
+std::pair<bool, std::pair<size_t, size_t>> NodeNetwork::TarjanSCCSearch(size_t node, std::vector<size_t>& stack, std::vector<AbstractNode*>& nodes)
+{
+	nodes[node]->onStack = true;
+	stack.push_back(node);
+
+	for (size_t c : nodes[node]->inputs)
+	{
+		if (nodes[c]->onStack)
+			return { true, { node, c } };
+
+		auto result = TarjanSCCSearch(c, stack, nodes);
+
+		if (result.first)
+			return { true, result.second };
+	}
+
+	nodes[node]->onStack = false;
+	stack.pop_back();
+
+	return { false, {} };
 }
 
 NodeNetwork::NodeDependencyInformation::~NodeDependencyInformation()
