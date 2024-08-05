@@ -1,11 +1,10 @@
 #pragma once
 #include "Vector.h"
-#include <vector>
 
 #include "portaudio.h"
 
 #define SAMPLE_RATE (44100)
-#define BUFFER_SIZE (1024)
+#define BUFFER_SIZE (2048)
 
 class AudioStream
 {
@@ -18,7 +17,7 @@ public:
 	void Init();
 	void Release();
 
-	const static int maxQueueLength = 4;
+	const static int maxQueueLength = 2;
 	std::vector<v2> audioData[maxQueueLength]{};
 	int audioQueueStart = 0;
 	int audioQueueLength = 0;

@@ -20,7 +20,6 @@
 */
 // "{\"data\": \"string\",\"num\" : 1234,\"float\" : 1.04,\"array\" : [42,	\"name\",	\"obj\",{\"nestedObject\": 42,\"okay\" : true}]}"
 
-#include <vector>
 #include <unordered_map>
 #include <map>
 #include <fstream>

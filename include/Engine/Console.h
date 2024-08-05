@@ -1,6 +1,5 @@
 #pragma once
 #include "Vector.h"
-#include <vector>
 
 typedef void (*ConsoleCommandCallback)(std::vector<std::string> arguments);
 

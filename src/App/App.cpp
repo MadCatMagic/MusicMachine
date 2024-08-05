@@ -17,7 +17,7 @@ void App::Initialize()
     b->position = v2(100.0f, 0.0f);
     b->IO();
 
-    Node* m = n->AddNodeFromName("Distortion");
+    Node* m = n->AddNodeFromName("AnalysisNode");
     m->IO();
     m->position = v2(-20.0f, 0.0f);
     if (b->Connect(0, m, 0))

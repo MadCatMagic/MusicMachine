@@ -274,9 +274,9 @@ nodeInteractionsEscape:
         {
             totalSliderMovement += sliderDelta * io.MouseDelta.x * scale.x * (io.KeyShift ? 0.2f : 1.0f);
             if (sliderIsInt)
-                *sliderValue.i = (int)clamp(originalSliderValue + totalSliderMovement, sliderMin, sliderMax, sliderLockMin, sliderLockMax);
+                *sliderValue.i = (int)optionalClamp(originalSliderValue + totalSliderMovement, sliderMin, sliderMax, sliderLockMin, sliderLockMax);
             else
-                *sliderValue.f = clamp(originalSliderValue + totalSliderMovement, sliderMin, sliderMax, sliderLockMin, sliderLockMax);
+                *sliderValue.f = optionalClamp(originalSliderValue + totalSliderMovement, sliderMin, sliderMax, sliderLockMin, sliderLockMax);
         }
     }
 
@@ -550,6 +550,7 @@ void Canvas::LoadState(const std::string& filepath, App* appPointer)
     if (nodes != nullptr)
         delete nodes;
     nodes = new NodeNetwork(std::string(filepath));
+    nodes->AssignCanvas(this);
     if (nodeRenderer != nullptr)
         delete nodeRenderer;
     nodeRenderer = new NodeNetworkRenderer(nodes, this);

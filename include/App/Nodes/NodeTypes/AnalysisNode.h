@@ -1,7 +1,7 @@
 #pragma once
 #include "App/Nodes/Node.h"
 
-struct Distortion : public Node
+struct AnalysisNode : public Node
 {
 protected:
 	virtual void Init() override;
@@ -19,13 +19,8 @@ private:
 	AudioChannel ichannel{ };
 	AudioChannel ochannel{ };
 
-	enum Mode { SoftClip, HardClip, Bitcrush, Sinfold } mode = Mode::SoftClip;
+	std::vector<Complex> resultLeft;
+	std::vector<Complex> resultRight;
 
-	float convert(float v) const;
-
-	float pregain = 1.0f;
-	float distortion = 0.5f;
-	float mix = 1.0f;
-
-	float tanConstant = 1.0f;
+	bool splitChannels = false;
 };

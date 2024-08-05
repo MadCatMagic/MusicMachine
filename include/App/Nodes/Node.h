@@ -1,7 +1,6 @@
 #pragma once
 #include "Vector.h"
 #include "BBox.h"
-#include <vector>
 #include "App/JSON.h"
 
 #include "App/AudioChannel.h"

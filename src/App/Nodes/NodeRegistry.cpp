@@ -3,6 +3,7 @@
 #include "App/Nodes/NodeFactory.h"
 
 #include "App/Nodes/NodeTypes/ADSRNode.h"
+#include "App/Nodes/NodeTypes/AnalysisNode.h"
 #include "App/Nodes/NodeTypes/ApproxLFO.h"
 #include "App/Nodes/NodeTypes/AudioFilter.h"
 #include "App/Nodes/NodeTypes/AudioOutputNode.h"
@@ -17,6 +18,7 @@
 void RegisterNodes()
 {
     GetNodeFactory().Register("ADSRNode", "ADSR", NodeBuilder<ADSRNode>);
+    GetNodeFactory().Register("AnalysisNode", "Analysis Node", NodeBuilder<AnalysisNode>);
     GetNodeFactory().Register("ApproxLFO", "Approx LFO", NodeBuilder<ApproxLFO>);
     GetNodeFactory().Register("AudioFilter", "Filter", NodeBuilder<AudioFilter>);
     GetNodeFactory().Register("AudioOutputNode", "Audio Output Node", NodeBuilder<AudioOutputNode>);

@@ -138,6 +138,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Nodes\NodeTypes\AnalysisNode.cpp" />
+    <ClCompile Include="src\Maths\Maths.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\NoiseNode.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\MathsNode.cpp" />
     <ClCompile Include="src\App\AudioStream.cpp" />
@@ -179,6 +181,7 @@
     <ClInclude Include="include\App\App.h" />
     <ClInclude Include="include\App\AudioChannel.h" />
     <ClInclude Include="include\App\AudioStream.h" />
+    <ClInclude Include="include\App\Nodes\NodeTypes\AnalysisNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\ApproxLFO.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\AudioFilter.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\AudioOutputNode.h" />
@@ -203,6 +206,7 @@
     <ClInclude Include="include\Engine\Texture\Image.h" />
     <ClInclude Include="include\Engine\Texture\ImageLoader.h" />
     <ClInclude Include="include\App\JSON.h" />
+    <ClInclude Include="include\Maths.h" />
     <ClInclude Include="include\Random.h" />
     <ClInclude Include="include\Vector.h" />
     <ClInclude Include="include\App\Sequencer.h" />
