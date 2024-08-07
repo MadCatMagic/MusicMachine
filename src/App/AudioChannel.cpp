@@ -1,7 +1,7 @@
 #include "App/AudioChannel.h"
 
-int AudioChannel::sampleRate = 0;
-int AudioChannel::bufferSize = 0;
+size_t AudioChannel::sampleRate = 0;
+size_t AudioChannel::bufferSize = 0;
 
 float AudioChannel::t = 0;
 float AudioChannel::dt = 0;

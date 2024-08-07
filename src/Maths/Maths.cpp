@@ -1,7 +1,9 @@
 #include "Maths.h"
+#include <assert.h>
 
 std::vector<Complex> FFT(const std::vector<Complex>& x)
 {
+    assert(x.size() != 0);
     auto data = _FFT(x, x.size());
     for (auto& v : data)
         v /= (float)x.size();

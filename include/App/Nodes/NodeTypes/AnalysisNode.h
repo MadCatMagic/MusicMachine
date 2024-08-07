@@ -8,19 +8,16 @@ protected:
 	virtual void IO() override;
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
-	virtual bool OnClick(const NodeClickInfo& info) override;
 
 	virtual void Work() override;
 
-	virtual void Load(JSONType& data) override;
-	virtual JSONType Save() override;
-
 private:
+	const float fftFeedback = 0.25f;
+	const float minDB = 70.0f;
+
 	AudioChannel ichannel{ };
 	AudioChannel ochannel{ };
 
-	std::vector<Complex> resultLeft;
-	std::vector<Complex> resultRight;
-
-	bool splitChannels = false;
+	std::vector<v2> inputBuffer;
+	std::vector<float> fftBuffer;
 };

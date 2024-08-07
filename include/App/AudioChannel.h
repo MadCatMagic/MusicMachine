@@ -12,8 +12,8 @@ struct AudioChannel
 
 	// either 1 or 2
 	int channels = 2;
-	static int sampleRate;
-	static int bufferSize;
+	static size_t sampleRate;
+	static size_t bufferSize;
 	static float t;
 	static float dt;
 
