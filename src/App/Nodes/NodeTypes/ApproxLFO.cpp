@@ -1,6 +1,8 @@
 #include "App/Nodes/NodeTypes/ApproxLFO.h"
 #include "Engine/DrawList.h"
 
+#include "App/Arranger.h"
+
 void ApproxLFO::Init()
 {
 	name = "ApproxLFO";
@@ -10,8 +12,13 @@ void ApproxLFO::Init()
 
 void ApproxLFO::IO()
 {
-	FloatInput("frequency", &frequency, 0.05f, 5.0f, true, false);
 	FloatInput("shape", &shape, 0.0f, 4.0f, true, true);
+	BoolInput("tempo sync", &useSync);
+	if (useSync)
+		TempoSyncIntInput("frequency", &syncInput);
+	else
+		FloatInput("frequency", &frequency, 0.05f, 5.0f, true, false);
+
 	FloatOutput("LFO", &output);
 }
 
@@ -51,6 +58,9 @@ void ApproxLFO::Work()
 
 float ApproxLFO::GetPhase() const
 {
+	if (useSync)
+		return Arranger::instance->getTime(tempoSyncToFloat(syncInput));
+	
 	float length = 1.0f / frequency;
 	return fmodf(AudioChannel::t, length) / length;
 }
@@ -59,12 +69,16 @@ void ApproxLFO::Load(JSONType& data)
 {
 	frequency = (float)data.obj["frequency"].f;
 	shape = (float)data.obj["shape"].f;
+	useSync = data.obj["sync"].b;
+	syncInput = (int)data.obj["syncv"].i;
 }
 
 JSONType ApproxLFO::Save()
 {
 	return { {
 		{ "frequency", (double)frequency },
-		{ "shape", (double)shape }
+		{ "shape", (double)shape },
+		{ "sync", useSync },
+		{ "syncv", (long)syncInput }
 	} };
 }

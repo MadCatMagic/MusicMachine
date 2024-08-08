@@ -218,6 +218,21 @@ void Node::FloatOutput(const std::string& name, float* target)
 	TransferOutput(o);
 }
 
+// 1/64, 1/32, 1/16, 1/8, 1/4, 1/2, 1, 2, 4, 8, 16, 32, 64
+void Node::TempoSyncIntInput(const std::string& name, int* target)
+{
+	NodeInput o;
+	o.name = name;
+	o.target = target;
+	o.type = NodeType::Int;
+	o.fmin = -6.0f;
+	o.fmax = 6.0f;
+	o.lockMin = true;
+	o.lockMax = true;
+	o.displayType = FloatDisplayType::TempoSync;
+	TransferInput(o);
+}
+
 void Node::IntInput(const std::string& name, int* target, int min, int max, bool lockMinToRange, bool lockMaxToRange)
 {
 	NodeInput o;
@@ -276,8 +291,12 @@ void Node::SequencerOutput(const std::string& name, PitchSequencer* target)
 	TransferOutput(o);
 }
 
-
 #pragma endregion IOTypes
+
+float Node::tempoSyncToFloat(int v) const
+{
+	return powf(2.0f, (float)v);
+}
 
 #include <sstream>
 #include <iomanip>

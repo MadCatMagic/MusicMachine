@@ -32,4 +32,6 @@ private:
 
 	int currentI = 0;
 	float bpm = 120.0f;
+	bool tempoSync = true;
+	int tempoSyncV = 0;
 };

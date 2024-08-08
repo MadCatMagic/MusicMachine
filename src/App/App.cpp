@@ -49,6 +49,8 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 	ImGui::Begin("App");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
 
+    arranger.UI();
+
 	ImGui::End();
 
     c.CreateWindow(&drawStyle, this);
@@ -92,6 +94,7 @@ bool App::GetAudio()
 {
     // execute networks, send sound data off
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, t_fake, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
+    arranger.Work();
     if (n == nullptr)
     {
         Console::LogWarn("NETWORK EXECUTING SKIPPED");

@@ -13,6 +13,7 @@
 #include "App/Nodes/NodeTypes/MathsNode.h"
 #include "App/Nodes/NodeTypes/NoiseNode.h"
 #include "App/Nodes/NodeTypes/SequencerNode.h"
+#include "App/Nodes/NodeTypes/VariableNode.h"
 #include "App/Nodes/NodeTypes/WaveformGenerator.h"
 
 void RegisterNodes()
@@ -28,5 +29,6 @@ void RegisterNodes()
     GetNodeFactory().Register("MathsNode", "Maths", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("NoiseNode", "Noise", NodeBuilder<NoiseNode>);
     GetNodeFactory().Register("SequencerNode", "Sequencer Node", NodeBuilder<SequencerNode>);
+    GetNodeFactory().Register("VariableNode", "Variable", NodeBuilder<VariableNode>);
     GetNodeFactory().Register("WaveformGenerator",  "Waveform Generator",   NodeBuilder<WaveformGenerator>);
 }

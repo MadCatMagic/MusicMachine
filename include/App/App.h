@@ -1,6 +1,7 @@
 #pragma once
 #include "Nodes/Canvas.h"
 #include "Nodes/NodeNetwork.h"
+#include "App/Arranger.h"
 
 const int FRAME_TIME_MOVING_WINDOW_SIZE = 120;
 const int FRAME_TIME_AVERAGE_LENGTH = 10;
@@ -24,6 +25,7 @@ public:
 
 private:
 	AudioStream astream;
+	Arranger arranger;
 
 	DrawStyle drawStyle;
 

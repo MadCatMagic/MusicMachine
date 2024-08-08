@@ -1,5 +1,6 @@
 #include "Engine/DrawList.h"
 #include "App/Nodes/NodeTypes/SequencerNode.h"
+#include "App/Arranger.h"
 
 void SequencerNode::Init()
 {
@@ -12,10 +13,14 @@ void SequencerNode::Init()
 void SequencerNode::IO()
 {
 	SequencerOutput("sequence", &seq);
-	FloatInput("bpm", &bpm, 10.0f, 600.0f, true, true);
 	IntInput("length", &width, 4, 32, true, true);
 	IntInput("height", &height, 12, 24, true, true);
 	IntInput("octave", &octaveShift, -2, 2);
+	BoolInput("tempo sync", &tempoSync);
+	if (tempoSync)
+		TempoSyncIntInput("'bpm'", &tempoSyncV);
+	else
+		FloatInput("bpm", &bpm, 10.0f, 600.0f, true, true);
 }
 
 void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
@@ -88,13 +93,24 @@ void SequencerNode::Work()
 {
 	EnsureDataSize();
 
-	currentI = (int)(AudioChannel::t * (bpm / 60.0f)) % width;
+	if (tempoSync)
+		currentI = Arranger::instance->getBeat(width, tempoSyncToFloat(tempoSyncV));
+	else
+		currentI = (int)(AudioChannel::t * (bpm / 60.0f)) % width;
 
-	float pitchLength = (float)AudioChannel::sampleRate / (bpm / 60.0f);
+	float pitchLength;
+	if (tempoSync)
+		pitchLength = (float)AudioChannel::sampleRate / (Arranger::instance->getTempo() / 60.0f);
+	else
+		pitchLength = (float)AudioChannel::sampleRate / (bpm / 60.0f);
 
 	seq = PitchSequencer();
 
-	float fakeTime = AudioChannel::t * (bpm / 60.0f);
+	float fakeTime;
+	if (tempoSync)
+		fakeTime = Arranger::instance->getTime(tempoSyncToFloat(tempoSyncV));
+	else
+		fakeTime = AudioChannel::t * (bpm / 60.0f);
 
 	int currLength = 0;
 	int io = 0;
@@ -115,7 +131,7 @@ void SequencerNode::Work()
 		seq.length.push_back(t);
 		seq.velocity.push_back(data[(currentI + io) % width].second);
 		// dont think this actually works :)
-		seq.cumSamples.push_back(pitchLength - ts);
+		seq.cumSamples.push_back((pitchLength - ts) * tempoSyncToFloat(tempoSyncV));
 		currLength += t;
 
 		io++;
@@ -129,6 +145,8 @@ void SequencerNode::Load(JSONType& data)
 	height = (int)data.obj["height"].i;
 	octaveShift = (int)data.obj["octave"].i;
 	bpm = (float)data.obj["bpm"].f;
+	tempoSync = data.obj["tempoSync"].b;
+	tempoSyncV = (int)data.obj["syncv"].i;
 	// load data
 	EnsureDataSize();
 	for (int i = 0; i < width; i++)
@@ -157,6 +175,8 @@ JSONType SequencerNode::Save()
 		{ "height", (long)height },
 		{ "octave", (long)octaveShift },
 		{ "bpm", (double)bpm },
+		{ "tempoSync", tempoSync },
+		{ "syncv", (long)tempoSyncV },
 		{ "data", dataVec }
 	});
 }

@@ -239,6 +239,7 @@ void NodeNetworkRenderer::DrawInput(const v2& cursor, const Node::NodeInput& inp
 				renderedValue = log10f(value) * 20.0f;
 			else if (inp.displayType == Node::FloatDisplayType::Hz)
 				renderedValue = value * 7214.4f; // experimentally obtained results
+
 			// drawing the text displaying the value
 			std::ostringstream ss;
 			if (inp.displayType == Node::FloatDisplayType::Hz)
@@ -254,6 +255,26 @@ void NodeNetworkRenderer::DrawInput(const v2& cursor, const Node::NodeInput& inp
 			else if (inp.displayType == Node::FloatDisplayType::Hz)
 				ss << "Hz";
 			std::string convertedString = ss.str();
+
+			// now do something completely different iff this is the case
+			const std::vector<std::string> tempoSyncMap = {
+				"1/64 beat",
+				"1/32 beat",
+				"1/16 beat",
+				"1/8 beat",
+				"1/4 beat",
+				"1/2 beat",
+				"1 beat",
+				"2 beats",
+				"4 beats",
+				"8 beats",
+				"16 beats",
+				"32 beats",
+				"64 beats"
+			};
+			if (inp.displayType == Node::FloatDisplayType::TempoSync)
+				convertedString = tempoSyncMap[*(int*)inp.target + 6];
+
 			v2 ftpos = cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f);
 			currentList->Text(
 				ftpos,

@@ -68,7 +68,7 @@ struct Node
 		Bool, Float, Int, Audio, Sequencer
 	};
 
-	enum FloatDisplayType { None, Db, Hz };
+	enum FloatDisplayType { None, Db, Hz, TempoSync };
 
 	friend NodeNetwork;
 	friend class NodeNetworkRenderer;
@@ -111,6 +111,7 @@ protected:
 	void FloatInput(const std::string& name, float* target, float min = 0.0f, float max = 1.0f, bool lockMinToRange = false, bool lockMaxToRange = false, FloatDisplayType displayType = FloatDisplayType::None);
 	void FloatOutput(const std::string& name, float* target);
 
+	void TempoSyncIntInput(const std::string& name, int* target);
 	void IntInput(const std::string& name, int* target, int min = 0, int max = 127, bool lockMinToRange = false, bool lockMaxToRange = false);
 	void IntOutput(const std::string& name, int* target);
 
@@ -119,6 +120,9 @@ protected:
 
 	void SequencerInput(const std::string& name, PitchSequencer* target);
 	void SequencerOutput(const std::string& name, PitchSequencer* target);
+
+	// returns in terms of beats
+	float tempoSyncToFloat(int v) const;
 
 private:
 	uint64_t id = 0;

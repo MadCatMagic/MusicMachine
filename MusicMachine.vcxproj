@@ -138,6 +138,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Arranger.cpp" />
+    <ClCompile Include="src\App\Nodes\NodeTypes\VariableNode.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\AnalysisNode.cpp" />
     <ClCompile Include="src\Maths\Maths.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\NoiseNode.cpp" />
@@ -179,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App\App.h" />
+    <ClInclude Include="include\App\Arranger.h" />
     <ClInclude Include="include\App\AudioChannel.h" />
     <ClInclude Include="include\App\AudioStream.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\AnalysisNode.h" />
@@ -195,6 +198,7 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\Distortion.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\MathsNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NoiseNode.h" />
+    <ClInclude Include="include\App\Nodes\NodeTypes\VariableNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\WaveformGenerator.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\SequencerNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\ADSRNode.h" />

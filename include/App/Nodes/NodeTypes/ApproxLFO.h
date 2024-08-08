@@ -29,6 +29,8 @@ private:
 	float GetPhase() const;
 
 	float output = 0.0f;
+	bool useSync = false;
+	int syncInput = 0;
 	float frequency = 1.0f;
 
 	// from 0 to 4
