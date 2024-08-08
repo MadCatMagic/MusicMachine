@@ -4,6 +4,8 @@
 
 #include "App/AudioStream.h"
 
+#include "App/Arranger.h"
+
 #include "imgui.h"
 #include "BBox.h"
 
@@ -43,6 +45,8 @@ public:
 	Node* GetNodeFromID(const std::string& id);
 
 	AudioStream* audioStream = nullptr;
+
+	Arranger arranger;
 
 private:
 

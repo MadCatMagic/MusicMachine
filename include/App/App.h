@@ -25,7 +25,6 @@ public:
 
 private:
 	AudioStream astream;
-	Arranger arranger;
 
 	DrawStyle drawStyle;
 

@@ -184,6 +184,15 @@ bool NodeNetwork::Execute()
 	if (nodeDependencyInfoPersistent->problemConnectionExists)
 		return false;
 
+	if (arranger.paused())
+	{
+		auto emptyVec = std::vector<v2>(AudioChannel::bufferSize, v2());
+		audioStream->SetData(emptyVec);
+		return true;
+	}
+
+	arranger.Work();
+
 	// backpropagate in a sensible manner
 	for (Node* n : nodes)
 		n->hasBeenExecuted = false;

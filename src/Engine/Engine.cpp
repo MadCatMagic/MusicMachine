@@ -1,5 +1,10 @@
 #include "Engine.h"
-#include "Engine/Input.h"
+// safeguarding against wrong include order
+#if !(defined(__gl_h_) || defined(__GL_H__) || defined(_GL_H) || defined(__X_GL_H))
+#include <GL/glew.h>
+#endif
+#include <GLFW/glfw3.h>
+
 #include <iostream>
 
 Engine::Engine()
@@ -29,9 +34,7 @@ void Engine::Mainloop(bool debugging)
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Input::InputUpdate();
         Update();
-        Input::scrollDiff = 0.0f;
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
@@ -91,8 +94,6 @@ void Engine::Initialize()
     io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    Input::EnableInput(window, io);
-
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
@@ -110,7 +111,7 @@ void Engine::Update()
     app.Update();
 
     // make sure console does its thing
-    if (Input::GetKeyDown(Input::Key::GRAVE))
+    if (ImGui::IsKeyPressed(ImGuiKey_GraveAccent))
         console.enabled = !console.enabled;
 
     // Start the Dear ImGui frame
@@ -126,7 +127,6 @@ void Engine::Update()
     
     app.UI(io, ft / FRAME_TIME_AVERAGE_LENGTH, lastFrameTime[(lastFrameTimeI - 1 + FRAME_TIME_MOVING_WINDOW_SIZE) % FRAME_TIME_MOVING_WINDOW_SIZE]);
     console.GUI();
-    ImGui::ShowDemoWindow();
 
     // Rendering
     ImGui::Render();

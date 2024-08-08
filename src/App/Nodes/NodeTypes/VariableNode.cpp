@@ -14,6 +14,11 @@ void VariableNode::Init()
 	title = "Variable";
 	minSpace = v2(100.0f, 15.0f);
 	variableNodes.push_back(this);
+
+    points.push_back(v2(0.5f, 0.8f));
+    points.push_back(v2(3.4f, 0.4f));
+    points.push_back(v2(5.2f, 0.7f));
+    points.push_back(v2(5.3f, 0.1f));
 }
 
 void VariableNode::IO()

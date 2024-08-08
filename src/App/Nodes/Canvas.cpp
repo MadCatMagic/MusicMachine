@@ -5,7 +5,6 @@
 #include "Engine/Console.h"
 #include "BBox.h"
 
-#include "Engine/Input.h"
 #include "Engine/DrawList.h"
 
 #include "App/App.h"
@@ -30,6 +29,10 @@ void Canvas::InitCanvas()
 // a lot of this code is taken from the ImGui canvas example
 void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
 {
+    ImGui::Begin("Arranger");
+    nodes->arranger.UI(drawStyle);
+    ImGui::End();
+
     ImGui::Begin("Canvas");
     ImGui::InputFloat2("position", &position.x);
 
@@ -281,7 +284,7 @@ nodeInteractionsEscape:
     }
 
     // delete things
-    if (Input::GetKeyDown(Input::Key::DELETE) && selectedStack.size() > 0)
+    if (ImGui::IsKeyPressed(ImGuiKey_Delete) && selectedStack.size() > 0)
     {
         for (Node* n : selectedStack)
             nodes->DeleteNode(n);
@@ -292,7 +295,7 @@ nodeInteractionsEscape:
     }
 
     // escape all seelctions
-    if (Input::GetKeyDown(Input::Key::ESCAPE) && selectedStack.size() > 0)
+    if (ImGui::IsKeyPressed(ImGuiKey_Escape) && selectedStack.size() > 0)
         selectedStack.clear();
 
     // taken from LevelEditor\...\Editor.cpp

@@ -22,5 +22,5 @@ public:
 	int audioQueueStart = 0;
 	int audioQueueLength = 0;
 
-	PaStream* stream;
+	PaStream* stream = nullptr;
 };
