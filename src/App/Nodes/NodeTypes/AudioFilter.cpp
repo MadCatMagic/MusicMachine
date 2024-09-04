@@ -67,9 +67,9 @@ void AudioFilter::Work()
 		case FilterType::LP:
 			ochannel.data[i] = buf1; break;
 		case FilterType::HP:
-			ochannel.data[i] = ichannel.data[i] - buf0;
+			ochannel.data[i] = ichannel.data[i] - buf0; break;
 		case FilterType::BP:
-			ochannel.data[i] = buf0 - buf1;
+			ochannel.data[i] = buf0 - buf1; break;
 		}
 	}
 }
