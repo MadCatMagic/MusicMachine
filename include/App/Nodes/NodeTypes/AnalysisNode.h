@@ -14,10 +14,13 @@ protected:
 private:
 	const float fftFeedback = 0.25f;
 	const float minDB = 70.0f;
+	
+	bool inputChanged = false;
 
 	AudioChannel ichannel{ };
 	AudioChannel ochannel{ };
 
+	std::vector<v2> points;
 	std::vector<v2> inputBuffer;
 	std::vector<float> fftBuffer;
 };

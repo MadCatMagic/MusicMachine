@@ -25,8 +25,9 @@ public:
 
 private:
 
-	const float pixelsPerBeat = 8.0f;
-	const float pixelHeight = 606.0f;
+	const float pixelsPerBeat = 12.0f;
+	const float pixelHeight = 646.0f;
+	const float rowHeight = 80.0f;
 	const float padding = 6.0f;
 
 	v2 ScreenToCanvas(const v2& pos) const;
@@ -45,9 +46,13 @@ private:
 	bool playing = false;
 	bool draggingTimeCursor = false;
 
-	int scalingLevel = 15;
-	float position = 0.0f;
-	float scale = 1.0f;
+	bool isDraggingNode = false;
+	int draggingVariable = -1;
+	int draggingNode = -1;
+
+	v2i scalingLevel = 15;
+	v2 position = 0.0f;
+	v2 scale = 1.0f;
 
 	v2 canvasPixelPos;
 	v2 canvasPixelSize;

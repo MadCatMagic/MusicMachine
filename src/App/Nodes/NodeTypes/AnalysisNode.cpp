@@ -16,7 +16,7 @@ void AnalysisNode::IO()
 
 void AnalysisNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
-    if (inputBuffer.size() != 0)
+    if (inputChanged && inputBuffer.size() != 0)
     {
         std::vector<Complex> cbufferLeft = std::vector<Complex>(inputBuffer.size());
         std::vector<Complex> cbufferRight = std::vector<Complex>(inputBuffer.size());
@@ -30,7 +30,7 @@ void AnalysisNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
         cbufferLeft = FFT(cbufferLeft);
         cbufferRight = FFT(cbufferRight);
 
-        std::vector<v2> points;
+        points.clear();
         float logConstant = 200.0f / log2f(ichannel.sampleRate / 40.0f);
         for (int i = 0; i < cbufferLeft.size() / 2; i++)
         {
@@ -52,6 +52,11 @@ void AnalysisNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
             ));
         }
 
+        inputChanged = false;
+    }
+
+    if (points.size() > 1)
+    {
         for (size_t i = 0; i < points.size() - 1; i++)
             dl->Line(points[i] + topLeft, points[i + 1] + topLeft, ImColor(1.0f, 1.0f, 1.0f));
     }
@@ -64,6 +69,8 @@ void AnalysisNode::Work()
         inputBuffer = std::vector<v2>(ichannel.bufferSize * 4);
         fftBuffer = std::vector<float>(ichannel.bufferSize * 2);
     }
+
+    inputChanged = true;
 
     for (size_t i = 0; i < ichannel.bufferSize * 3; i++)
         inputBuffer[i] = inputBuffer[i + ichannel.bufferSize];
