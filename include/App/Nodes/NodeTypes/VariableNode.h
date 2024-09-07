@@ -6,6 +6,12 @@ struct VariableNode : public Node
 	friend class Arranger;
 	~VariableNode();
 
+	float minV = 0.0f;
+	float maxV = 1.0f;
+
+	void FlagForDeletion(int index);
+	void DeleteFlaggedPoints();
+
 protected:
 	virtual void Init() override;
 	virtual void IO() override;
@@ -17,6 +23,7 @@ protected:
 
 private:
 	std::vector<v2> points;
+	std::vector<int> toDelete;
 	float getValue(float xv) const;
 
 	float output = 0.0f;

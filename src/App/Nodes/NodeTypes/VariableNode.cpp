@@ -1,4 +1,5 @@
 #include "App/Nodes/NodeTypes/VariableNode.h"
+#include "App/Arranger.h"
 #include "Engine/DrawList.h"
 
 VariableNode::~VariableNode()
@@ -8,11 +9,37 @@ VariableNode::~VariableNode()
         variableNodes.erase(r);
 }
 
+void VariableNode::FlagForDeletion(int index)
+{
+    // linear insertion
+    // slow but whatever fast enough for now
+    if (toDelete.size() == 0)
+    {
+        toDelete.push_back(index);
+        return;
+    }
+
+    for (size_t i = 0; i < toDelete.size(); i++)
+        if (toDelete[i] < index)
+        {
+            toDelete.insert(toDelete.begin() + i, index);
+            return;
+        }
+}
+
+void VariableNode::DeleteFlaggedPoints()
+{
+    // to delete should be sorted reverse-alphabetically
+    for (int index : toDelete)
+        points.erase(points.begin() + index);
+    toDelete.clear();
+}
+
 void VariableNode::Init()
 {
 	name = "VariableNode";
 	title = "Variable";
-	minSpace = v2(100.0f, 15.0f);
+	minSpace = v2(100.0f, 30.0f);
 	variableNodes.push_back(this);
 
     points.push_back(v2(0.5f, 0.8f));
@@ -29,6 +56,7 @@ void VariableNode::IO()
 void VariableNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 	dl->Text(topLeft, DrawColour::Text, id.c_str());
+    dl->Text(topLeft + v2(0.0f, 15.0f), DrawColour::Text, std::to_string(getValue(Arranger::instance->getTime()) * (maxV - minV) + minV).c_str());
 }
 
 void VariableNode::Load(JSONType& data)
@@ -57,16 +85,16 @@ float VariableNode::getValue(float xv) const
         return 0.0f;
 
     if (xv <= points[0].x)
-        return points[0].y;
+        return 1.0f - points[0].y;
     if (xv >= points[points.size() - 1].x)
-        return points[points.size() - 1].y;
+        return 1.0f - points[points.size() - 1].y;
 
     for (size_t i = 0; i < points.size() - 1; i++)
     {
         if (xv >= points[i].x && xv < points[i + 1].x)
         {
             float lerpv = (xv - points[i].x) / (points[i + 1].x - points[i].x);
-            return lerpv * points[i].y + (1.0f - lerpv) * points[i + 1].y;
+            return 1.0f - ((1.0f - lerpv) * points[i].y + lerpv * points[i + 1].y);
         }
     }
     return 0.0f;

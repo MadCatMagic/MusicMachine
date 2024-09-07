@@ -66,18 +66,18 @@ void AnalysisNode::Work()
 {
     if (inputBuffer.size() == 0)
     {
-        inputBuffer = std::vector<v2>(ichannel.bufferSize * 4);
-        fftBuffer = std::vector<float>(ichannel.bufferSize * 2);
+        inputBuffer = std::vector<v2>(ichannel.bufferSize * 8);
+        fftBuffer = std::vector<float>(ichannel.bufferSize * 4);
     }
 
     inputChanged = true;
 
-    for (size_t i = 0; i < ichannel.bufferSize * 3; i++)
+    for (size_t i = 0; i < ichannel.bufferSize * 7; i++)
         inputBuffer[i] = inputBuffer[i + ichannel.bufferSize];
 
     for (int i = 0; i < ichannel.bufferSize; i++)
     {
-        inputBuffer[i + ichannel.bufferSize * 3] = ichannel.data[i];
+        inputBuffer[i + ichannel.bufferSize * 7] = ichannel.data[i];
         ochannel.data[i] = ichannel.data[i];
     }
 }

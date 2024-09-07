@@ -59,7 +59,7 @@ void ApproxLFO::Work()
 float ApproxLFO::GetPhase() const
 {
 	if (useSync)
-		return Arranger::instance->getTime(tempoSyncToFloat(syncInput));
+		return Arranger::instance->getTiming(tempoSyncToFloat(syncInput));
 	
 	float length = 1.0f / frequency;
 	return fmodf(AudioChannel::t, length) / length;

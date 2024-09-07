@@ -13,7 +13,7 @@ Arranger::Arranger()
 void Arranger::Work()
 {
 	for (VariableNode* node : VariableNode::variableNodes)
-		node->output = node->getValue(time);
+		node->output = node->getValue(time) * (node->maxV - node->minV) + node->minV;
 	time += AudioChannel::dt * tempo / 60.0f;
 }
 
@@ -38,6 +38,8 @@ void Arranger::UI(DrawStyle* drawStyle)
 
     if (!ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_Space))
         playing = !playing;
+    if (!ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_Delete))
+        DeleteNodesOnSelectedStack();
 
     // Child 1: list of input nodes
     {
@@ -52,13 +54,16 @@ void Arranger::UI(DrawStyle* drawStyle)
             VariableNode* node = VariableNode::variableNodes[i];
             ImGui::PushID((int)i);
             ImGui::BeginChild("AAAA", ImVec2(ImGui::GetContentRegionAvail().x, rowHeight / scale.y), true);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 4.0f));
 
             // name editing
             char buf[32]{ };
             strcpy_s<32>(buf, node->id.c_str());
             ImGui::InputText("id", buf, 32);
             node->id = std::string(buf);
+            ImGui::DragFloatRange2("range", &node->minV, &node->maxV, 0.01f, 0.0f, 100.0f);
 
+            ImGui::PopStyleVar();
             ImGui::EndChild();
             ImGui::PopID();
         }
@@ -95,7 +100,7 @@ void Arranger::UI(DrawStyle* drawStyle)
         const v2 mouseCanvasPos = ScreenToCanvas((v2)io.MousePos);
         const v2 mousePos = CanvasToPosition(mouseCanvasPos);
 
-        // DOESNT WORK
+        // does work?
         int hoveredID = (int)(mousePos.y / rowHeight);
         if (hoveredID < 0 || hoveredID >= VariableNode::variableNodes.size() || !isHovered)
             hoveredID = -1;
@@ -125,8 +130,34 @@ void Arranger::UI(DrawStyle* drawStyle)
             }
         }
 
+        // create new nodes
+        int targetIndex = -1;
+        if (hoveredID != -1 && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && isActive && isNearLine(mousePos, hoveredID, targetIndex))
+        {
+            VariableNode::variableNodes[hoveredID]->points.insert(
+                VariableNode::variableNodes[hoveredID]->points.begin() + targetIndex,
+                mousePos.scale(1.0f / pixelsPerBeat, 1.0f / rowHeight) - v2(0.0f, hoveredID)
+            );
+            // select newly created node
+            selectedStack.clear();
+            selectedStack.push_back({ hoveredID, targetIndex });
+            isDraggingNode = true;
+        }
+
+        // moving time cursor
+        else if (isActive && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+            draggingTimeCursor = true;
+        else if (draggingTimeCursor && ImGui::IsMouseDown(ImGuiMouseButton_Left))
+            time = std::max(0.0f, mousePos.x / pixelsPerBeat);
+        else if (draggingTimeCursor)
+        {
+            // snap time to quarter notes
+            time = std::roundf(time);
+            draggingTimeCursor = false;
+        }
+
         // selection box
-        if (!selectingStuff && isActive && closestCell == -1 && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        else if (!selectingStuff && isActive && closestCell == -1 && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
             selectingStuff = true;
             selectionStart = mousePos;
@@ -192,18 +223,6 @@ void Arranger::UI(DrawStyle* drawStyle)
         else if (isDraggingNode)
             isDraggingNode = false;
 
-        // moving time cursor
-        else if (isActive && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-            draggingTimeCursor = true;
-        else if (draggingTimeCursor && ImGui::IsMouseDown(ImGuiMouseButton_Left))
-            time = std::max(0.0f, mousePos.x / pixelsPerBeat);
-        else if (draggingTimeCursor)
-        {
-            // snap time to quarter notes
-            time = std::roundf(time);
-            draggingTimeCursor = false;
-        }
-
         // taken from LevelEditor\...\Editor.cpp
         if (isHovered && io.MouseWheel != 0.0f)
         {
@@ -226,15 +245,6 @@ void Arranger::UI(DrawStyle* drawStyle)
         }
         position.x = std::max(0.0f, position.x);
         position.y = std::max(0.0f, position.y);
-
-        // Context menu (under default mouse threshold)
-        ImVec2 drag_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
-        if (drag_delta.x == 0.0f && drag_delta.y == 0.0f)
-            ImGui::OpenPopupOnItemClick("context", ImGuiPopupFlags_MouseButtonRight);
-        if (ImGui::BeginPopup("context"))
-        {
-            ImGui::EndPopup();
-        }
 
         // Draw grid + all lines in the canvas
         drawList.dl->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
@@ -260,27 +270,28 @@ void Arranger::UI(DrawStyle* drawStyle)
         {
             VariableNode* node = VariableNode::variableNodes[j];
 
-            if (node->points.size() == 0)
-                continue;
-            if (position.x <= node->points[0].x * pixelsPerBeat)
-                drawList.Line(
-                    ptcts(v2(position.x, node->points[0].y * rowHeight + rowHeight * j)),
-                    ptcts(node->points[0].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
-                    ImColor(1.0f, 1.0f, 1.0f)
-                );
-            if (position.x + canvasPixelSize.x * scale.x >= node->points[node->points.size() - 1].x * pixelsPerBeat)
-                drawList.Line(
-                    ptcts(node->points[node->points.size() - 1].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
-                    ptcts(v2(position.x + canvasPixelSize.x * scale.x, node->points[node->points.size() - 1].y * rowHeight + rowHeight * j)),
-                    ImColor(1.0f, 1.0f, 1.0f)
-                );
+            if (node->points.size() != 0)
+            {
+                if (position.x <= node->points[0].x * pixelsPerBeat)
+                    drawList.Line(
+                        ptcts(v2(position.x, node->points[0].y * rowHeight + rowHeight * j)),
+                        ptcts(node->points[0].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
+                        ImColor(1.0f, 1.0f, 1.0f)
+                    );
+                if (position.x + canvasPixelSize.x * scale.x >= node->points[node->points.size() - 1].x * pixelsPerBeat)
+                    drawList.Line(
+                        ptcts(node->points[node->points.size() - 1].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
+                        ptcts(v2(position.x + canvasPixelSize.x * scale.x, node->points[node->points.size() - 1].y * rowHeight + rowHeight * j)),
+                        ImColor(1.0f, 1.0f, 1.0f)
+                    );
 
-            for (size_t i = 0; i < node->points.size() - 1; i++)
-                drawList.Line(
-                    ptcts(node->points[i].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
-                    ptcts(node->points[i + 1].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
-                    ImColor(1.0f, 1.0f, 1.0f)
-                );
+                for (size_t i = 0; i < node->points.size() - 1; i++)
+                    drawList.Line(
+                        ptcts(node->points[i].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
+                        ptcts(node->points[i + 1].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
+                        ImColor(1.0f, 1.0f, 1.0f)
+                    );
+            }
 
             drawList.Line(
                 canvasPixelPos + v2(0.0f, -position.y / scale.y + padding + rowHeight * (j + 1) / scale.y - 1.0f),
@@ -293,9 +304,7 @@ void Arranger::UI(DrawStyle* drawStyle)
             {
                 v2 centre = ptcts(node->points[i].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j));
 
-                bool selected = inSelectedStack(j, i);
-
-                if (selected)
+                if (inSelectedStack(j, i))
                     drawList.Rect(centre - cellR - 2.0f, centre + cellR + 2.0f, ImColor(1.0f, 0.0f, 1.0f));
                 if (j == hoveredID)
                     drawList.RectFilled(centre - cellR, centre + cellR, ImColor(1.0f, i == closestCell ? 0.0f : 1.0f, 1.0f));
@@ -328,7 +337,7 @@ int Arranger::getBeat(int mod, float division) const
 	return (int)(time / division) % mod;
 }
 
-float Arranger::getTime(float period) const
+float Arranger::getTiming(float period) const
 {
 	return fmodf(time / (float)period, 1.0f);
 }
@@ -347,6 +356,32 @@ bool Arranger::inSelectedStack(int i, int j) const
         if (pair.first == i && pair.second == j)
             return true;
     return false;
+}
+
+bool Arranger::isNearLine(const v2& pos, int hovered, int& target) const
+{
+    v2 truePos = pos.scale(1.0f / pixelsPerBeat, 1.0f / rowHeight) - v2(0.0f, hovered);
+    VariableNode* ref = VariableNode::variableNodes[hovered];
+    int i;
+    for (i = 0; i < ref->points.size(); i++)
+        if (ref->points[i].x > truePos.x)
+            break;
+    target = i;
+    // stupid but whatever
+    float y = 1.0f - ref->getValue(truePos.x);
+    if (abs(y - truePos.y) < 0.1f)
+        return true;
+    return false;
+}
+
+void Arranger::DeleteNodesOnSelectedStack()
+{
+    // how the fuck am i gonna do this one then
+    for (auto& pair : selectedStack)
+        VariableNode::variableNodes[pair.first]->FlagForDeletion(pair.second);
+    for (VariableNode* n : VariableNode::variableNodes)
+        n->DeleteFlaggedPoints();
+    selectedStack.clear();
 }
 
 v2 Arranger::ScreenToCanvas(const v2& pos) const // c = s + p

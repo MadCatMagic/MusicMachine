@@ -18,8 +18,9 @@ public:
 	// scaled for tempo
 	int getBeat(int mod, float division) const;
 	// returns [0,1] for this period (period in terms of beats)
-	float getTime(float period) const;
+	float getTiming(float period) const;
 
+	inline float getTime() const { return time; }
 	inline float getTempo() const { return tempo; }
 	inline bool paused() const { return !playing; }
 
@@ -52,6 +53,9 @@ private:
 	bool isDraggingNode = false;
 
 	bool inSelectedStack(int i, int j) const;
+	bool isNearLine(const v2& pos, int hovered, int& target) const;
+
+	void DeleteNodesOnSelectedStack();
 
 	v2i scalingLevel = 15;
 	v2 position = 0.0f;

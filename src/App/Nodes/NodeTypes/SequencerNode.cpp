@@ -108,7 +108,7 @@ void SequencerNode::Work()
 
 	float fakeTime;
 	if (tempoSync)
-		fakeTime = Arranger::instance->getTime(tempoSyncToFloat(tempoSyncV));
+		fakeTime = Arranger::instance->getTiming(tempoSyncToFloat(tempoSyncV));
 	else
 		fakeTime = AudioChannel::t * (bpm / 60.0f);
 
