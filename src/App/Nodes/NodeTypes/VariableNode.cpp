@@ -31,6 +31,26 @@ void VariableNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	dl->Text(topLeft, DrawColour::Text, id.c_str());
 }
 
+void VariableNode::Load(JSONType& data)
+{
+    points.clear();
+    for (auto& p : data.obj["points"].arr)
+        points.push_back(v2((float)p.arr[0].f, (float)p.arr[1].f));
+    id = data.obj["id"].s;
+}
+
+JSONType VariableNode::Save()
+{
+    std::vector<JSONType> pointsVec;
+    for (v2& p : points)
+        pointsVec.push_back(JSONType(std::vector({ JSONType((double)p.x), JSONType((double)p.y) })));
+
+    return JSONType({
+        { "points", pointsVec },
+        { "id", id }
+    });
+}
+
 float VariableNode::getValue(float xv) const
 {
     if (points.size() == 0)

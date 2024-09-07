@@ -31,6 +31,7 @@ struct v2
 
 	v2 reciprocal() const;
 	v2 scale(const v2& a) const;
+	v2 scale(float _x, float _y) const;
 
 	v2 normalise() const;
 	float length() const;

@@ -26,7 +26,6 @@ public:
 private:
 
 	const float pixelsPerBeat = 12.0f;
-	const float pixelHeight = 646.0f;
 	const float rowHeight = 80.0f;
 	const float padding = 6.0f;
 
@@ -46,9 +45,13 @@ private:
 	bool playing = false;
 	bool draggingTimeCursor = false;
 
+	// variableID, nodeID
+	std::vector<std::pair<int, int>> selectedStack;
+	bool selectingStuff = false;
+	v2 selectionStart;
 	bool isDraggingNode = false;
-	int draggingVariable = -1;
-	int draggingNode = -1;
+
+	bool inSelectedStack(int i, int j) const;
 
 	v2i scalingLevel = 15;
 	v2 position = 0.0f;

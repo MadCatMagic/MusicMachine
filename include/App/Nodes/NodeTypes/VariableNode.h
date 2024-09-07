@@ -12,6 +12,9 @@ protected:
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 private:
 	std::vector<v2> points;
 	float getValue(float xv) const;

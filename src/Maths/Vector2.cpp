@@ -46,6 +46,11 @@ v2 v2::scale(const v2& a) const
 	return v2(x * a.x, y * a.y);
 }
 
+v2 v2::scale(float _x, float _y) const
+{
+	return v2(x * _x, y * _y);
+}
+
 v2 v2::normalise() const
 {
 	const float kEpsilon = 0.000001f;
