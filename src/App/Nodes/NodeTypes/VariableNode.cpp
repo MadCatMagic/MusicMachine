@@ -65,6 +65,8 @@ void VariableNode::Load(JSONType& data)
     for (auto& p : data.obj["points"].arr)
         points.push_back(v2((float)p.arr[0].f, (float)p.arr[1].f));
     id = data.obj["id"].s;
+    minV = (float)data.obj["min"].f;
+    maxV = (float)data.obj["max"].f;
 }
 
 JSONType VariableNode::Save()
@@ -75,7 +77,9 @@ JSONType VariableNode::Save()
 
     return JSONType({
         { "points", pointsVec },
-        { "id", id }
+        { "id", id },
+        { "min", minV },
+        { "max", minV }
     });
 }
 
