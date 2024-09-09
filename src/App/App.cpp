@@ -140,19 +140,39 @@ void App::DebugWindow(ImGuiIO* io, double lastFrameTime, double averageFrameTime
 
 void App::Export(const std::string& filepath)
 {
-    std::vector<v2> dataBuf = std::vector<v2>((size_t)((exportEnd - exportBegin) * SAMPLE_RATE) + 1);
+    size_t bufSize = (size_t)((exportEnd - exportBegin) * SAMPLE_RATE) + 1;
+    std::vector<v2> dataBuf = std::vector<v2>(bufSize);
     Arranger::instance->setTime(exportBegin);
 
     astream.doNotMakeSound = true;
+    bool wasPlaying = Arranger::instance->playing;
+    Arranger::instance->playing = true;
+
+    // really stupid
+    // relies on this variable overflowing
     size_t tick = 0;
     while (Arranger::instance->getTime() <= exportEnd)
     {
         GetAudio();
         std::vector<v2> v = astream.GetData();
         for (size_t i = 0; i < v.size(); i++)
+        {
+            if (i + tick * BUFFER_SIZE >= bufSize)
+                goto escape;
             dataBuf[i + tick * BUFFER_SIZE] = v[i];
+        }
+        tick += 1;
     }
+escape:
     astream.doNotMakeSound = false;
+    Arranger::instance->playing = wasPlaying;
+
+    std::vector<int16_t> data = std::vector<int16_t>(dataBuf.size() * 2);
+    for (size_t i = 0; i < dataBuf.size(); i++)
+    {
+        data[i * 2] = (int16_t)(clamp(dataBuf[i].x, -1.0f, 1.0f) * INT16_MAX);
+        data[i * 2 + 1] = (int16_t)(clamp(dataBuf[i].y, -1.0f, 1.0f) * INT16_MAX);
+    }
     
     std::ofstream wf(filepath, std::ios::out | std::ios::binary);
 
@@ -161,20 +181,20 @@ void App::Export(const std::string& filepath)
         return;
     }
 
-    uint32_t fileSize = 10;
     uint32_t channels = 2;
     uint32_t sampleRate = SAMPLE_RATE;
     uint32_t bitsPerSample = 16;
     uint32_t byteRate = SAMPLE_RATE * channels * bitsPerSample / 8;
     uint32_t blockAlign = channels * bitsPerSample / 8;
     uint32_t dataSize = dataBuf.size() * channels * bitsPerSample / 8;
+    uint32_t fileSize = 36 + dataSize;
 
     wf.write("RIFF", 4);                                                    // "RIFF"           4b be
     wf.write(static_cast<char*>(static_cast<void*>(&fileSize)), 4);         // filesize         4b le
     wf.write("WAVE", 4);                                                    // "WAVE"           4b be
     
     wf.write("fmt ", 4);                                                    // "fmt "           4b be
-    wf.write("\x0F\x00\x00\x00", 4);                                        // 16               4b le
+    wf.write("\x10\x00\x00\x00", 4);                                        // 16               4b le
     wf.write("\x01\x00", 2);                                                // 1                2b le
     wf.write(static_cast<char*>(static_cast<void*>(&channels)), 2);         // numChannels      2b le
     wf.write(static_cast<char*>(static_cast<void*>(&sampleRate)), 4);       // sampleRate       4b le
@@ -185,9 +205,7 @@ void App::Export(const std::string& filepath)
     wf.write("data", 4); // "data"           4b be
     wf.write(static_cast<char*>(static_cast<void*>(&dataSize)), 4);         // dataSize (bytes) 4b le
     
-    // data             *  le
-    
-    // wf.write((char*)&wstu[i], sizeof(Student));
+    wf.write(static_cast<char*>(static_cast<void*>(&data[0])), data.size() * bitsPerSample / 8);
 
     wf.close();
 }
@@ -209,7 +227,6 @@ bool App::GetAudio()
         Console::LogWarn("NETWORK EXECUTING SKIPPED");
         return false;
     }
-    t_fake += (float)BUFFER_SIZE / (float)SAMPLE_RATE;
     if (!n->Execute()) {
         Console::LogWarn("NETWORK EXECUTING FAILED");
         return false;

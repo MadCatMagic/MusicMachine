@@ -184,7 +184,7 @@ bool NodeNetwork::Execute()
 	if (nodeDependencyInfoPersistent->problemConnectionExists)
 		return false;
 
-	if (arranger.paused())
+	if (!arranger.playing)
 	{
 		auto emptyVec = std::vector<v2>(AudioChannel::bufferSize, v2());
 		audioStream->SetData(emptyVec);

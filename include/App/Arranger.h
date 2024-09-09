@@ -21,9 +21,9 @@ public:
 	float getTiming(float period) const;
 
 	inline float getTime() const { return time; }
-	inline void setTime(float t) const { time = t; }
+	inline void setTime(float t) { time = t; }
 	inline float getTempo() const { return tempo; }
-	inline bool paused() const { return !playing; }
+	bool playing = false;
 
 private:
 
@@ -44,7 +44,6 @@ private:
 	// this is beat dependent - if the tempo changes this value does not as it just refers to the beat
 	float time = 0.0f;
 	float tempo = 120.0f;
-	bool playing = false;
 	bool draggingTimeCursor = false;
 
 	// variableID, nodeID
