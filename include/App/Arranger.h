@@ -21,6 +21,7 @@ public:
 	float getTiming(float period) const;
 
 	inline float getTime() const { return time; }
+	inline void setTime(float t) const { time = t; }
 	inline float getTempo() const { return tempo; }
 	inline bool paused() const { return !playing; }
 

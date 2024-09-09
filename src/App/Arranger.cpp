@@ -20,6 +20,7 @@ void Arranger::Work()
 // in our own window
 void Arranger::UI(DrawStyle* drawStyle)
 {
+    ImGui::Text("time = %.2f", time * (tempo / 240.0f));
 	ImGui::InputFloat("tempo", &tempo, 20.0f, 300.0f);
 	tempo = clamp(tempo, 20.0f, 600.0f);
 

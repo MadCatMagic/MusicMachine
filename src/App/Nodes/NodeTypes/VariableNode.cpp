@@ -79,7 +79,7 @@ JSONType VariableNode::Save()
         { "points", pointsVec },
         { "id", id },
         { "min", minV },
-        { "max", minV }
+        { "max", maxV }
     });
 }
 

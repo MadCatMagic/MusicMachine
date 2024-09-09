@@ -37,6 +37,11 @@ private:
 
 	float t_fake = 0.0f;
 
+	float exportBegin = 0.0f;
+	float exportEnd = 10.0f;
+
+	void Export(const std::string& filepath);
+
 	NodeNetwork* n = nullptr;
 	Canvas c;
 };

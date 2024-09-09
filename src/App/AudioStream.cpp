@@ -21,7 +21,7 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     (void)inputBuffer; /* Prevent unused variable warning. */
 
     // check if any data is filled; if none is, something went wrong probably
-    if (data->NoData())
+    if (data->NoData() || data->doNotMakeSound)
     {
         Console::LogWarn("NO DATA!!!");
         // wipe clean
