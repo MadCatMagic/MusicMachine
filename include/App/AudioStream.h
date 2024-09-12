@@ -12,6 +12,7 @@ class AudioStream
 public:
 	void SetData(std::vector<v2>& v);
 	std::vector<v2> GetData();
+	void EmptyQueue();
 	inline bool NoData() const { return audioQueueLength == 0; }
 	inline bool QueueFull() const { return audioQueueLength == MAX_QUEUE_LENGTH; }
 

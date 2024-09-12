@@ -145,13 +145,12 @@ void App::Export(const std::string& filepath)
     Arranger::instance->setTime(exportBegin);
 
     astream.doNotMakeSound = true;
+    astream.EmptyQueue();
     bool wasPlaying = Arranger::instance->playing;
     Arranger::instance->playing = true;
 
-    // really stupid
-    // relies on this variable overflowing
     size_t tick = 0;
-    while (Arranger::instance->getTime() <= exportEnd)
+    while (Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f <= exportEnd)
     {
         GetAudio();
         std::vector<v2> v = astream.GetData();

@@ -194,6 +194,7 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\DelayNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\Distortion.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\MathsNode.h" />
+    <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NoiseNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\VariableNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\WaveformGenerator.h" />

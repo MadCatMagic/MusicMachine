@@ -227,5 +227,8 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\VariableNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

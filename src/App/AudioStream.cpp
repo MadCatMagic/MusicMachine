@@ -66,6 +66,11 @@ std::vector<v2> AudioStream::GetData()
     return audioData[qs];
 }
 
+void AudioStream::EmptyQueue()
+{
+    audioQueueLength = 0;
+}
+
 void AudioStream::Init()
 {
     // audio 
