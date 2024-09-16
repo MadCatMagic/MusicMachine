@@ -43,5 +43,6 @@ private:
 	void Export(const std::string& filepath);
 
 	NodeNetwork* n = nullptr;
-	Canvas c;
+	std::vector<Canvas> c;
+	Arranger arranger;
 };

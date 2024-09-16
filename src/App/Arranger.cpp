@@ -12,6 +12,7 @@ Arranger::Arranger()
 
 void Arranger::Work()
 {
+    if (!playing) return;
 	for (VariableNode* node : VariableNode::variableNodes)
 		node->output = node->getValue(time) * (node->maxV - node->minV) + node->minV;
 	time += AudioChannel::dt * tempo / 60.0f;

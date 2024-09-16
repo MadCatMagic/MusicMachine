@@ -126,6 +126,12 @@
     <ClCompile Include="src\App\Arranger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkVariable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App\App.h">
@@ -228,6 +234,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkVariable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

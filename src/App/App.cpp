@@ -13,18 +13,24 @@ void App::Initialize()
 
     drawStyle.InitColours();
 
-    c.LoadState("networks/init.nn", this);
-    c.GenerateAllTextLODs();
-    c.InitCanvas();
+    c.push_back(Canvas());
+    c.push_back(Canvas());
+    c[0].LoadState("networks/init.nn", this);
+    c[1].nodes = new NodeNetwork();
+    Canvas::GenerateAllTextLODs();
+    c[0].InitCanvas();
+    c[1].InitCanvas();
     RegisterJSONCommands();
 
     astream.Init();
 
     n->audioStream = &astream;
+    n->isRoot = true;
 }
 
 void App::Update()
 {
+    c[0].nodes->isRoot = true;
     while (!astream.QueueFull() && GetAudio()) {}
 }
 
@@ -50,7 +56,23 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 
     DebugWindow(io, lastFrameTime, averageFrameTime);
 
-    c.CreateWindow(&drawStyle, this);
+    ImGui::Begin("Arranger");
+    arranger.UI(&drawStyle);
+    ImGui::End();
+
+    int toDestroyI = -1;
+    for (int i = 0; i < (int)c.size(); i++)
+        if (c[i].CreateWindow(&drawStyle, this, i))
+        {
+            if (i == 0)
+                continue;
+            toDestroyI = i;
+        }
+
+    if (toDestroyI != -1)
+    {
+        c.erase(c.begin() + toDestroyI);
+    }
 
     static char buf[64] = { 0 };
     if (beginExport)
@@ -226,6 +248,7 @@ bool App::GetAudio()
         Console::LogWarn("NETWORK EXECUTING SKIPPED");
         return false;
     }
+    arranger.Work();
     if (!n->Execute()) {
         Console::LogWarn("NETWORK EXECUTING FAILED");
         return false;

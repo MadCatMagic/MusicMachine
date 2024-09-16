@@ -124,6 +124,8 @@ protected:
 	// returns in terms of beats
 	float tempoSyncToFloat(int v) const;
 
+	NodeNetwork* parent = nullptr;
+
 private:
 	uint64_t id = 0;
 	std::string id_s();
@@ -132,7 +134,6 @@ private:
 	const float headerHeight = 20.0f;
 	const float miniTriangleOffset = 10.0f;
 
-	NodeNetwork* parent = nullptr;
 	bool hasBeenExecuted = true;
 	void Execute();
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "Vector.h"
 #include "Engine/DrawList.h"
+#include "Node.h"
 
 // will act as a file which contains all of the nodes, but only as a reference grid point
 // all of the transformations between local and canvas coordinates happen here
@@ -18,7 +19,7 @@ public:
 	~Canvas();
 
 	void InitCanvas();
-	void CreateWindow(DrawStyle* drawStyle, class App* appPointer);
+	bool CreateWindow(DrawStyle* drawStyle, class App* appPointer, int canvasI);
 
 	void SaveLoadWindows(bool beginSaveAs, bool beginLoad, App* appPointer);
 	void SaveState(const std::string& filepath);
@@ -30,25 +31,27 @@ public:
 	v2 PositionToCanvas(const v2& pos) const;
 
 	inline v2 GetSF() const { return scale; }
-	float GetSFFromScalingLevel(int scaling);
+	static float GetSFFromScalingLevel(int scaling);
 
 	// shortcut
 	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
 	inline v2 stctp(const v2& pos) const { return CanvasToPosition(ScreenToCanvas(pos)); }
 
-	void GenerateAllTextLODs();
+	static void GenerateAllTextLODs();
 
 	class NodeNetwork* nodes = nullptr;
 	class NodeNetworkRenderer* nodeRenderer = nullptr;
 	
 private:
+	bool shouldStayOpen = true;
+
 	inline float optionalClamp(float f, float min, float max, bool doMin, bool doMax) 
 	{ 
 		float dm = doMin && (f < min) ? min : f;
 		return doMax && dm > max ? max : dm;
 	}
 	// text stuff
-	struct ImFont* textLODs[NUM_SCALING_LEVELS]{};
+	static struct ImFont* textLODs[NUM_SCALING_LEVELS];
 
 	int scalingLevel = 15;
 	v2 position = v2::zero;
@@ -60,4 +63,33 @@ private:
 	DrawList drawList;
 
 	std::string currentFilepath = "";
+
+	// stuff
+	// always the top element is the selected item
+	std::vector<Node*> selectedStack = std::vector<Node*>();
+	bool selectingArea = false;
+	v2 selectionStart = v2::zero;
+
+	// connections
+	bool draggingConnection = false;
+	bool connectionReversed = false;
+	std::string connectionOriginName = "";
+	Node* connectionOrigin = nullptr;
+
+	// dragging stuff
+	bool draggingNodes = false;
+	float draggingDistance = 0.0f;
+
+	// sliders
+	bool draggingSlider = false;
+	bool sliderIsInt = false;
+	NodeClickResponse::sliderValueType sliderValue{};
+	float sliderDelta = 0.0f;
+	float totalSliderMovement = 0.0f;
+	float originalSliderValue = 0.0f;
+
+	float sliderMin = 0.0f;
+	float sliderMax = 1.0f;
+	bool sliderLockMin = false;
+	bool sliderLockMax = false;
 };

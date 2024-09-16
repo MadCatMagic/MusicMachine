@@ -46,7 +46,8 @@ public:
 
 	AudioStream* audioStream = nullptr;
 
-	Arranger arranger;
+	bool isRoot = false;
+	std::vector<class NodeNetworkVariable*> ioVariables;
 
 private:
 

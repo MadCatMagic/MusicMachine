@@ -1,6 +1,7 @@
 #include "App/Nodes/NodeNetwork.h"
 #include "App/Nodes/Canvas.h"
 #include "App/Nodes/NodeFactory.h"
+#include "App/Nodes/NodeTypes/NodeNetworkVariable.h"
 
 #include "App/JSON.h"
 
@@ -74,7 +75,11 @@ NodeNetwork::~NodeNetwork()
 
 Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCursor)
 {
-	Node* n = GetNodeFactory().Build(type);
+	Node* n;
+	if (type == "NodeNetworkVariable")
+		n = new NodeNetworkVariable();
+	else
+		n = GetNodeFactory().Build(type);
 
 	if (n == nullptr)
 		return nullptr;
@@ -164,6 +169,12 @@ void NodeNetwork::DrawContextMenu()
 		ImGui::EndMenu();
 	}
 
+	if (!isRoot)
+		if (ImGui::MenuItem("New Network Variable"))
+		{
+			AddNodeFromName("NodeNetworkVariable", true);
+		}
+
 	ImGui::MenuItem("Debug Enable", nullptr, &drawDebugInformation);
 }
 
@@ -184,14 +195,12 @@ bool NodeNetwork::Execute()
 	if (nodeDependencyInfoPersistent->problemConnectionExists)
 		return false;
 
-	if (!arranger.playing)
+	if (!Arranger::instance->playing)
 	{
 		auto emptyVec = std::vector<v2>(AudioChannel::bufferSize, v2());
 		audioStream->SetData(emptyVec);
 		return true;
 	}
-
-	arranger.Work();
 
 	// backpropagate in a sensible manner
 	for (Node* n : nodes)

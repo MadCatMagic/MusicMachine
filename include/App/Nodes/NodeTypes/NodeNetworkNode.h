@@ -16,6 +16,6 @@ protected:
 	virtual JSONType Save() override;
 
 private:
-
+	class NodeNetwork* network = nullptr;
 	
 };

@@ -138,6 +138,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkVariable.cpp" />
+    <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkNode.cpp" />
     <ClCompile Include="src\App\Arranger.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\VariableNode.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\AnalysisNode.cpp" />
@@ -195,6 +197,7 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\Distortion.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\MathsNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkNode.h" />
+    <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkVariable.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NoiseNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\VariableNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\WaveformGenerator.h" />

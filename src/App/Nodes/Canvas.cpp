@@ -11,6 +11,8 @@
 
 #include <filesystem>
 
+ImFont* Canvas::textLODs[NUM_SCALING_LEVELS] = {};
+
 Canvas::~Canvas()
 {
     if (nodeRenderer != nullptr)
@@ -27,14 +29,18 @@ void Canvas::InitCanvas()
 }
 
 // a lot of this code is taken from the ImGui canvas example
-void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
+bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
 {
-    ImGui::Begin("Arranger");
-    nodes->arranger.UI(drawStyle);
-    ImGui::End();
+    std::string title = "Canvas " + std::to_string(canvasI + 1);
+    title += " - '" + (currentFilepath == "" ? "new network" : currentFilepath.substr(9)) + "'";
+    title += "###Canvas " + std::to_string(canvasI + 1);
 
-    ImGui::Begin("Canvas");
-    ImGui::InputFloat2("position", &position.x);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(-1, -1));
+    if (nodes->isRoot)
+        ImGui::Begin(title.c_str());
+    else
+        ImGui::Begin(title.c_str(), &shouldStayOpen);
+    ImGui::PopStyleVar();
 
     // Using InvisibleButton() as a convenience 
     // 1) it will advance the layout cursor and 
@@ -60,34 +66,6 @@ void Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer)
     const bool isActive = ImGui::IsItemActive();   // Held
     const v2 mouseCanvasPos = ScreenToCanvas((v2)io.MousePos);
     const v2 mousePos = CanvasToPosition(mouseCanvasPos);
-
-    // always the top element is the selected item
-    static std::vector<Node*> selectedStack = std::vector<Node*>();
-    static bool selectingArea = false;
-    static v2 selectionStart = v2::zero;
-
-    // connections
-    static bool draggingConnection = false;
-    static bool connectionReversed = false;
-    static std::string connectionOriginName = "";
-    static Node* connectionOrigin = nullptr;
-
-    // dragging stuff
-    static bool draggingNodes = false;
-    static float draggingDistance = 0.0f;
-
-    // sliders
-    static bool draggingSlider = false;
-    static bool sliderIsInt = false;
-    static NodeClickResponse::sliderValueType sliderValue{};
-    static float sliderDelta = 0.0f;
-    static float totalSliderMovement = 0.0f;
-    static float originalSliderValue = 0.0f;
-
-    static float sliderMin = 0.0f;
-    static float sliderMax = 1.0f;
-    static bool sliderLockMin = false;
-    static bool sliderLockMax = false;
 
     // handle non-left click node interactions first
     bool handledInteractionAlready = false;
@@ -413,6 +391,8 @@ nodeInteractionsEscape:
     drawList.dl->PopClipRect();
 
     ImGui::End();
+
+    return !shouldStayOpen;
 }
 
 void Canvas::SaveLoadWindows(bool beginSaveAs, bool beginLoad, App* appPointer)
