@@ -16,12 +16,15 @@ class Canvas
 {
 public:
 	inline Canvas() {}
+	Canvas(const Canvas& source);
+	Canvas(Canvas&& source);
+	/// IMPLEMENT COPY AND MOVE ASSIGNMENT OPERATORS ???
 	~Canvas();
 
 	void InitCanvas();
 	bool CreateWindow(DrawStyle* drawStyle, class App* appPointer, int canvasI);
 
-	void SaveLoadWindows(bool beginSaveAs, bool beginLoad, App* appPointer);
+	void SaveLoadWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetworkLoad, App* appPointer);
 	void SaveState(const std::string& filepath);
 	void LoadState(const std::string& filepath, App* appPointer);
 
@@ -41,6 +44,9 @@ public:
 
 	class NodeNetwork* nodes = nullptr;
 	class NodeNetworkRenderer* nodeRenderer = nullptr;
+
+	// context menu
+	v2 contextMenuClickPos;
 	
 private:
 	bool shouldStayOpen = true;
@@ -61,8 +67,6 @@ private:
 	v2 canvasPixelSize;
 
 	DrawList drawList;
-
-	std::string currentFilepath = "";
 
 	// stuff
 	// always the top element is the selected item

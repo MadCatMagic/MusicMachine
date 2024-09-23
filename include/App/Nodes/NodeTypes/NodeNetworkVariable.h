@@ -14,9 +14,13 @@ protected:
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 	virtual bool OnClick(const NodeClickInfo& info);
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 private:
 	bool isOutput = false;
+	NodeType nodeType = NodeType::Audio;
 
-	AudioChannel channel;
+	void* data = nullptr;
 	std::string id = "new variable";
 };

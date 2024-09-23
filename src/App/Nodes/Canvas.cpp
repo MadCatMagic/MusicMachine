@@ -1,5 +1,6 @@
 #include "App/Nodes/Canvas.h"
 #include "App/Nodes/NodeNetwork.h"
+#include "App/Nodes/NodeTypes/NodeNetworkNode.h"
 #include "imgui.h"
 
 #include "Engine/Console.h"
@@ -13,18 +14,31 @@
 
 ImFont* Canvas::textLODs[NUM_SCALING_LEVELS] = {};
 
+Canvas::Canvas(const Canvas& source)
+{
+    nodes = source.nodes;
+    InitCanvas();
+}
+
+Canvas::Canvas(Canvas&& source)
+{
+    nodes = source.nodes;
+    InitCanvas();
+    source.nodes = nullptr;
+}
+
 Canvas::~Canvas()
 {
     if (nodeRenderer != nullptr)
+    {
         nodeRenderer->UnassignCanvas();
-    if (nodes != nullptr)
-        nodes->UnassignCanvas();
+        delete nodeRenderer;
+    }
 }
 
 void Canvas::InitCanvas()
 {
     drawList.SetConversionCallback([this](const v2& p) -> v2 { return this->ptcts(p); });
-    nodes->AssignCanvas(this);
     nodeRenderer = new NodeNetworkRenderer(nodes, this);
 }
 
@@ -32,7 +46,7 @@ void Canvas::InitCanvas()
 bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
 {
     std::string title = "Canvas " + std::to_string(canvasI + 1);
-    title += " - '" + (currentFilepath == "" ? "new network" : currentFilepath.substr(9)) + "'";
+    title += " - '" + nodes->name + "'";
     title += "###Canvas " + std::to_string(canvasI + 1);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(-1, -1));
@@ -42,9 +56,7 @@ bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
         ImGui::Begin(title.c_str(), &shouldStayOpen);
     ImGui::PopStyleVar();
 
-    // Using InvisibleButton() as a convenience 
-    // 1) it will advance the layout cursor and 
-    // 2) allows us to use IsItemHovered()/IsItemActive()
+    // Using InvisibleButton() as a convenience
     canvasPixelPos = (v2)ImGui::GetCursorScreenPos();
     canvasPixelSize = ImGui::GetContentRegionAvail();
     if (canvasPixelSize.x < 50.0f) canvasPixelSize.x = 50.0f;
@@ -294,18 +306,24 @@ nodeInteractionsEscape:
     // Context menu (under default mouse threshold)
     ImVec2 drag_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
     if (drag_delta.x == 0.0f && drag_delta.y == 0.0f)
+    {
         ImGui::OpenPopupOnItemClick("context", ImGuiPopupFlags_MouseButtonRight);
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+            contextMenuClickPos = mousePos;
+    }
     bool beginSaveAs = false;
     bool beginLoad = false;
+    bool beginNodeNetworkLoad = false;
+
     if (ImGui::BeginPopup("context"))
     {
-        nodes->DrawContextMenu();
+        beginNodeNetworkLoad = nodes->DrawContextMenu(contextMenuClickPos);
 
         // save
         if (ImGui::MenuItem("Save"))
         {
-            if (currentFilepath != "")
-                SaveState(currentFilepath);
+            if (nodes->name != "new network")
+                SaveState(nodes->name);
             else
                 beginSaveAs = true;
         }
@@ -317,7 +335,7 @@ nodeInteractionsEscape:
         ImGui::EndPopup();
     }
 
-    SaveLoadWindows(beginSaveAs, beginLoad, appPointer);
+    SaveLoadWindows(beginSaveAs, beginLoad, beginNodeNetworkLoad, appPointer);
 
     // Draw grid + all lines in the canvas
     drawList.dl->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
@@ -395,7 +413,7 @@ nodeInteractionsEscape:
     return !shouldStayOpen;
 }
 
-void Canvas::SaveLoadWindows(bool beginSaveAs, bool beginLoad, App* appPointer)
+void Canvas::SaveLoadWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetworkLoad, App* appPointer)
 {
     ////////////
     // SAVING //
@@ -463,11 +481,15 @@ void Canvas::SaveLoadWindows(bool beginSaveAs, bool beginLoad, App* appPointer)
     /////////////
     static std::vector<std::string> files;
     static int selected = -1;
+    static int selectedExisting = -1;
     if (beginLoad)
-    {
         ImGui::OpenPopup("Load");
+
+    if (beginLoad || beginNodeNetworkLoad)
+    {
         files.clear();
         selected = -1;
+        selectedExisting = -1;
         for (const auto& entry : std::filesystem::directory_iterator("networks"))
         {
             std::string fp = entry.path().string().substr(9);
@@ -520,25 +542,131 @@ void Canvas::SaveLoadWindows(bool beginSaveAs, bool beginLoad, App* appPointer)
             ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
     }
+
+    /////////////////
+    // NNN Loading //
+    /////////////////
+
+    if (beginNodeNetworkLoad)
+        ImGui::OpenPopup("New Network Node");
+
+    if (ImGui::BeginPopupModal("New Network Node", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        if (ImGui::BeginTable("3ways", 1, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody))
+        {
+            // The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 300.0f);
+            ImGui::TableHeadersRow();
+
+            for (int i = 0; i < (int)files.size(); i++)
+            {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+                if (selected == i)
+                    flags |= ImGuiTreeNodeFlags_Selected;
+                ImGui::TreeNodeEx((void*)(intptr_t)i, flags, files[i].c_str(), i);
+                if (ImGui::IsItemClicked())
+                {
+                    if (selected == i)
+                        selected = -1;
+                    else
+                        selected = i;
+                }
+            }
+
+            ImGui::EndTable();
+        }
+
+        // idk about this one chief
+        // need to exclude the isRoot network and the currently inside of network
+        if (ImGui::BeginTable("3ways", 1, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody))
+        {
+            // The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 300.0f);
+            ImGui::TableHeadersRow();
+
+            for (int i = 0; i < (int)appPointer->n.size(); i++)
+            {
+                if (appPointer->n[i]->isRoot || appPointer->n[i] == nodes)
+                    continue;
+
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+                if (selectedExisting == i)
+                    flags |= ImGuiTreeNodeFlags_Selected;
+                ImGui::TreeNodeEx((void*)(intptr_t)i, flags, appPointer->n[i]->name.c_str(), i);
+                if (ImGui::IsItemClicked())
+                {
+                    if (selectedExisting == i)
+                        selectedExisting = -1;
+                    else
+                        selectedExisting = i;
+                }
+            }
+
+            ImGui::EndTable();
+        }
+
+        if (ImGui::Button("Create Empty"))
+        {
+            NodeNetworkNode* newNode = (NodeNetworkNode*)(nodes->AddNodeFromName("NodeNetworkNode", contextMenuClickPos));
+            NodeNetwork* newNetwork = new NodeNetwork();
+            appPointer->AddNetwork(newNetwork);
+            newNode->AssignNetwork(newNetwork);
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::BeginDisabled(selectedExisting == -1);
+        if (ImGui::Button("Use"))
+        {
+            NodeNetworkNode* newNode = (NodeNetworkNode*)(nodes->AddNodeFromName("NodeNetworkNode", contextMenuClickPos));
+            newNode->AssignNetwork(appPointer->n[selectedExisting]);
+
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndDisabled();
+
+        ImGui::BeginDisabled(selected == -1);
+        if (ImGui::Button("Load"))
+        {
+            NodeNetworkNode* newNode = (NodeNetworkNode*)(nodes->AddNodeFromName("NodeNetworkNode", contextMenuClickPos));
+            NodeNetwork* newNetwork = new NodeNetwork("networks/" + files[selected] + ".nn");
+            appPointer->AddNetwork(newNetwork);
+            newNode->AssignNetwork(newNetwork);
+
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndDisabled();
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
 }
 
 void Canvas::SaveState(const std::string& filepath)
 {
     nodes->SaveNetworkToFile(std::string(filepath));
-    currentFilepath = filepath;
+    nodes->name = filepath;
 }
 
 void Canvas::LoadState(const std::string& filepath, App* appPointer)
 {
-    if (nodes != nullptr)
-        delete nodes;
+    if (nodes != nullptr && nodes->usedInNetworkNode == 0)
+        appPointer->DeleteNetwork(nodes);
     nodes = new NodeNetwork(std::string(filepath));
-    nodes->AssignCanvas(this);
     if (nodeRenderer != nullptr)
         delete nodeRenderer;
     nodeRenderer = new NodeNetworkRenderer(nodes, this);
-    appPointer->SetNodes(nodes);
-    currentFilepath = filepath;
+    // 'temporary', should not be like this but whatever
+    if (nodes->ioVariables.size() == 0)
+        appPointer->ReplaceMainNetwork(nodes);
+    else
+        appPointer->AddNetwork(nodes);
+    nodes->name = filepath;
 }
 
 float Canvas::GetSFFromScalingLevel(int scaling)
@@ -573,7 +701,7 @@ void Canvas::GenerateAllTextLODs()
 {
     static ImVector<ImWchar> ranges;
     ImFontGlyphRangesBuilder builder;
-    builder.AddText("abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.<>/?;:'@#~[]{}()-_=+\\|*&^%$£\"!1234567890 ");                        // Add a string (here "Hello world" contains 7 unique characters)
+    builder.AddText("abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.<>/?;:'@#~[]{}()-_=+\\|*&^%$£\"!1234567890 ");
     builder.BuildRanges(&ranges);
 
     ImGuiIO& io = ImGui::GetIO();

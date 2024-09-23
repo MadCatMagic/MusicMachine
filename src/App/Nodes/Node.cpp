@@ -291,6 +291,24 @@ void Node::SequencerOutput(const std::string& name, PitchSequencer* target)
 	TransferOutput(o);
 }
 
+void Node::DefaultInput(const std::string& name, void* target, NodeType type)
+{
+	NodeInput o;
+	o.name = name;
+	o.target = target;
+	o.type = type;
+	TransferInput(o);
+}
+
+void Node::DefaultOutput(const std::string& name, void* target, NodeType type)
+{
+	NodeOutput o;
+	o.name = name;
+	o.data = target;
+	o.type = type;
+	TransferOutput(o);
+}
+
 #pragma endregion IOTypes
 
 float Node::tempoSyncToFloat(int v) const

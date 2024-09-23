@@ -3,7 +3,12 @@
 
 struct NodeNetworkNode : public Node
 {
+public:
+	void AssignNetwork(NodeNetwork* network);
+
 protected:
+	~NodeNetworkNode();
+
 	virtual void Init() override;
 	virtual void IO() override;
 
@@ -15,7 +20,5 @@ protected:
 	virtual void Load(JSONType& data) override;
 	virtual JSONType Save() override;
 
-private:
 	class NodeNetwork* network = nullptr;
-	
 };

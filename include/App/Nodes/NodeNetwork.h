@@ -22,7 +22,7 @@ public:
 	NodeNetwork(const std::string& nnFilePath);
 	~NodeNetwork();
 
-	Node* AddNodeFromName(const std::string& type, bool positionFromCursor = false);
+	Node* AddNodeFromName(const std::string& type, const v2& initPos = v2::zero, bool skipInitialisation = false);
 	Node* GetNodeAtPosition(const v2& pos, Node* currentSelection = nullptr, size_t offset = 0);
 	std::vector<Node*> FindNodesInArea(const v2& p1, const v2& p2);
 	void PushNodeToTop(Node* node);
@@ -30,7 +30,7 @@ public:
 	void TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 	void DeleteNode(Node* node);
 
-	void DrawContextMenu();
+	bool DrawContextMenu(const v2& contextMenuClickPos);
 
 	bool Execute();
 	void Update();
@@ -38,13 +38,14 @@ public:
 	void SaveNetworkToFile(const std::string& nnFilePath);
 
 	inline void RecalculateDependencies() { recalculateDependencies = true; }
-	inline void UnassignCanvas() { currentCanvas = nullptr; }
-	inline void AssignCanvas(class Canvas* canvas) { currentCanvas = canvas; }
 	inline bool doIDrawDebug() const { return drawDebugInformation; }
 
 	Node* GetNodeFromID(const std::string& id);
 
 	AudioStream* audioStream = nullptr;
+
+	std::string name = "new network";
+	int usedInNetworkNode = 0;
 
 	bool isRoot = false;
 	std::vector<class NodeNetworkVariable*> ioVariables;
@@ -77,8 +78,6 @@ private:
 	std::unordered_map<std::string, Node*> nodeIDMap;
 
 	bool drawDebugInformation = false;
-
-	class Canvas* currentCanvas = nullptr;
 };
 
 class NodeNetworkRenderer

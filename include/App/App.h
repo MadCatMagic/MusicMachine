@@ -11,6 +11,7 @@ const int FRAME_TIME_AVERAGE_LENGTH = 10;
 class App
 {
 public:
+	friend Canvas;
 
 	void Initialize();
 
@@ -21,7 +22,9 @@ public:
 
 	bool GetAudio();
 
-	inline void SetNodes(NodeNetwork* nodes) { n = nodes; n->audioStream = &astream; }
+	void AddNetwork(NodeNetwork* nodes);
+	void DeleteNetwork(NodeNetwork* nodes);
+	void ReplaceMainNetwork(NodeNetwork* nodes);
 
 private:
 	AudioStream astream;
@@ -42,7 +45,7 @@ private:
 
 	void Export(const std::string& filepath);
 
-	NodeNetwork* n = nullptr;
+	std::vector<NodeNetwork*> n;
 	std::vector<Canvas> c;
 	Arranger arranger;
 };

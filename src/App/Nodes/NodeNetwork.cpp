@@ -2,6 +2,7 @@
 #include "App/Nodes/Canvas.h"
 #include "App/Nodes/NodeFactory.h"
 #include "App/Nodes/NodeTypes/NodeNetworkVariable.h"
+#include "App/Nodes/NodeTypes/NodeNetworkNode.h"
 
 #include "App/JSON.h"
 
@@ -15,16 +16,14 @@
 #include <sstream>
 #include <unordered_map>
 
-NodeNetwork* NodeNetwork::context = nullptr;
-
 NodeNetwork::NodeNetwork()
 {
-	context = this;
 }
 
 NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 {
 	JSONConverter conv;
+	name = nnFilePath;
 	auto res = conv.DecodeFile(nnFilePath);
 	if (!res.second)
 	{
@@ -36,7 +35,7 @@ NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 	auto& arr = res.first["nodes"].arr;
 	for (JSONType& t : arr)
 	{
-		Node* node = GetNodeFactory().Build(t.obj["name"].s);
+		Node* node = AddNodeFromName(t.obj["name"].s, v2::zero, true);
 		if (node == nullptr)
 		{
 			Console::LogErr("Unrecognised node name '" + t.obj["name"].s + "'.");
@@ -73,23 +72,27 @@ NodeNetwork::~NodeNetwork()
 	nodes.clear();
 }
 
-Node* NodeNetwork::AddNodeFromName(const std::string& type, bool positionFromCursor)
+Node* NodeNetwork::AddNodeFromName(const std::string& type, const v2& initPos, bool skipInitialisation)
 {
 	Node* n;
 	if (type == "NodeNetworkVariable")
 		n = new NodeNetworkVariable();
+	else if (type == "NodeNetworkNode")
+		n = new NodeNetworkNode();
 	else
 		n = GetNodeFactory().Build(type);
 
 	if (n == nullptr)
 		return nullptr;
 
+	if (skipInitialisation)
+		return n;
+
 	// random enough for now but unreliable
 	n->NodeInit(this, (uint64_t)rand() << 16 ^ nodes.size());
 	n->Init();
 	n->UpdateDimensions();
-	if (positionFromCursor)
-		n->position = currentCanvas->CanvasToPosition(currentCanvas->ScreenToCanvas(ImGui::GetMousePos())) - n->size * 0.5f;
+	n->position = initPos - n->size * 0.5f;
 	nodes.push_back(n);
 	nodeIDMap[n->id_s()] = n;
 	return n;
@@ -159,23 +162,29 @@ void NodeNetwork::DeleteNode(Node* node)
 	recalculateDependencies = true;
 }
 
-void NodeNetwork::DrawContextMenu()
+bool NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos)
 {
 	if (ImGui::BeginMenu("Nodes"))
 	{
 		for (auto& pair : GetNodeFactory().Names())
 			if (ImGui::MenuItem(pair.second.c_str()))
-				AddNodeFromName(pair.first, true);
+				AddNodeFromName(pair.first, contextMenuClickPos);
 		ImGui::EndMenu();
 	}
+
+	bool beginNetworkNodePrompt = false;
+	if (ImGui::MenuItem("New Network Node"))
+		beginNetworkNodePrompt = true;
 
 	if (!isRoot)
 		if (ImGui::MenuItem("New Network Variable"))
 		{
-			AddNodeFromName("NodeNetworkVariable", true);
+			AddNodeFromName("NodeNetworkVariable", contextMenuClickPos);
 		}
 
 	ImGui::MenuItem("Debug Enable", nullptr, &drawDebugInformation);
+
+	return beginNetworkNodePrompt;
 }
 
 Node* NodeNetwork::GetNodeFromID(const std::string& id)
@@ -233,6 +242,8 @@ void NodeNetwork::Update()
 
 void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 {
+	name = nnFilePath;
+
 	JSONConverter conv;
 	JSONType nodeData = JSONType(JSONType::Array);
 

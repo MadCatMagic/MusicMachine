@@ -17,6 +17,7 @@ void App::Initialize()
     c.push_back(Canvas());
     c[0].LoadState("networks/init.nn", this);
     c[1].nodes = new NodeNetwork();
+    AddNetwork(c[1].nodes);
     Canvas::GenerateAllTextLODs();
     c[0].InitCanvas();
     c[1].InitCanvas();
@@ -24,8 +25,8 @@ void App::Initialize()
 
     astream.Init();
 
-    n->audioStream = &astream;
-    n->isRoot = true;
+    n[0]->audioStream = &astream;
+    n[0]->isRoot = true;
 }
 
 void App::Update()
@@ -47,6 +48,31 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
                 showDebug = !showDebug;
             if (ImGui::MenuItem("Export", NULL, nullptr))
                 beginExport = true;
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Networks"))
+        {
+            for (size_t i = 0; i < n.size(); i++)
+            {
+                bool shown = false;
+                size_t ownedCanvas = 0;
+                for (; ownedCanvas < c.size(); ownedCanvas++)
+                    if (c[ownedCanvas].nodes == n[i])
+                        shown = true;
+                // add canvas with network if not shown, otherwise delete existing canvas
+                if (ImGui::MenuItem((n[i]->name + (shown ? " - shown" : "")).c_str()) && !n[i]->isRoot)
+                {
+                    if (shown)
+                        c.erase(c.begin() + ownedCanvas);
+                    else
+                    {
+                        c.push_back(Canvas());
+                        size_t p = c.size() - 1;
+                        c[p].nodes = n[i];
+                        c[p].InitCanvas();
+                    }
+                }
+            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -235,23 +261,51 @@ void App::Release()
 {
     astream.Release();
 
-    if (n != nullptr)
-        delete n;
+    for (auto* p : n)
+        delete p;
 }
 
 bool App::GetAudio()
 {
     // execute networks, send sound data off
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
-    if (n == nullptr)
+    if (n.size() == 0)
     {
         Console::LogWarn("NETWORK EXECUTING SKIPPED");
         return false;
     }
     arranger.Work();
-    if (!n->Execute()) {
+    if (!n[0]->Execute()) {
         Console::LogWarn("NETWORK EXECUTING FAILED");
         return false;
     }
     return true;
+}
+
+void App::AddNetwork(NodeNetwork* nodes)
+{
+    n.push_back(nodes);
+}
+
+void App::DeleteNetwork(NodeNetwork* nodes)
+{
+    for (size_t i = 0; i < n.size(); i++)
+        if (n[i] == nodes)
+        {
+            n.erase(n.begin() + i);
+            return;
+        }
+}
+
+void App::ReplaceMainNetwork(NodeNetwork* nodes)
+{
+    if (n.size() == 0)
+        n.push_back(nodes);
+    else
+    {
+        delete n[0];
+        n[0] = nodes;
+    }
+    n[0]->audioStream = &astream;
+    n[0]->isRoot = true;
 }

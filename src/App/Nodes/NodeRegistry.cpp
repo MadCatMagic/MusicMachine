@@ -11,7 +11,6 @@
 #include "App/Nodes/NodeTypes/DelayNode.h"
 #include "App/Nodes/NodeTypes/Distortion.h"
 #include "App/Nodes/NodeTypes/MathsNode.h"
-#include "App/Nodes/NodeTypes/NodeNetworkNode.h"
 #include "App/Nodes/NodeTypes/NoiseNode.h"
 #include "App/Nodes/NodeTypes/SequencerNode.h"
 #include "App/Nodes/NodeTypes/VariableNode.h"
@@ -28,7 +27,6 @@ void RegisterNodes()
     GetNodeFactory().Register("DelayNode", "Delay", NodeBuilder<DelayNode>);
     GetNodeFactory().Register("Distortion", "Distortion", NodeBuilder<Distortion>);
     GetNodeFactory().Register("MathsNode", "Maths", NodeBuilder<MathsNode>);
-    GetNodeFactory().Register("NodeNetworkNode", "Network", NodeBuilder<NodeNetworkNode>);
     GetNodeFactory().Register("NoiseNode", "Noise", NodeBuilder<NoiseNode>);
     GetNodeFactory().Register("SequencerNode", "Sequencer Node", NodeBuilder<SequencerNode>);
     GetNodeFactory().Register("VariableNode", "Variable", NodeBuilder<VariableNode>);

@@ -121,6 +121,9 @@ protected:
 	void SequencerInput(const std::string& name, PitchSequencer* target);
 	void SequencerOutput(const std::string& name, PitchSequencer* target);
 
+	void DefaultInput(const std::string& name, void* target, NodeType type);
+	void DefaultOutput(const std::string& name, void* target, NodeType type);
+
 	// returns in terms of beats
 	float tempoSyncToFloat(int v) const;
 
