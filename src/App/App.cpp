@@ -13,14 +13,14 @@ void App::Initialize()
 
     drawStyle.InitColours();
 
-    c.push_back(Canvas());
-    c.push_back(Canvas());
-    c[0].LoadState("networks/init.nn", this);
-    c[1].nodes = new NodeNetwork();
-    AddNetwork(c[1].nodes);
+    c.push_back(new Canvas());
+    c.push_back(new Canvas());
+    c[0]->LoadState("networks/init.nn", this);
+    c[1]->nodes = new NodeNetwork();
+    AddNetwork(c[1]->nodes);
     Canvas::GenerateAllTextLODs();
-    c[0].InitCanvas();
-    c[1].InitCanvas();
+    c[0]->InitCanvas();
+    c[1]->InitCanvas();
     RegisterJSONCommands();
 
     astream.Init();
@@ -31,7 +31,7 @@ void App::Initialize()
 
 void App::Update()
 {
-    c[0].nodes->isRoot = true;
+    c[0]->nodes->isRoot = true;
     while (!astream.QueueFull() && GetAudio()) {}
 }
 
@@ -57,19 +57,25 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
                 bool shown = false;
                 size_t ownedCanvas = 0;
                 for (; ownedCanvas < c.size(); ownedCanvas++)
-                    if (c[ownedCanvas].nodes == n[i])
+                    if (c[ownedCanvas]->nodes == n[i])
+                    {
                         shown = true;
+                        break;
+                    }
                 // add canvas with network if not shown, otherwise delete existing canvas
                 if (ImGui::MenuItem((n[i]->name + (shown ? " - shown" : "")).c_str()) && !n[i]->isRoot)
                 {
                     if (shown)
+                    {
+                        delete c[ownedCanvas];
                         c.erase(c.begin() + ownedCanvas);
+                    }
                     else
                     {
-                        c.push_back(Canvas());
+                        c.push_back(new Canvas());
                         size_t p = c.size() - 1;
-                        c[p].nodes = n[i];
-                        c[p].InitCanvas();
+                        c[p]->nodes = n[i];
+                        c[p]->InitCanvas();
                     }
                 }
             }
@@ -88,7 +94,7 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 
     int toDestroyI = -1;
     for (int i = 0; i < (int)c.size(); i++)
-        if (c[i].CreateWindow(&drawStyle, this, i))
+        if (c[i]->CreateWindow(&drawStyle, this, i))
         {
             if (i == 0)
                 continue;
@@ -97,6 +103,7 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 
     if (toDestroyI != -1)
     {
+        delete c[toDestroyI];
         c.erase(c.begin() + toDestroyI);
     }
 
@@ -262,6 +269,9 @@ void App::Release()
     astream.Release();
 
     for (auto* p : n)
+        delete p;
+
+    for (auto* p : c)
         delete p;
 }
 

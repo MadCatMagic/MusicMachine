@@ -14,19 +14,6 @@
 
 ImFont* Canvas::textLODs[NUM_SCALING_LEVELS] = {};
 
-Canvas::Canvas(const Canvas& source)
-{
-    nodes = source.nodes;
-    InitCanvas();
-}
-
-Canvas::Canvas(Canvas&& source)
-{
-    nodes = source.nodes;
-    InitCanvas();
-    source.nodes = nullptr;
-}
-
 Canvas::~Canvas()
 {
     if (nodeRenderer != nullptr)

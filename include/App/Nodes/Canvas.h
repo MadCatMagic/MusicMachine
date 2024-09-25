@@ -16,8 +16,6 @@ class Canvas
 {
 public:
 	inline Canvas() {}
-	Canvas(const Canvas& source);
-	Canvas(Canvas&& source);
 	/// IMPLEMENT COPY AND MOVE ASSIGNMENT OPERATORS ???
 	~Canvas();
 

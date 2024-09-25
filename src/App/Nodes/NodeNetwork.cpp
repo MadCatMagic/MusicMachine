@@ -51,6 +51,7 @@ NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 			}
 		node->NodeInit(this, idv);
 		node->Init();
+		node->Load(t.obj["node"]);
 		node->IO();
 		node->UpdateDimensions();
 		nodes.push_back(node);

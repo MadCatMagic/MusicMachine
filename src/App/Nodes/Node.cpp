@@ -474,8 +474,6 @@ void Node::LoadData(JSONType& data)
 				}
 			}
 	}
-
-	Load(data.obj["node"]);
 }
 
 JSONType Node::SaveData()
