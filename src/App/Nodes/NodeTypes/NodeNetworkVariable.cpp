@@ -19,26 +19,20 @@ void NodeNetworkVariable::Init()
 void NodeNetworkVariable::IO()
 {
 	if (isOutput)
-		DefaultInput("out", &data, nodeType);
+		DefaultInput("out", &b, &i, &f, &c, &s, nodeType);
 	else
-		DefaultOutput("in", &data, nodeType);
+		DefaultOutput("in", &b, &i, &f, &c, &s, nodeType);
 }
 
 void NodeNetworkVariable::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
-	for (int i = 0; i < 2; i++)
-	{
-		if ((int)isOutput == i)
-			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
-		else
-			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
-	}
+	title = id;
 	for (int i = 0; i < 5; i++)
 	{
 		if ((int)nodeType == i)
-			dl->RectFilled(topLeft + v2(i * 20.0f, 20.0f), topLeft + v2(i * 20.0f + 20.0f, 40.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
+			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
 		else
-			dl->RectFilled(topLeft + v2(i * 20.0f, 20.0f), topLeft + v2(i * 20.0f + 20.0f, 40.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
+			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
 	}
 }
 
@@ -48,10 +42,16 @@ bool NodeNetworkVariable::OnClick(const NodeClickInfo& info)
 		return false;
 
 	int tcp = (int)(info.pos.x / 20.0f);
-	if (info.pos.y < 20.0f)
-		isOutput = (bool)tcp;
-	else
-		nodeType = (NodeType)tcp;
+
+	if (nodeType != (NodeType)tcp)
+	{
+		if (isOutput)
+			Disconnect(0);
+		else
+			DisconnectOutput(0);
+			
+	}
+	nodeType = (NodeType)tcp;
 	return true;
 }
 

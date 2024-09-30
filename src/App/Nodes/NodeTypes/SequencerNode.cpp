@@ -35,7 +35,7 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 		for (int j = 0; j < height; j++)
 		{
 			dl->Rect(
-				topLeft + v2(i, j) * cellSize, 
+				topLeft + v2((float)i, (float)j) * cellSize, 
 				topLeft + v2(i + 1.0f, j + 1.0f) * cellSize, 
 				keyboard[(height - 1 - j) % 12] ? ImColor(1.0f, (float)i / width, (float)j / height, 1.0f) : ImColor(0.0f, (float)i / width, (float)j / height, 1.0f)
 			);
@@ -45,7 +45,7 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	for (int i = 0; i < width; i++)
 	{
 		if (data[i].first != -1)
-			dl->RectFilled(topLeft + v2(i, height - 1 - data[i].first) * cellSize, topLeft + v2(i, height - 1 - data[i].first) * cellSize + cellSize, ImColor(0.7f, data[i].second, 0.2f, 1.0f));
+			dl->RectFilled(topLeft + v2(i, (float)(height - 1 - data[i].first)) * cellSize, topLeft + v2(i, (float)(height - 1 - data[i].first)) * cellSize + cellSize, ImColor(0.7f, data[i].second, 0.2f, 1.0f));
 	}
 
 	// render velocities
@@ -53,8 +53,8 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	{
 		if (data[i].first != -1)
 			dl->RectFilled(
-				topLeft + v2(i, height) * cellSize + v2(cellSize * 0.2f, 20.0f * (1.0f - data[i].second)),
-				topLeft + v2(i + 1, height) * cellSize + v2(-cellSize * 0.2f, 20.0f),
+				topLeft + v2((float)i, (float)height) * cellSize + v2(cellSize * 0.2f, 20.0f * (1.0f - data[i].second)),
+				topLeft + v2((float)(i + 1), (float)height) * cellSize + v2(-cellSize * 0.2f, 20.0f),
 				ImColor(0.7f, data[i].second, 0.2f, 1.0f)
 			);
 	}
@@ -124,14 +124,14 @@ void SequencerNode::Work()
 			exactI = 0.0f;
 		int t = (int)((1.0f - exactI) * pitchLength);
 		int ts = t;
-		t = (t + currLength) >= AudioChannel::bufferSize ? AudioChannel::bufferSize - currLength : t;
+		t = (t + currLength) >= AudioChannel::bufferSize ? (int)AudioChannel::bufferSize - currLength : t;
 
 		// send pitch
 		seq.pitch.push_back(p);
 		seq.length.push_back(t);
 		seq.velocity.push_back(data[(currentI + io) % width].second);
 		// dont think this actually works :)
-		seq.cumSamples.push_back((pitchLength - ts) * tempoSyncToFloat(tempoSyncV));
+		seq.cumSamples.push_back((int)((pitchLength - ts) * tempoSyncToFloat(tempoSyncV)));
 		currLength += t;
 
 		io++;
@@ -196,7 +196,7 @@ float SequencerNode::GetPitch(int i)
 
 void SequencerNode::EnsureDataSize()
 {
-	minSpace = v2(width, height) * cellSize + v2(0.0f, 20.0f);
+	minSpace = v2((float)width, (float)height) * cellSize + v2(0.0f, 20.0f);
 	size_t s = data.size();
 
 	if (s == width)

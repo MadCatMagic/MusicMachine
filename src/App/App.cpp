@@ -7,20 +7,20 @@
 #include "App/Nodes/NodeRegistry.h"
 #include <filesystem>
 
+App* App::instance = nullptr;
+
 void App::Initialize()
 {
+    instance = this;
+
     RegisterNodes();
 
     drawStyle.InitColours();
 
     c.push_back(new Canvas());
-    c.push_back(new Canvas());
     c[0]->LoadState("networks/init.nn", this);
-    c[1]->nodes = new NodeNetwork();
-    AddNetwork(c[1]->nodes);
     Canvas::GenerateAllTextLODs();
     c[0]->InitCanvas();
-    c[1]->InitCanvas();
     RegisterJSONCommands();
 
     astream.Init();
@@ -31,6 +31,8 @@ void App::Initialize()
 
 void App::Update()
 {
+    for (NodeNetwork* network : n)
+        network->Update();
     c[0]->nodes->isRoot = true;
     while (!astream.QueueFull() && GetAudio()) {}
 }
@@ -63,7 +65,13 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
                         break;
                     }
                 // add canvas with network if not shown, otherwise delete existing canvas
-                if (ImGui::MenuItem((n[i]->name + (shown ? " - shown" : "")).c_str()) && !n[i]->isRoot)
+                if (ImGui::MenuItem((
+                    "(" + 
+                    (n[i]->isRoot ? "root" : std::to_string(n[i]->usedInNetworkNode)) +
+                    ") " + 
+                    n[i]->name + 
+                    (shown ? " - shown" : "")).c_str()
+                ) && !n[i]->isRoot)
                 {
                     if (shown)
                     {
@@ -285,7 +293,7 @@ bool App::GetAudio()
         return false;
     }
     arranger.Work();
-    if (!n[0]->Execute()) {
+    if (!n[0]->Execute(true)) {
         Console::LogWarn("NETWORK EXECUTING FAILED");
         return false;
     }
@@ -318,4 +326,18 @@ void App::ReplaceMainNetwork(NodeNetwork* nodes)
     }
     n[0]->audioStream = &astream;
     n[0]->isRoot = true;
+}
+
+NodeNetwork* App::GetNetwork(const std::string& name)
+{
+    for (NodeNetwork* network : n)
+        if (network->name == name && !network->isRoot)
+            return network;
+
+    if (name == "new network")
+        return nullptr;
+
+    NodeNetwork* network = new NodeNetwork(name);
+    AddNetwork(network);
+    return network;
 }

@@ -60,6 +60,7 @@ override 'void Work()' to actually serve your function, taking your inputs and t
 do not use a regular constructor pwease
 in Init assign 'name' and 'minSpace' do declare, respectively, the name of the node and the minimum space it wants for ui.
 */
+
 struct Node
 {
 	inline virtual ~Node() { }
@@ -82,6 +83,7 @@ struct Node
 
 	bool Connect(size_t inputIndex, Node* origin, size_t originIndex);
 	void Disconnect(size_t inputIndex);
+	void DisconnectOutput(size_t outputIndex);
 
 	v2 GetInputPos(const std::string& name) const;
 	v2 GetOutputPos(const std::string& name) const;
@@ -121,8 +123,8 @@ protected:
 	void SequencerInput(const std::string& name, PitchSequencer* target);
 	void SequencerOutput(const std::string& name, PitchSequencer* target);
 
-	void DefaultInput(const std::string& name, void* target, NodeType type);
-	void DefaultOutput(const std::string& name, void* target, NodeType type);
+	void DefaultInput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type);
+	void DefaultOutput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type);
 
 	// returns in terms of beats
 	float tempoSyncToFloat(int v) const;

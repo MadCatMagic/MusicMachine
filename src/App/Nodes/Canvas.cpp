@@ -1,6 +1,7 @@
 #include "App/Nodes/Canvas.h"
 #include "App/Nodes/NodeNetwork.h"
 #include "App/Nodes/NodeTypes/NodeNetworkNode.h"
+#include "App/Nodes/NodeTypes/NodeNetworkVariable.h"
 #include "imgui.h"
 
 #include "Engine/Console.h"
@@ -300,11 +301,11 @@ nodeInteractionsEscape:
     }
     bool beginSaveAs = false;
     bool beginLoad = false;
-    bool beginNodeNetworkLoad = false;
+    std::pair<bool, bool> beginNetworkThings = std::make_pair(false, false);
 
     if (ImGui::BeginPopup("context"))
     {
-        beginNodeNetworkLoad = nodes->DrawContextMenu(contextMenuClickPos);
+        beginNetworkThings = nodes->DrawContextMenu(contextMenuClickPos);
 
         // save
         if (ImGui::MenuItem("Save"))
@@ -322,7 +323,7 @@ nodeInteractionsEscape:
         ImGui::EndPopup();
     }
 
-    SaveLoadWindows(beginSaveAs, beginLoad, beginNodeNetworkLoad, appPointer);
+    PopupWindows(beginSaveAs, beginLoad, beginNetworkThings.first, beginNetworkThings.second, appPointer);
 
     // Draw grid + all lines in the canvas
     drawList.dl->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
@@ -349,7 +350,6 @@ nodeInteractionsEscape:
 
     ImGui::PushFont(textLODs[scalingLevel]);
     drawList.convertPosition = true;
-    nodes->Update();
     nodeRenderer->drawDebugInformation = nodes->doIDrawDebug();
     nodeRenderer->Draw(&drawList, selectedStack, bbox2(stctp(canvasPixelPos), stctp(canvasBottomRight)));
 
@@ -400,7 +400,7 @@ nodeInteractionsEscape:
     return !shouldStayOpen;
 }
 
-void Canvas::SaveLoadWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetworkLoad, App* appPointer)
+void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetworkLoad, bool beginNetworkVariableCreate, App* appPointer)
 {
     ////////////
     // SAVING //
@@ -632,6 +632,40 @@ void Canvas::SaveLoadWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNet
             ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
     }
+
+    //////////////////////////
+    // New Network Variable //
+    //////////////////////////
+    if (beginNetworkVariableCreate)
+    {
+        ImGui::OpenPopup("New Network Variable");
+        memset(buf, 0, 64);
+        memcpy_s(buf, 64, "new variable", 13);
+    }
+
+    if (ImGui::BeginPopupModal("New Network Variable", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::InputText("name", buf, 64);
+        if (ImGui::Button("Input"))
+        {
+            NodeNetworkVariable* newVariable = (NodeNetworkVariable*)(nodes->AddNodeFromName("NodeNetworkVariable", contextMenuClickPos));
+            newVariable->isOutput = false;
+            newVariable->id = SanitiseName(std::string(buf));
+            ImGui::CloseCurrentPopup();
+        }
+
+        if (ImGui::Button("Output"))
+        {
+            NodeNetworkVariable* newVariable = (NodeNetworkVariable*)(nodes->AddNodeFromName("NodeNetworkVariable", contextMenuClickPos));
+            newVariable->isOutput = true;
+            newVariable->id = std::string(buf);
+            ImGui::CloseCurrentPopup();
+        }
+
+        if (ImGui::Button("Cancel"))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
 }
 
 void Canvas::SaveState(const std::string& filepath)
@@ -695,4 +729,25 @@ void Canvas::GenerateAllTextLODs()
     io.Fonts->AddFontDefault();
     for (int i = 0; i < NUM_SCALING_LEVELS; i++)
         textLODs[i] = io.Fonts->AddFontFromFileTTF("res/fonts/Cousine-Regular.ttf", 12.0f / GetSFFromScalingLevel(i), nullptr, ranges.Data);
+}
+
+std::string Canvas::SanitiseName(const std::string& o)
+{
+    std::string id = o;
+    while (true)
+    {
+        bool breakNow = true;
+        for (NodeNetworkVariable* variable : nodes->ioVariables)
+        {
+            if (id == variable->id)
+            {
+                id += "_";
+                breakNow = false;
+                break;
+            }
+        }
+        if (breakNow)
+            break;
+    }
+    return id;
 }

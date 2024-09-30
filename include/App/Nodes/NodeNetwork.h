@@ -15,6 +15,7 @@ class NodeNetwork
 {
 public:
 	friend class NodeNetworkRenderer;
+	friend Node;
 
 	static NodeNetwork* context;
 
@@ -30,9 +31,9 @@ public:
 	void TryEndConnection(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
 	void DeleteNode(Node* node);
 
-	bool DrawContextMenu(const v2& contextMenuClickPos);
+	std::pair<bool, bool> DrawContextMenu(const v2& contextMenuClickPos);
 
-	bool Execute();
+	bool Execute(bool setAudioStream);
 	void Update();
 
 	void SaveNetworkToFile(const std::string& nnFilePath);
@@ -48,7 +49,7 @@ public:
 	int usedInNetworkNode = 0;
 
 	bool isRoot = false;
-	std::vector<class NodeNetworkVariable*> ioVariables;
+	std::vector<struct NodeNetworkVariable*> ioVariables;
 
 private:
 

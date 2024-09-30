@@ -153,7 +153,7 @@ bool Node::Connect(size_t inputIndex, Node* origin, size_t originIndex)
 
 void Node::Disconnect(size_t inputIndex)
 {
-	if (inputs.size() <= inputIndex)
+	if (inputs.size() <= inputIndex || inputs[inputIndex].source == nullptr)
 		return;
 	NodeInput& i = inputs[inputIndex];
 	for (size_t k = 0; k < i.source->outputs.size(); k++)
@@ -165,6 +165,15 @@ void Node::Disconnect(size_t inputIndex)
 	i.source = nullptr;
 	i.sourceName = "";
 	i.target = nullptr;
+	parent->RecalculateDependencies();
+}
+
+void Node::DisconnectOutput(size_t outputIndex)
+{
+	for (Node* n : parent->nodes)
+		for (size_t i = 0; i < n->inputs.size(); i++)
+			if (n->inputs[i].source != nullptr && n->inputs[i].source == this && n->inputs[i].sourceName == outputs[outputIndex].name)
+				n->Disconnect(i);
 	parent->RecalculateDependencies();
 }
 
@@ -291,20 +300,38 @@ void Node::SequencerOutput(const std::string& name, PitchSequencer* target)
 	TransferOutput(o);
 }
 
-void Node::DefaultInput(const std::string& name, void* target, NodeType type)
+void Node::DefaultInput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type)
 {
 	NodeInput o;
 	o.name = name;
-	o.target = target;
+	if (type == NodeType::Bool)
+		o.target = b;
+	else if (type == NodeType::Int)
+		o.target = i;
+	else if (type == NodeType::Float)
+		o.target = f;
+	else if (type == NodeType::Audio)
+		o.target = c;
+	else
+		o.target = s;
 	o.type = type;
 	TransferInput(o);
 }
 
-void Node::DefaultOutput(const std::string& name, void* target, NodeType type)
+void Node::DefaultOutput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type)
 {
 	NodeOutput o;
 	o.name = name;
-	o.data = target;
+	if (type == NodeType::Bool)
+		o.data = b;
+	else if (type == NodeType::Int)
+		o.data = i;
+	else if (type == NodeType::Float)
+		o.data = f;
+	else if (type == NodeType::Audio)
+		o.data = c;
+	else
+		o.data = s;
 	o.type = type;
 	TransferOutput(o);
 }

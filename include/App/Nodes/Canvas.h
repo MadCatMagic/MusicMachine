@@ -22,7 +22,7 @@ public:
 	void InitCanvas();
 	bool CreateWindow(DrawStyle* drawStyle, class App* appPointer, int canvasI);
 
-	void SaveLoadWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetworkLoad, App* appPointer);
+	void PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetworkLoad, bool beginNetworkVariableCreate, App* appPointer);
 	void SaveState(const std::string& filepath);
 	void LoadState(const std::string& filepath, App* appPointer);
 
@@ -48,6 +48,8 @@ public:
 	
 private:
 	bool shouldStayOpen = true;
+
+	std::string SanitiseName(const std::string& o);
 
 	inline float optionalClamp(float f, float min, float max, bool doMin, bool doMax) 
 	{ 

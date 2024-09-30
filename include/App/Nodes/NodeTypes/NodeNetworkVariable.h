@@ -3,9 +3,12 @@
 
 struct NodeNetworkVariable : public Node
 {
-	friend class NodeNetworkNode;
+	friend struct NodeNetworkNode;
 	friend class NodeNetwork;
 	~NodeNetworkVariable();
+
+	bool isOutput = false;
+	std::string id = "new variable";
 
 protected:
 	virtual void Init() override;
@@ -18,9 +21,11 @@ protected:
 	virtual JSONType Save() override;
 
 private:
-	bool isOutput = false;
 	NodeType nodeType = NodeType::Audio;
 
-	void* data = nullptr;
-	std::string id = "new variable";
+	bool b = false;
+	int i = 0;
+	float f = 0.0f;
+	AudioChannel c;
+	PitchSequencer s;
 };

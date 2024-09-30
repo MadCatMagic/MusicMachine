@@ -11,6 +11,8 @@ const int FRAME_TIME_AVERAGE_LENGTH = 10;
 class App
 {
 public:
+	static App* instance;
+
 	friend Canvas;
 
 	void Initialize();
@@ -25,6 +27,8 @@ public:
 	void AddNetwork(NodeNetwork* nodes);
 	void DeleteNetwork(NodeNetwork* nodes);
 	void ReplaceMainNetwork(NodeNetwork* nodes);
+
+	NodeNetwork* GetNetwork(const std::string& name);
 
 private:
 	AudioStream astream;

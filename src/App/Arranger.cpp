@@ -306,7 +306,7 @@ void Arranger::UI(DrawStyle* drawStyle)
             {
                 v2 centre = ptcts(node->points[i].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j));
 
-                if (inSelectedStack(j, i))
+                if (inSelectedStack((int)j, (int)i))
                     drawList.Rect(centre - cellR - 2.0f, centre + cellR + 2.0f, ImColor(1.0f, 0.0f, 1.0f));
                 if (j == hoveredID)
                     drawList.RectFilled(centre - cellR, centre + cellR, ImColor(1.0f, i == closestCell ? 0.0f : 1.0f, 1.0f));
@@ -362,7 +362,7 @@ bool Arranger::inSelectedStack(int i, int j) const
 
 bool Arranger::isNearLine(const v2& pos, int hovered, int& target) const
 {
-    v2 truePos = pos.scale(1.0f / pixelsPerBeat, 1.0f / rowHeight) - v2(0.0f, hovered);
+    v2 truePos = pos.scale(1.0f / pixelsPerBeat, 1.0f / rowHeight) - v2(0.0f, (float)hovered);
     VariableNode* ref = VariableNode::variableNodes[hovered];
     int i;
     for (i = 0; i < ref->points.size(); i++)

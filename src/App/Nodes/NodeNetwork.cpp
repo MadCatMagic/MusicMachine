@@ -63,6 +63,13 @@ NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 	for (size_t i = 0; i < nodes.size(); i++)
 		nodes[i]->LoadData(arr[i]);
 
+	for (size_t i = 0; i < nodes.size(); i++)
+	{
+		nodes[i]->ResetTouchedStatus();
+		nodes[i]->IO();
+		nodes[i]->CheckTouchedStatus();
+	}
+
 	Console::Log("Loaded NodeNetwork from file <" + nnFilePath + ">.");
 }
 
@@ -163,7 +170,7 @@ void NodeNetwork::DeleteNode(Node* node)
 	recalculateDependencies = true;
 }
 
-bool NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos)
+std::pair<bool, bool> NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos)
 {
 	if (ImGui::BeginMenu("Nodes"))
 	{
@@ -177,15 +184,14 @@ bool NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos)
 	if (ImGui::MenuItem("New Network Node"))
 		beginNetworkNodePrompt = true;
 
+	bool beginNetworkVariablePrompt = false;
 	if (!isRoot)
 		if (ImGui::MenuItem("New Network Variable"))
-		{
-			AddNodeFromName("NodeNetworkVariable", contextMenuClickPos);
-		}
+			beginNetworkVariablePrompt = true;
 
 	ImGui::MenuItem("Debug Enable", nullptr, &drawDebugInformation);
 
-	return beginNetworkNodePrompt;
+	return std::make_pair(beginNetworkNodePrompt, beginNetworkVariablePrompt);
 }
 
 Node* NodeNetwork::GetNodeFromID(const std::string& id)
@@ -195,7 +201,7 @@ Node* NodeNetwork::GetNodeFromID(const std::string& id)
 	return nullptr;
 }
 
-bool NodeNetwork::Execute()
+bool NodeNetwork::Execute(bool setAudioStream)
 {
 	// help
 	if (nodeDependencyInfoPersistent == nullptr)
@@ -205,7 +211,7 @@ bool NodeNetwork::Execute()
 	if (nodeDependencyInfoPersistent->problemConnectionExists)
 		return false;
 
-	if (!Arranger::instance->playing)
+	if (!Arranger::instance->playing && setAudioStream)
 	{
 		auto emptyVec = std::vector<v2>(AudioChannel::bufferSize, v2());
 		audioStream->SetData(emptyVec);
@@ -220,7 +226,8 @@ bool NodeNetwork::Execute()
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
 	{
 		e->Execute();
-		audioStream->SetData(e->Result()->data);
+		if (setAudioStream)
+			audioStream->SetData(e->Result()->data);
 	}
 	return true;
 }

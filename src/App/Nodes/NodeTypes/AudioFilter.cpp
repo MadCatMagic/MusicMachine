@@ -59,6 +59,13 @@ void AudioFilter::Work()
 {
 	CalculateFeedbackAmount();
 
+	if (isnan(buf0.x) || isnan(buf0.y))
+	{
+		Console::LogWarn("NANS IN THE FILTER MAN THERE ARE NANS EVERYWHERE");
+		buf0 = 0.0f;
+		buf1 = 0.0f;
+	}
+
 	for (int i = 0; i < ichannel.bufferSize; i++)
 	{
 		buf0 += (ichannel.data[i] - buf0 + (buf0 - buf1) * feedbackAmount) * cutoff;

@@ -338,9 +338,9 @@ void NodeNetworkRenderer::DrawHeader(const v2& cursor, const std::string& name, 
 	v2 triCentre = cursor + v2(miniTriOffset, height * 0.5f);
 	if (mini)
 		currentList->TriangleFilled(
-			triCentre + v2(3.0f, 0.0f),
-			triCentre + v2(-3.0f, -3.0f),
 			triCentre + v2(-3.0f, 3.0f),
+			triCentre + v2(-3.0f, -3.0f),
+			triCentre + v2(3.0f, 0.0f),
 			DrawColour::Text
 		);
 	else
