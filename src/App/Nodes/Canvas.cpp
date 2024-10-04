@@ -683,7 +683,7 @@ void Canvas::LoadState(const std::string& filepath, App* appPointer)
         delete nodeRenderer;
     nodeRenderer = new NodeNetworkRenderer(nodes, this);
     // 'temporary', should not be like this but whatever
-    if (nodes->ioVariables.size() == 0)
+    if (nodes->isRoot)
         appPointer->ReplaceMainNetwork(nodes);
     else
         appPointer->AddNetwork(nodes);

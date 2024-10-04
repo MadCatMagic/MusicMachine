@@ -31,6 +31,9 @@ NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 		return;
 	}
 
+	// check if node should be set as root
+	isRoot = res.first["root"].b;
+
 	// first pass creates the nodes themselves and reassigns their ids
 	auto& arr = res.first["nodes"].arr;
 	for (JSONType& t : arr)
@@ -53,7 +56,7 @@ NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 		node->Init();
 		node->Load(t.obj["node"]);
 		node->IO();
-		node->UpdateDimensions();
+		node->renderer.UpdateDimensions();
 		nodes.push_back(node);
 		nodeIDMap[node->id_s()] = node;
 	}
@@ -99,8 +102,8 @@ Node* NodeNetwork::AddNodeFromName(const std::string& type, const v2& initPos, b
 	// random enough for now but unreliable
 	n->NodeInit(this, (uint64_t)rand() << 16 ^ nodes.size());
 	n->Init();
-	n->UpdateDimensions();
-	n->position = initPos - n->size * 0.5f;
+	n->renderer.UpdateDimensions();
+	n->position = initPos - n->renderer.size * 0.5f;
 	nodes.push_back(n);
 	nodeIDMap[n->id_s()] = n;
 	return n;
@@ -111,7 +114,7 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection, size
 	if (currentSelection == nullptr)
 	{
 		for (Node* node : nodes)
-			if (node->getBounds().containsLeniant(pos, 4.0f))
+			if (node->renderer.getBounds().containsLeniant(pos, 4.0f))
 				return node;
 	}
 	else
@@ -120,7 +123,7 @@ Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection, size
 		for (size_t i = index; i < nodes.size() + index; i++)
 		{
 			Node* n = nodes[i % nodes.size()];
-			if (n->getBounds().containsLeniant(pos, 4.0f))
+			if (n->renderer.getBounds().containsLeniant(pos, 4.0f))
 				return n;
 		}
 	}
@@ -132,7 +135,7 @@ std::vector<Node*> NodeNetwork::FindNodesInArea(const v2& p1, const v2& p2)
 	std::vector<Node*> v = std::vector<Node*>();
 	bbox2 bb = bbox2(p1, p2);
 	for (Node* n : nodes)
-		if (bb.overlaps(n->getBounds()))
+		if (bb.overlaps(n->renderer.getBounds()))
 			v.push_back(n);
 	return v;
 }
@@ -260,6 +263,7 @@ void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 
 	conv.WriteFile(nnFilePath, JSONType({
 		{ "nodes", nodeData },
+		{ "isRoot", isRoot },
 		{ "dummy", false }
 	}));
 

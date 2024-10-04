@@ -48,6 +48,29 @@ struct NodeClickInfo
 	bool isRight = false;
 };
 
+struct NodeRenderer
+{
+	const float headerHeight = 20.0f;
+	const float miniTriangleOffset = 10.0f;
+
+	inline NodeRenderer(Node* n) : node(n) {}
+
+	v2 GetInputPos(size_t index) const;
+	v2 GetOutputPos(size_t index) const;
+
+	v2 spaceOffset() const;
+	void UpdateDimensions();
+	float IOWidth(const std::string& text, size_t additionalWidth = 0) const;
+	float headerSize() const;
+	float getNormalWidth() const;
+	bbox2 getBounds() const;
+
+	v2 size;
+
+private:
+	Node* node;
+};
+
 /*
 -- Inheriting from the Node class --
 override 'void IO()' to create your own inputs and outputs.
@@ -73,11 +96,11 @@ struct Node
 
 	friend NodeNetwork;
 	friend class NodeNetworkRenderer;
+	friend struct NodeRenderer;
+
 	virtual void IO();
 
 	v2 position = v2::zero;
-	// please don't set me! thanks xx
-	v2 size = v2::zero;
 
 	NodeClickResponse HandleClick(const NodeClickInfo& info);
 
@@ -85,10 +108,12 @@ struct Node
 	void Disconnect(size_t inputIndex);
 	void DisconnectOutput(size_t outputIndex);
 
-	v2 GetInputPos(const std::string& name) const;
-	v2 GetOutputPos(const std::string& name) const;
 	NodeType GetInputType(const std::string& name) const;
 	NodeType GetOutputType(const std::string& name) const;
+	v2 GetInputPos(const std::string& name) const;
+	v2 GetOutputPos(const std::string& name) const;
+
+	NodeRenderer renderer = NodeRenderer(this);
 
 protected:
 	inline virtual void Init() { }
@@ -136,8 +161,6 @@ private:
 	std::string id_s();
 
 	bool mini = false;
-	const float headerHeight = 20.0f;
-	const float miniTriangleOffset = 10.0f;
 
 	bool hasBeenExecuted = true;
 	void Execute();
@@ -178,23 +201,15 @@ private:
 	void ResetTouchedStatus();
 	void CheckTouchedStatus();
 
+	size_t GetInputIndex(const std::string& name) const;
+	size_t GetOutputIndex(const std::string& name) const;
+
 	inline void NodeInit(NodeNetwork* parent, uint64_t id) { this->parent = parent; this->id = id; }
 	
 	void LoadData(JSONType& data);
 	JSONType SaveData();
 
 	bool TryConnect(Node* origin, const std::string& originName, const v2& pos, bool connectionReversed);
-	
-	v2 GetInputPos(size_t index) const;
-	v2 GetOutputPos(size_t index) const;
-	v2 spaceOffset() const;
-	size_t GetInputIndex(const std::string& name) const;
-	size_t GetOutputIndex(const std::string& name) const;
-	void UpdateDimensions();
-	float IOWidth(const std::string& text, size_t additionalWidth = 0) const;
-	float headerSize() const;
-	float getNormalWidth() const;
-	bbox2 getBounds() const;
 
 	size_t DataSize(NodeType type);
 };

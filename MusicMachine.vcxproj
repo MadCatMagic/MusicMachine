@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Nodes\NodeRenderer.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkVariable.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkNode.cpp" />
     <ClCompile Include="src\App\Arranger.cpp" />

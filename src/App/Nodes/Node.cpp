@@ -7,7 +7,7 @@ NodeClickResponse Node::HandleClick(const NodeClickInfo& info)
 {
 	NodeClickResponse r;
 	r.handled = true;
-	v2 centre = v2(getNormalWidth() - miniTriangleOffset, headerHeight * 0.5f);
+	v2 centre = v2(renderer.getNormalWidth() - renderer.miniTriangleOffset, renderer.headerHeight * 0.5f);
 
 	// only care about left clicks for this whole section
 	if (info.interactionType == 0 && !info.isRight)
@@ -28,7 +28,7 @@ NodeClickResponse Node::HandleClick(const NodeClickInfo& info)
 			float minDist = FLT_MAX;
 			for (size_t i = 0; i < outputs.size(); i++)
 			{
-				float d = GetOutputPos(i).distanceTo(worldPos);
+				float d = renderer.GetOutputPos(i).distanceTo(worldPos);
 				if (d <= minDist)
 				{
 					oi = i;
@@ -50,7 +50,7 @@ NodeClickResponse Node::HandleClick(const NodeClickInfo& info)
 			size_t inpI = 0;
 			for (size_t i = 0; i < inputs.size(); i++)
 			{
-				float d = GetInputPos(i).distanceTo(worldPos);
+				float d = renderer.GetInputPos(i).distanceTo(worldPos);
 				if (d <= minDist)
 				{
 					minDist = d;
@@ -81,23 +81,23 @@ NodeClickResponse Node::HandleClick(const NodeClickInfo& info)
 			{
 				if (inputs[i].target == nullptr || inputs[i].source != nullptr)
 					continue;
-				v2 p = GetInputPos(i);
+				v2 p = renderer.GetInputPos(i);
 				if (inputs[i].type == NodeType::Int || inputs[i].type == NodeType::Float)
 				{
-					bbox2 bb = bbox2(p - v2(0.0f, 8.0f), p + v2(size.y, 8.0f));
+					bbox2 bb = bbox2(p - v2(0.0f, 8.0f), p + v2(renderer.size.y, 8.0f));
 					if (bb.contains(worldPos))
 					{
 						if (inputs[i].type == NodeType::Float)
 						{
 							r.type = NodeClickResponseType::InteractWithFloatSlider;
 							r.sliderValue.f = (float*)inputs[i].target;
-							r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+							r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / renderer.size.x;
 						}
 						else
 						{
 							r.type = NodeClickResponseType::InteractWithIntSlider;
 							r.sliderValue.i = (int*)inputs[i].target;
-							r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / size.x;
+							r.sliderDelta = (inputs[i].fmax - inputs[i].fmin) / renderer.size.x;
 						}
 						r.sliderLockMin = inputs[i].lockMin;
 						r.sliderLockMax = inputs[i].lockMax;
@@ -110,7 +110,7 @@ NodeClickResponse Node::HandleClick(const NodeClickInfo& info)
 				}
 				else if (inputs[i].type == NodeType::Bool)
 				{
-					v2 centre = p + v2(size.x - 10.0f, 0.0f);
+					v2 centre = p + v2(renderer.size.x - 10.0f, 0.0f);
 					if ((centre - worldPos).length() > 6.0f)
 						continue;
 					*(bool*)inputs[i].target = !(*(bool*)inputs[i].target);
@@ -125,8 +125,8 @@ NodeClickResponse Node::HandleClick(const NodeClickInfo& info)
 	NodeClickInfo localNodeInfo;
 	localNodeInfo.interactionType = info.interactionType;
 	localNodeInfo.isRight = info.isRight;
-	localNodeInfo.pos = info.pos - spaceOffset();
-	if (!mini && (info.pos - spaceOffset()).inBox(v2(), minSpace) && OnClick(localNodeInfo))
+	localNodeInfo.pos = info.pos - renderer.spaceOffset();
+	if (!mini && (info.pos - renderer.spaceOffset()).inBox(v2(), minSpace) && OnClick(localNodeInfo))
 	{
 		r.handled = true;
 		r.type = NodeClickResponseType::Interact;
@@ -395,36 +395,6 @@ void Node::Execute()
 	Work();
 }
 
-float Node::headerSize() const
-{
-	return std::max(headerHeight, 16.0f * (std::max(inputs.size(), outputs.size())) / (PI * 0.6f));
-}
-
-float Node::getNormalWidth() const
-{
-	float maxXOff = 0.0f;
-	for (const NodeInput& input : inputs)
-	{
-		size_t additionalWidth = (input.type == NodeType::Int) ? 5 : 0;
-		additionalWidth = (input.type == NodeType::Float) ? 6 : additionalWidth;
-		additionalWidth = (input.displayType != FloatDisplayType::None) ? 8 : additionalWidth;
-		maxXOff = std::max(IOWidth(input.name, additionalWidth), maxXOff);
-	}
-	for (const NodeOutput& output : outputs)
-		maxXOff = std::max(IOWidth(output.name), maxXOff);
-	maxXOff = std::max(minSpace.x + 4.0f, maxXOff);
-	maxXOff = std::max(IOWidth(title) + 8.0f, maxXOff);
-	return maxXOff;
-}
-
-bbox2 Node::getBounds() const
-{
-	if (!mini)
-		return bbox2(position, position + size);
-	v2 offset = position - v2(0.0f, headerSize() * 0.5f - headerHeight * 0.5f);
-	return bbox2(offset, offset + size);
-}
-
 // O(n^2) (over a whole frame)
 void Node::TransferInput(const NodeInput& i)
 {
@@ -551,65 +521,18 @@ bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos
 	return false;
 }
 
-v2 Node::GetInputPos(size_t index) const
+size_t Node::DataSize(NodeType type)
 {
-	if (!mini)
+	switch (type)
 	{
-		return position + v2(0.0f, headerHeight + 4.0f + 4.0f + 16.0f * outputs.size() + minSpace.y + 16.0f * index + 8.0f);
+	case NodeType::Bool:
+		return sizeof(bool);
+	case NodeType::Float:
+		return sizeof(float);
+	case NodeType::Int:
+		return sizeof(int);
 	}
-	if (inputs.size() > 1)
-	{
-		// fuck this shit
-		// ahhh they should take up the same spacing as the most populous node type (input/output)
-		// fuck
-		float amountOfCircle = 0.6f;
-		if (outputs.size() > 1)
-			amountOfCircle *= std::min(1.0f, (float)(inputs.size() - 1) / (float)(outputs.size() - 1));
-		if (inputs.size() == 2 && outputs.size() <= 2)
-			amountOfCircle *= 2.0f / 3.0f;
-		const float hh = headerSize() * 0.5f;
-		const float angle = PI * (0.5f - amountOfCircle * 0.5f + amountOfCircle * index / (float)(inputs.size() - 1));
-		const v2 offset = v2(sinf(-angle), -cosf(angle));
-		const v2 constOffset = v2(hh, headerHeight * 0.5f);
-		return position + constOffset + offset * hh;
-	}
-	return position + v2(0.0f, headerHeight * 0.5f);
-}
-
-v2 Node::GetInputPos(const std::string& name) const
-{
-	size_t n = GetInputIndex(name);
-	if (n == -1)
-		return v2::zero;
-	return GetInputPos(n);
-}
-
-v2 Node::GetOutputPos(size_t index) const
-{
-	if (!mini)
-	{
-		return position + v2(size.x, headerHeight + 4.0f + 16.0f * index + 8.0f);
-	}
-	if (outputs.size() > 1)
-	{
-		// same as for inputs but with one or two changes
-		float amountOfCircle = 0.6f;
-		if (inputs.size() > 1)
-			amountOfCircle *= std::min(1.0f, (float)(outputs.size() - 1) / (float)(inputs.size() - 1));
-		if (outputs.size() == 2 && inputs.size() <= 2)
-			amountOfCircle *= 2.0f / 3.0f;
-		const float hh = headerSize() * 0.5f;
-		const float angle = PI * (0.5f - amountOfCircle * 0.5f + amountOfCircle * index / (float)(outputs.size() - 1));
-		const v2 offset = v2(sinf(angle), -cosf(angle));
-		const v2 constOffset = v2(size.x - hh, headerHeight * 0.5f);
-		return position + constOffset + offset * hh;
-	}
-	return position + v2(size.x, headerHeight * 0.5f);
-}
-
-v2 Node::spaceOffset() const
-{
-	return v2((size.x - minSpace.x) * 0.5f, headerHeight + 4.0f + 2.0f + 16.0f * outputs.size());
+	return 0;
 }
 
 size_t Node::GetInputIndex(const std::string& name) const
@@ -628,20 +551,12 @@ size_t Node::GetOutputIndex(const std::string& name) const
 	return -1;
 }
 
-v2 Node::GetOutputPos(const std::string& name) const
-{
-	size_t n = GetOutputIndex(name);
-	if (n == -1)
-		return v2::zero;
-	return GetOutputPos(n);
-}
-
 Node::NodeType Node::GetInputType(const std::string& name) const
 {
 	size_t n = GetInputIndex(name);
 	if (n != -1)
 		return inputs[n].type;
-	return NodeType::Bool;
+	return Node::NodeType::Bool;
 }
 
 Node::NodeType Node::GetOutputType(const std::string& name) const
@@ -649,41 +564,21 @@ Node::NodeType Node::GetOutputType(const std::string& name) const
 	size_t n = GetOutputIndex(name);
 	if (n != -1)
 		return outputs[n].type;
-	return NodeType::Bool;
+	return Node::NodeType::Bool;
 }
 
-void Node::UpdateDimensions()
+v2 Node::GetInputPos(const std::string& name) const
 {
-	float maxXOff = getNormalWidth();
-	if (mini)
-		size = v2(
-			std::max(maxXOff, headerSize() + 2.0f), 
-			headerSize()
-		);
-	else
-		size = v2(
-			maxXOff, 
-			headerHeight + 8.0f + (minSpace.y + 4.0f) + inputs.size() * 16.0f + outputs.size() * 16.0f
-		);
+	size_t n = GetInputIndex(name);
+	if (n == -1)
+		return v2::zero;
+	return renderer.GetInputPos(n);
 }
 
-float Node::IOWidth(const std::string& text, size_t additionalWidth) const
+v2 Node::GetOutputPos(const std::string& name) const
 {
-	// return length
-	// text space + 8px padding either side
-	return 6.0f * (float)(text.size() + additionalWidth + 1) + 16.0f;
-}
-
-size_t Node::DataSize(NodeType type)
-{
-	switch (type)
-	{
-	case NodeType::Bool:
-		return sizeof(bool);
-	case NodeType::Float:
-		return sizeof(float);
-	case NodeType::Int:
-		return sizeof(int);
-	}
-	return 0;
+	size_t n = GetOutputIndex(name);
+	if (n == -1)
+		return v2::zero;
+	return renderer.GetOutputPos(n);
 }

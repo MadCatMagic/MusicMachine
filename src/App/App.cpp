@@ -321,8 +321,9 @@ void App::ReplaceMainNetwork(NodeNetwork* nodes)
         n.push_back(nodes);
     else
     {
-        delete n[0];
+        NodeNetwork* n_k = n[0];
         n[0] = nodes;
+        n.push_back(n_k);
     }
     n[0]->audioStream = &astream;
     n[0]->isRoot = true;

@@ -21,16 +21,16 @@ void NodeNetworkRenderer::Draw(DrawList* drawList, std::vector<Node*>& selected,
 		node->IO();
 		node->CheckTouchedStatus();
 		// automatically sets the size
-		bool dontCullNode = screen.overlaps(node->getBounds());
+		bool dontCullNode = screen.overlaps(node->renderer.getBounds());
 		DrawNode(node, !dontCullNode);
 
 		if (dontCullNode)
 		{
 			// draw node body
-			bbox2 nodeBounds = node->getBounds();
+			bbox2 nodeBounds = node->renderer.getBounds();
 			v2 topLeft = nodeBounds.a;
 			v2 bottomRight = nodeBounds.b;
-			float rounding = node->mini ? node->headerSize() : NODE_ROUNDING;
+			float rounding = node->mini ? node->renderer.headerSize() : NODE_ROUNDING;
 
 			bool isSelected = std::find(selected.begin(), selected.end(), node) != selected.end();
 			bool isSelectedTop = selected.size() > 0 && selected[selected.size() - 1] == node;
@@ -146,20 +146,21 @@ void NodeNetworkRenderer::Draw(DrawList* drawList, std::vector<Node*>& selected,
 void NodeNetworkRenderer::DrawNode(Node* node, bool cullBody)
 {
 	v2 cursor = node->position;
-	node->UpdateDimensions();
+	NodeRenderer& r = node->renderer;
+	r.UpdateDimensions();
 	if (!cullBody)
 	{
 		if (!node->mini)
 		{
 			// leave spaces
-			cursor.y += node->headerHeight + 4.0f;
+			cursor.y += r.headerHeight + 4.0f;
 			cursor.y += 16.0f * node->outputs.size();
 
 			// draw node and stuff
 			// 2px padding round the minspace
 			// centered horizontally too
 
-			node->Render(cursor + v2((node->size.x - node->minSpace.x) * 0.5f, 2.0f), currentList, canvas->GetSF().x > 2.4f);
+			node->Render(cursor + v2((r.size.x - node->minSpace.x) * 0.5f, 2.0f), currentList, canvas->GetSF().x > 2.4f);
 
 			cursor.y += node->minSpace.y + 4.0f;
 
@@ -167,20 +168,20 @@ void NodeNetworkRenderer::DrawNode(Node* node, bool cullBody)
 			for (const Node::NodeInput& input : node->inputs)
 			{
 				cursor.y += 8.0f;
-				DrawInput(cursor, input, node->size.x);
+				DrawInput(cursor, input, r.size.x);
 				cursor.y += 8.0f;
 			}
 
 			cursor = node->position;
 			// draw node header
-			DrawHeader(cursor, node->title, node->size.x, node->headerHeight, node->mini, node->getNormalWidth() - node->miniTriangleOffset);
-			cursor.y += node->headerHeight + 4.0f;
+			DrawHeader(cursor, node->title, r.size.x, r.headerHeight, node->mini, r.getNormalWidth() - r.miniTriangleOffset);
+			cursor.y += r.headerHeight + 4.0f;
 
 			// draw outputs
 			for (const Node::NodeOutput& output : node->outputs)
 			{
 				cursor.y += 8.0f;
-				DrawOutput(cursor, node->size.x, output);
+				DrawOutput(cursor, r.size.x, output);
 				cursor.y += 8.0f;
 			}
 		}
@@ -188,17 +189,17 @@ void NodeNetworkRenderer::DrawNode(Node* node, bool cullBody)
 		{
 			DrawHeader(
 				cursor - v2(0.0f, 
-				(node->headerSize() - node->headerHeight) * 0.5f), 
-				node->title, 
-				node->size.x, 
-				node->headerSize(), 
-				node->mini, 
-				node->getNormalWidth() - node->miniTriangleOffset
+				(r.headerSize() - r.headerHeight) * 0.5f),
+				node->title,
+				r.size.x,
+				r.headerSize(),
+				node->mini,
+				r.getNormalWidth() - r.miniTriangleOffset
 			);
 			for (size_t i = 0; i < node->inputs.size(); i++)
-				DrawConnectionEndpoint(node->GetInputPos(i), GetCol(node->inputs[i].type), true, node->inputs[i].target == nullptr);
+				DrawConnectionEndpoint(r.GetInputPos(i), GetCol(node->inputs[i].type), true, node->inputs[i].target == nullptr);
 			for (size_t i = 0; i < node->outputs.size(); i++)
-				DrawConnectionEndpoint(node->GetOutputPos(i), GetCol(node->outputs[i].type), true, node->outputs[i].data == nullptr);
+				DrawConnectionEndpoint(r.GetOutputPos(i), GetCol(node->outputs[i].type), true, node->outputs[i].data == nullptr);
 		}
 	}
 
