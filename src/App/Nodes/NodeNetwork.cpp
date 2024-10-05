@@ -229,7 +229,7 @@ bool NodeNetwork::Execute(bool setAudioStream)
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
 	{
 		e->Execute();
-		if (setAudioStream)
+		if (setAudioStream && e->name == "AudioOutputNode")
 			audioStream->SetData(e->Result()->data);
 	}
 	return true;

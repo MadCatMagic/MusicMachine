@@ -499,7 +499,7 @@ bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos
 {
 	if (connectionReversed)
 	{
-		v2 firstOutput = GetOutputPos(0);
+		v2 firstOutput = renderer.GetOutputPos(0);
 		for (size_t i = 0; i < outputs.size(); i++)
 			if (pos.distanceTo(firstOutput + v2(0.0f, 16.0f * i)) <= 6.0f && origin->GetInputType(originName) == outputs[i].type)
 			{
@@ -509,7 +509,7 @@ bool Node::TryConnect(Node* origin, const std::string& originName, const v2& pos
 	}
 	else
 	{
-		v2 firstInput = GetInputPos(0);
+		v2 firstInput = renderer.GetInputPos(0);
 		for (size_t i = 0; i < inputs.size(); i++)
 			if (pos.distanceTo(firstInput + v2(0.0f, 16.0f * i)) <= 6.0f && origin->GetOutputType(originName) == inputs[i].type)
 			{
