@@ -35,7 +35,7 @@ void ADSRNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	dl->Lines(curve, ImColor(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
 }
 
-void ADSRNode::Work()
+void ADSRNode::Work(int id)
 {
 	if (isequencer.length.size() == 0)
 		return;
@@ -54,24 +54,24 @@ void ADSRNode::Work()
 			freq++;
 			if (freq >= isequencer.length.size())
 				return;
-			timer = 0.0f;
+			timer[id] = 0.0f;
 		}
 
 		if (isequencer.pitch[freq] != 0.0f)
 		{
-			lastSample = adsr(scounter + isequencer.cumSamples[freq]);
-			ochannel.data[i] = lastSample;
+			lastSample[id] = adsr(scounter + isequencer.cumSamples[freq]);
+			ochannel.data[i] = lastSample[id];
 		}
 		else
 		{
-			lastSample *= releaseFactor;
-			ochannel.data[i] = lastSample;
+			lastSample[id] *= releaseFactor;
+			ochannel.data[i] = lastSample[id];
 		}
 
 		scounter++;
 	}
 
-	timer += ochannel.dt;
+	timer[id] += ochannel.dt;
 }
 
 void ADSRNode::Load(JSONType& data)

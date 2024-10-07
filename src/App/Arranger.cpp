@@ -138,7 +138,7 @@ void Arranger::UI(DrawStyle* drawStyle)
         {
             VariableNode::variableNodes[hoveredID]->points.insert(
                 VariableNode::variableNodes[hoveredID]->points.begin() + targetIndex,
-                mousePos.scale(1.0f / pixelsPerBeat, 1.0f / rowHeight) - v2(0.0f, hoveredID)
+                mousePos.scale(1.0f / pixelsPerBeat, 1.0f / rowHeight) - v2(0.0f, (float)hoveredID)
             );
             // select newly created node
             selectedStack.clear();

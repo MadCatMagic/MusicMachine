@@ -55,28 +55,28 @@ bool AudioFilter::OnClick(const NodeClickInfo& info)
 	return true;
 }
 
-void AudioFilter::Work()
+void AudioFilter::Work(int id)
 {
 	CalculateFeedbackAmount();
 
-	if (isnan(buf0.x) || isnan(buf0.y))
+	if (isnan(buf0[id].x) || isnan(buf0[id].y))
 	{
 		Console::LogWarn("NANS IN THE FILTER MAN THERE ARE NANS EVERYWHERE");
-		buf0 = 0.0f;
-		buf1 = 0.0f;
+		buf0[id] = 0.0f;
+		buf1[id] = 0.0f;
 	}
 
 	for (int i = 0; i < ichannel.bufferSize; i++)
 	{
-		buf0 += (ichannel.data[i] - buf0 + (buf0 - buf1) * feedbackAmount) * cutoff;
-		buf1 += (buf0 - buf1) * cutoff;
+		buf0[id] += (ichannel.data[i] - buf0[id] + (buf0[id] - buf1[id]) * feedbackAmount) * cutoff;
+		buf1[id] += (buf0[id] - buf1[id]) * cutoff;
 		switch (mode) {
 		case FilterType::LP:
-			ochannel.data[i] = buf1; break;
+			ochannel.data[i] = buf1[id]; break;
 		case FilterType::HP:
-			ochannel.data[i] = ichannel.data[i] - buf0; break;
+			ochannel.data[i] = ichannel.data[i] - buf0[id]; break;
 		case FilterType::BP:
-			ochannel.data[i] = buf0 - buf1; break;
+			ochannel.data[i] = buf0[id] - buf1[id]; break;
 		}
 	}
 }

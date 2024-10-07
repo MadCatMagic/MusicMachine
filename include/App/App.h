@@ -28,7 +28,7 @@ public:
 	void DeleteNetwork(NodeNetwork* nodes);
 	void ReplaceMainNetwork(NodeNetwork* nodes);
 
-	NodeNetwork* GetNetwork(const std::string& name);
+	std::pair<NodeNetwork*, int> GetNetwork(const std::string& name);
 
 private:
 	AudioStream astream;

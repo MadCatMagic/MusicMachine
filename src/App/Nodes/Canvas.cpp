@@ -273,7 +273,7 @@ nodeInteractionsEscape:
     }
 
     // escape all seelctions
-    if (ImGui::IsKeyPressed(ImGuiKey_Escape) && selectedStack.size() > 0)
+    if (ImGui::IsKeyPressed(ImGuiKey_Escape) && selectedStack.size() > 0 || ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isActive)
         selectedStack.clear();
 
     // taken from LevelEditor\...\Editor.cpp
@@ -583,6 +583,8 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
                 ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen;
                 if (selectedExisting == i)
                     flags |= ImGuiTreeNodeFlags_Selected;
+                bool taken = appPointer->n[i]->usedInNetworkNode.all();
+                ImGui::BeginDisabled(taken);
                 ImGui::TreeNodeEx((void*)(intptr_t)i, flags, appPointer->n[i]->name.c_str(), i);
                 if (ImGui::IsItemClicked())
                 {
@@ -591,6 +593,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
                     else
                         selectedExisting = i;
                 }
+                ImGui::EndDisabled();
             }
 
             ImGui::EndTable();
@@ -601,7 +604,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
             NodeNetworkNode* newNode = (NodeNetworkNode*)(nodes->AddNodeFromName("NodeNetworkNode", contextMenuClickPos));
             NodeNetwork* newNetwork = new NodeNetwork();
             appPointer->AddNetwork(newNetwork);
-            newNode->AssignNetwork(newNetwork);
+            newNode->AssignNetwork({ newNetwork, 0 });
 
             ImGui::CloseCurrentPopup();
         }
@@ -610,7 +613,13 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
         if (ImGui::Button("Use"))
         {
             NodeNetworkNode* newNode = (NodeNetworkNode*)(nodes->AddNodeFromName("NodeNetworkNode", contextMenuClickPos));
-            newNode->AssignNetwork(appPointer->n[selectedExisting]);
+            auto& set = appPointer->n[selectedExisting]->usedInNetworkNode;
+            for (int i = 0; i < (int)set.size(); i++)
+                if (!set.test(i))
+                {
+                    newNode->AssignNetwork({ appPointer->n[selectedExisting], i });
+                    break;
+                }
 
             ImGui::CloseCurrentPopup();
         }
@@ -622,7 +631,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
             NodeNetworkNode* newNode = (NodeNetworkNode*)(nodes->AddNodeFromName("NodeNetworkNode", contextMenuClickPos));
             NodeNetwork* newNetwork = new NodeNetwork("networks/" + files[selected] + ".nn");
             appPointer->AddNetwork(newNetwork);
-            newNode->AssignNetwork(newNetwork);
+            newNode->AssignNetwork({ newNetwork, 0 });
 
             ImGui::CloseCurrentPopup();
         }
@@ -676,7 +685,7 @@ void Canvas::SaveState(const std::string& filepath)
 
 void Canvas::LoadState(const std::string& filepath, App* appPointer)
 {
-    if (nodes != nullptr && nodes->usedInNetworkNode == 0)
+    if (nodes != nullptr && nodes->usedInNetworkNode.none())
         appPointer->DeleteNetwork(nodes);
     nodes = new NodeNetwork(std::string(filepath));
     if (nodeRenderer != nullptr)

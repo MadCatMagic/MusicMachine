@@ -45,7 +45,7 @@ void WaveformGenerator::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 		);
 }
 
-void WaveformGenerator::Work()
+void WaveformGenerator::Work(int id)
 {
 	if (seq.length.size() == 0)
 		return;
@@ -58,7 +58,7 @@ void WaveformGenerator::Work()
 	float increment = 1.0f / samplesPerCycle;
 
 	if (seq.cumSamples[0] == 0)
-		kv = 0.0f;
+		kv[id] = 0.0f;
 
 	for (size_t i = 0; i < c.bufferSize; i++)
 	{
@@ -73,14 +73,14 @@ void WaveformGenerator::Work()
 			increment = 1.0f / samplesPerCycle;
 
 			if (seq.cumSamples[freq] == 0)
-				kv = 0.0f;
+				kv[id] = 0.0f;
 		}
 
 		if (seq.pitch[freq] != 0.0f)
 		{
-			kv += increment;
-			if (kv >= 1.0f) kv -= 1.0f;
-			c.data[i] = Bilinear(kv) * seq.velocity[freq];
+			kv[id] += increment;
+			if (kv[id] >= 1.0f) kv[id] -= 1.0f;
+			c.data[i] = Bilinear(kv[id]) * seq.velocity[freq];
 		}
 
 		scounter++;

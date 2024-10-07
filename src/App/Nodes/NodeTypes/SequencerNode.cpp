@@ -45,7 +45,7 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	for (int i = 0; i < width; i++)
 	{
 		if (data[i].first != -1)
-			dl->RectFilled(topLeft + v2(i, (float)(height - 1 - data[i].first)) * cellSize, topLeft + v2(i, (float)(height - 1 - data[i].first)) * cellSize + cellSize, ImColor(0.7f, data[i].second, 0.2f, 1.0f));
+			dl->RectFilled(topLeft + v2((float)i, (float)(height - 1 - data[i].first)) * cellSize, topLeft + v2((float)i, (float)(height - 1 - data[i].first)) * cellSize + cellSize, ImColor(0.7f, data[i].second, 0.2f, 1.0f));
 	}
 
 	// render velocities
@@ -89,7 +89,7 @@ bool SequencerNode::OnClick(const NodeClickInfo& info)
 	return true;
 }
 
-void SequencerNode::Work()
+void SequencerNode::Work(int id)
 {
 	EnsureDataSize();
 

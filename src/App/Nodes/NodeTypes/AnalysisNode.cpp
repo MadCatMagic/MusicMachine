@@ -62,7 +62,7 @@ void AnalysisNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
     }
 }
 
-void AnalysisNode::Work()
+void AnalysisNode::Work(int id)
 {
     if (inputBuffer.size() == 0)
     {

@@ -6,6 +6,9 @@ struct AudioChannel
 	static void Init(int sr, int bs, float _t, float _dt);
 
 	AudioChannel();
+	// copy constructor
+	AudioChannel(const AudioChannel&);
+	AudioChannel& operator=(const AudioChannel&);
 	~AudioChannel();
 
 	void ResetData();

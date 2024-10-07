@@ -69,7 +69,7 @@ bool MathsNode::OnClick(const NodeClickInfo& info)
 	return true;
 }
 
-void MathsNode::Work()
+void MathsNode::Work(int id)
 {
 	switch (op)
 	{

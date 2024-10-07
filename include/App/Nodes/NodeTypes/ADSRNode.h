@@ -9,7 +9,7 @@ protected:
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 
-	virtual void Work() override;
+	virtual void Work(int id) override;
 
 	virtual void Load(JSONType& data) override;
 	virtual JSONType Save() override;
@@ -25,6 +25,6 @@ private:
 	float sustain = 1.0f;
 	float release = 0.01f;
 
-	float lastSample = 0.0f;
-	float timer = 0.0f;
+	float lastSample[MAX_OWNED_NETWORKS]{};
+	float timer[MAX_OWNED_NETWORKS]{};
 };

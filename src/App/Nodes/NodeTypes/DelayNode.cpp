@@ -22,12 +22,12 @@ void DelayNode::IO()
 
 void DelayNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
-	EnsureQueueSize();
+	EnsureQueueSize(0);
 	int skip = lodOn ? 4 : 1;
 	for (int i = 0; i < 127; i += skip)
 	{
-		v2 va = queueLerp((float)i / 128.0f * queueSize);
-		v2 vb = queueLerp((float)(i + skip) / 128.0f * queueSize);
+		v2 va = queueLerp((float)i / 128.0f * queueSize[0], 0);
+		v2 vb = queueLerp((float)(i + skip) / 128.0f * queueSize[0], 0);
 		dl->Line(topLeft + v2((float)i, 50.0f + va.x * 10.0f), topLeft + v2((float)(i + skip), 50.0f + vb.x * 10.0f), ImColor(1.0f, 0.0f, 0.0f, 0.5f));
 		dl->Line(topLeft + v2((float)i, 50.0f + va.y * 10.0f), topLeft + v2((float)(i + skip), 50.0f + vb.y * 10.0f), ImColor(0.0f, 1.0f, 0.0f, 0.5f));
 	}
@@ -51,27 +51,27 @@ bool DelayNode::OnClick(const NodeClickInfo& info)
 	return true;
 }
 
-void DelayNode::Work()
+void DelayNode::Work(int id)
 {
-	EnsureQueueSize();
+	EnsureQueueSize(id);
 	float wideness = stereoWideness * 0.5f + 0.5f;
 	if (delayType == DelayType::Mono)
 		for (int i = 0; i < ichannel.bufferSize; i++)
 		{
-			queue[queuePointer] = queue[queuePointer] * feedback + ichannel.data[i];
-			ochannel.data[i].x = queue[queuePointer].x * mix + ichannel.data[i].x * (1.0f - mix);
-			ochannel.data[i].y = queue[queuePointer].y * mix + ichannel.data[i].y * (1.0f - mix);
-			queuePointer++;
-			queuePointer %= queueSize;
+			queue[id][queuePointer[id]] = queue[id][queuePointer[id]] * feedback + ichannel.data[i];
+			ochannel.data[i].x = queue[id][queuePointer[id]].x * mix + ichannel.data[i].x * (1.0f - mix);
+			ochannel.data[i].y = queue[id][queuePointer[id]].y * mix + ichannel.data[i].y * (1.0f - mix);
+			queuePointer[id]++;
+			queuePointer[id] %= queueSize[id];
 		}
 	else
 		for (int i = 0; i < ichannel.bufferSize; i++)
 		{
-			queue[queuePointer] = queue[queuePointer] * feedback + ichannel.data[i];
+			queue[id][queuePointer[id]] = queue[id][queuePointer[id]] * feedback + ichannel.data[i];
 			// need to take wideness into account somehow
 			v2 lr = v2(
-				queue[queuePointer].x, 
-				queue[(queuePointer + queueSize / 2) % queueSize].y
+				queue[id][queuePointer[id]].x, 
+				queue[id][(queuePointer[id] + queueSize[id] / 2) % queueSize[id]].y
 			);
 			lr = v2(
 				lr.x * wideness + lr.y * (1.0f - wideness),
@@ -79,8 +79,8 @@ void DelayNode::Work()
 			);
 
 			ochannel.data[i] = lr * mix + ichannel.data[i] * (1.0f - mix);
-			queuePointer++;
-			queuePointer %= queueSize;
+			queuePointer[id]++;
+			queuePointer[id] %= queueSize[id];
 		}
 }
 
@@ -104,31 +104,30 @@ JSONType DelayNode::Save()
 	});
 }
 
-v2 DelayNode::queueLerp(float index) const
+v2 DelayNode::queueLerp(float index, int id) const
 {
 	float lv = fmodf(index, 1.0f);
-	return queue[(int)index % queueSize] * lv + queue[(int)(index + 1.0f) % queueSize] * (1.0f - lv);
+	return queue[id][(int)index % queueSize[id]] * lv + queue[id][(int)(index + 1.0f) % queueSize[id]] * (1.0f - lv);
 }
 
-void DelayNode::EnsureQueueSize()
+void DelayNode::EnsureQueueSize(int id)
 {
 	if (time < 0.1f)
 		time = 0.1f;
-	queueSize = (int)(time * ichannel.sampleRate * (delayType == DelayType::PingPong ? 2.0f : 1.0f));
-	skipLength = queueSize / 256;
-	size_t s = queue.size();
+	queueSize[id] = (int)(time * ichannel.sampleRate * (delayType == DelayType::PingPong ? 2.0f : 1.0f));
+	size_t s = queue[id].size();
 
-	if (queuePointer >= queueSize)
-		queuePointer = 0;
+	if (queuePointer[id] >= queueSize[id])
+		queuePointer[id] = 0;
 
-	if (queueSize > s)
+	if (queueSize[id] > s)
 	{
-		for (int i = 0; i < queueSize - s; i++)
-			queue.push_back(v2());
+		for (int i = 0; i < queueSize[id] - s; i++)
+			queue[id].push_back(v2());
 	}
-	else if (queueSize < s)
+	else if (queueSize[id] < s)
 	{
-		for (int i = 0; i < s - queueSize; i++)
-			queue.pop_back();
+		for (int i = 0; i < s - queueSize[id]; i++)
+			queue[id].pop_back();
 	}
 }

@@ -1,6 +1,9 @@
 #pragma once
 #include "App/Nodes/Node.h"
 
+// atm just doesnt care about multiple instances
+// only allowed to be added in the main instance
+// maybe change in future
 struct AnalysisNode : public Node
 {
 protected:
@@ -9,7 +12,7 @@ protected:
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 
-	virtual void Work() override;
+	virtual void Work(int id) override;
 
 private:
 	const float fftFeedback = 0.25f;

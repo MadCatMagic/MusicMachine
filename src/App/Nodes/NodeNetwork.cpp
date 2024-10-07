@@ -73,6 +73,8 @@ NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 		nodes[i]->CheckTouchedStatus();
 	}
 
+	RecalculateDependencies();
+	Update();
 	Console::Log("Loaded NodeNetwork from file <" + nnFilePath + ">.");
 }
 
@@ -178,8 +180,12 @@ std::pair<bool, bool> NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos
 	if (ImGui::BeginMenu("Nodes"))
 	{
 		for (auto& pair : GetNodeFactory().Names())
+		{
+			if (!isRoot && pair.second == "Analysis")
+				continue;
 			if (ImGui::MenuItem(pair.second.c_str()))
 				AddNodeFromName(pair.first, contextMenuClickPos);
+		}
 		ImGui::EndMenu();
 	}
 
@@ -204,7 +210,7 @@ Node* NodeNetwork::GetNodeFromID(const std::string& id)
 	return nullptr;
 }
 
-bool NodeNetwork::Execute(bool setAudioStream)
+bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 {
 	// help
 	if (nodeDependencyInfoPersistent == nullptr)
@@ -228,7 +234,7 @@ bool NodeNetwork::Execute(bool setAudioStream)
 		Console::LogWarn("Multiple endpoints exist, panic!");
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
 	{
-		e->Execute();
+		e->Execute(ownedID);
 		if (setAudioStream && e->name == "AudioOutputNode")
 			audioStream->SetData(e->Result()->data);
 	}
@@ -263,7 +269,7 @@ void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 
 	conv.WriteFile(nnFilePath, JSONType({
 		{ "nodes", nodeData },
-		{ "isRoot", isRoot },
+		{ "root", isRoot },
 		{ "dummy", false }
 	}));
 

@@ -10,7 +10,7 @@ protected:
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 	virtual bool OnClick(const NodeClickInfo& info) override;
 
-	virtual void Work() override;
+	virtual void Work(int id) override;
 
 	virtual void Load(JSONType& data) override;
 	virtual JSONType Save() override;

@@ -67,7 +67,7 @@ bool MixNode::OnClick(const NodeClickInfo& info)
 	return true;
 }
 
-void MixNode::Work()
+void MixNode::Work(int id)
 {
 	if (type == TransformationType::WeightedAdd)
 	{

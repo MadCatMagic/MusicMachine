@@ -25,6 +25,19 @@ AudioChannel::AudioChannel()
 	ResetData();
 }
 
+AudioChannel::AudioChannel(const AudioChannel&)
+{
+	livingChannels.push_back(this);
+	ResetData();
+}
+
+AudioChannel& AudioChannel::operator=(const AudioChannel&)
+{
+	livingChannels.push_back(this);
+	ResetData();
+	return *this;
+}
+
 
 AudioChannel::~AudioChannel()
 {

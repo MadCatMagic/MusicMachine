@@ -6,6 +6,8 @@
 #include "App/AudioChannel.h"
 #include "App/Sequencer.h"
 
+#define MAX_OWNED_NETWORKS (16)
+
 struct Node;
 
 // underlying node structure
@@ -117,7 +119,7 @@ struct Node
 
 protected:
 	inline virtual void Init() { }
-	inline virtual void Work() { }
+	inline virtual void Work(int id) { }
 	inline virtual AudioChannel* Result() { return nullptr; }
 
 	inline virtual void Render(const v2& topLeft, class DrawList* dl, bool lodOn) { }
@@ -163,7 +165,7 @@ private:
 	bool mini = false;
 
 	bool hasBeenExecuted = true;
-	void Execute();
+	void Execute(int ownedID);
 
 	struct NodeOutput
 	{

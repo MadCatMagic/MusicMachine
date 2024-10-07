@@ -93,7 +93,7 @@ bool Distortion::OnClick(const NodeClickInfo& info)
 	return true;
 }
 
-void Distortion::Work()
+void Distortion::Work(int id)
 {
 	tanConstant = tanf(1.0f / (2.7f - 2.05f * distortion));
 

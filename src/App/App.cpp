@@ -65,25 +65,38 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
                         break;
                     }
                 // add canvas with network if not shown, otherwise delete existing canvas
-                if (ImGui::MenuItem((
-                    "(" + 
-                    (n[i]->isRoot ? "root" : std::to_string(n[i]->usedInNetworkNode)) +
-                    ") " + 
-                    n[i]->name + 
-                    (shown ? " - shown" : "")).c_str()
-                ) && !n[i]->isRoot)
+                // if ctrl held and such, delete network too
+                std::string message = "(" +
+                    (n[i]->isRoot ? "root" : std::to_string(n[i]->usedInNetworkNode.count())) +
+                    ") " +
+                    n[i]->name +
+                    (shown ? " - shown" : "");
+                bool validForDeletion = false;
+                if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && n[i]->usedInNetworkNode.none() && !n[i]->isRoot)
+                {
+                    message = "DELETE " + message;
+                    validForDeletion = true;
+                }
+
+                if (ImGui::MenuItem(message.c_str()) && !n[i]->isRoot)
                 {
                     if (shown)
                     {
                         delete c[ownedCanvas];
                         c.erase(c.begin() + ownedCanvas);
                     }
-                    else
+                    else if (!validForDeletion)
                     {
                         c.push_back(new Canvas());
                         size_t p = c.size() - 1;
                         c[p]->nodes = n[i];
                         c[p]->InitCanvas();
+                    }
+                    if (validForDeletion)
+                    {
+                        NodeNetwork* deleting = n[i];
+                        DeleteNetwork(deleting);
+                        delete deleting;
                     }
                 }
             }
@@ -248,7 +261,7 @@ escape:
     uint32_t bitsPerSample = 16;
     uint32_t byteRate = SAMPLE_RATE * channels * bitsPerSample / 8;
     uint32_t blockAlign = channels * bitsPerSample / 8;
-    uint32_t dataSize = dataBuf.size() * channels * bitsPerSample / 8;
+    uint32_t dataSize = (uint32_t)dataBuf.size() * channels * bitsPerSample / 8;
     uint32_t fileSize = 36 + dataSize;
 
     wf.write("RIFF", 4);                                                    // "RIFF"           4b be
@@ -293,7 +306,7 @@ bool App::GetAudio()
         return false;
     }
     arranger.Work();
-    if (!n[0]->Execute(true)) {
+    if (!n[0]->Execute(true, 0)) {
         Console::LogWarn("NETWORK EXECUTING FAILED");
         return false;
     }
@@ -310,7 +323,10 @@ void App::DeleteNetwork(NodeNetwork* nodes)
     for (size_t i = 0; i < n.size(); i++)
         if (n[i] == nodes)
         {
-            n.erase(n.begin() + i);
+            if (i == 0)
+                n[0] = nullptr;
+            else
+                n.erase(n.begin() + i);
             return;
         }
 }
@@ -323,22 +339,27 @@ void App::ReplaceMainNetwork(NodeNetwork* nodes)
     {
         NodeNetwork* n_k = n[0];
         n[0] = nodes;
-        n.push_back(n_k);
+        if (n_k != nullptr)
+            n.push_back(n_k);
     }
     n[0]->audioStream = &astream;
     n[0]->isRoot = true;
 }
 
-NodeNetwork* App::GetNetwork(const std::string& name)
+std::pair<NodeNetwork*, int> App::GetNetwork(const std::string& name)
 {
     for (NodeNetwork* network : n)
-        if (network->name == name && !network->isRoot)
-            return network;
+        if (network != nullptr && network->name == name && !network->isRoot && !network->usedInNetworkNode.all())
+        {
+            for (int i = 0; i < (int)network->usedInNetworkNode.size(); i++)
+                if (!network->usedInNetworkNode.test(i))
+                    return { network, i };
+        }
 
     if (name == "new network")
-        return nullptr;
+        return { nullptr, 0 };
 
     NodeNetwork* network = new NodeNetwork(name);
     AddNetwork(network);
-    return network;
+    return { network, 0 };
 }

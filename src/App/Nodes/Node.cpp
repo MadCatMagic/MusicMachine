@@ -307,7 +307,11 @@ void Node::DefaultInput(const std::string& name, bool* b, int* i, float* f, Audi
 	if (type == NodeType::Bool)
 		o.target = b;
 	else if (type == NodeType::Int)
+	{
 		o.target = i;
+		o.fmin = 0.0f;
+		o.fmax = 10.0f;
+	}
 	else if (type == NodeType::Float)
 		o.target = f;
 	else if (type == NodeType::Audio)
@@ -354,7 +358,7 @@ std::string Node::id_s()
 	return stream.str() + "_" + name;
 }
 
-void Node::Execute()
+void Node::Execute(int ownedID)
 {
 	hasBeenExecuted = true;
 	for (NodeInput& input : inputs)
@@ -362,7 +366,7 @@ void Node::Execute()
 		if (input.source == nullptr)
 			continue;
 		if (!input.source->hasBeenExecuted)
-			input.source->Execute();
+			input.source->Execute(ownedID);
 		size_t index = input.source->GetOutputIndex(input.sourceName);
 		// need to transfer data
 		if (input.target != nullptr && input.source->outputs[index].data != nullptr)
@@ -392,7 +396,7 @@ void Node::Execute()
 		}
 	}
 
-	Work();
+	Work(ownedID);
 }
 
 // O(n^2) (over a whole frame)

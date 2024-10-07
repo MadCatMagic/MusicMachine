@@ -10,7 +10,7 @@ protected:
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 	virtual bool OnClick(const NodeClickInfo& info) override;
 
-	virtual void Work() override;
+	virtual void Work(int id) override;
 
 	virtual void Load(JSONType& data) override;
 	virtual JSONType Save() override;
@@ -23,8 +23,8 @@ private:
 	float resonance = 0.0f;
 	float feedbackAmount = 0.0f;
 	inline void CalculateFeedbackAmount() { feedbackAmount = resonance + resonance / (1.0f - cutoff); }
-	v2 buf0 = 0.0f;
-	v2 buf1 = 0.0f;
+	v2 buf0[MAX_OWNED_NETWORKS]{};
+	v2 buf1[MAX_OWNED_NETWORKS]{};
 
 	enum FilterType { LP, HP, BP } mode = FilterType::LP;
 };

@@ -9,6 +9,8 @@
 #include "imgui.h"
 #include "BBox.h"
 
+#include <bitset>
+
 #define NODE_ROUNDING 4.0f
 
 class NodeNetwork
@@ -33,7 +35,7 @@ public:
 
 	std::pair<bool, bool> DrawContextMenu(const v2& contextMenuClickPos);
 
-	bool Execute(bool setAudioStream);
+	bool Execute(bool setAudioStream, int ownedID);
 	void Update();
 
 	void SaveNetworkToFile(const std::string& nnFilePath);
@@ -46,7 +48,7 @@ public:
 	AudioStream* audioStream = nullptr;
 
 	std::string name = "new network";
-	int usedInNetworkNode = 0;
+	std::bitset<16> usedInNetworkNode;
 
 	bool isRoot = false;
 	std::vector<struct NodeNetworkVariable*> ioVariables;

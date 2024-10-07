@@ -9,7 +9,7 @@ protected:
 
 	virtual void Render(const v2& topLeft, DrawList* dl, bool lodOn) override;
 
-	virtual void Work() override;
+	virtual void Work(int id) override;
 
 	virtual void Load(JSONType& data) override;
 	virtual JSONType Save() override;
@@ -20,7 +20,7 @@ private:
 	float shape = 0.0f;
 
 	AudioChannel c{ };
-	float kv = 0.0f;
+	float kv[MAX_OWNED_NETWORKS]{};
 
 	float GetValue(float phase, int shape) const;
 	float Bilinear(float phase) const;

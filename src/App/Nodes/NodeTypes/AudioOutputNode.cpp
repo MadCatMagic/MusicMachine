@@ -39,7 +39,7 @@ void AudioOutputNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	}
 }
 
-void AudioOutputNode::Work()
+void AudioOutputNode::Work(int id)
 {
 	for (size_t i = 0; i < c.bufferSize; i++)
 	{
