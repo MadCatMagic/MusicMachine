@@ -19,9 +19,10 @@ private:
 	enum TransformationType { WeightedAdd, Multiply } type = TransformationType::WeightedAdd;
 	const int numTypes = 2;
 
-	AudioChannel ic1{ };
-	AudioChannel ic2{ };
-	AudioChannel oc{ };
-	float weight1 = 1.0f;
-	float weight2 = 1.0f;
+	std::vector<AudioChannel> ichannels;
+	AudioChannel ochannel{ };
+	std::vector<float> weights;
+	int numChannels = 2;
+
+	void EnsureCorrectChannelNum();
 };
