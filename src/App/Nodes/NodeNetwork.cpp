@@ -179,12 +179,23 @@ std::pair<bool, bool> NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos
 {
 	if (ImGui::BeginMenu("Nodes"))
 	{
-		for (auto& pair : GetNodeFactory().Names())
+		for (auto& folder : GetNodeFactory().Folders())
 		{
-			if (!isRoot && pair.second == "Analysis")
-				continue;
-			if (ImGui::MenuItem(pair.second.c_str()))
-				AddNodeFromName(pair.first, contextMenuClickPos);
+			bool end = false;
+			if (folder.first != "")
+				end = ImGui::BeginMenu(folder.first.c_str());
+
+			if (end || folder.first == "")
+				for (auto& pair : folder.second)
+				{
+					if (!isRoot && pair.second == "Analysis")
+						continue;
+					if (ImGui::MenuItem(pair.second.c_str()))
+						AddNodeFromName(pair.first, contextMenuClickPos);
+				}
+
+			if (end)
+				ImGui::EndMenu();
 		}
 		ImGui::EndMenu();
 	}
