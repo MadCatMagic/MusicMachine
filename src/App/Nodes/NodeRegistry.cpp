@@ -18,17 +18,17 @@
 
 void RegisterNodes()
 {
-    GetNodeFactory().Register("ADSRNode", "ADSR", NodeBuilder<ADSRNode>);
-    GetNodeFactory().Register("AnalysisNode", "Analysis Node", NodeBuilder<AnalysisNode>);
-    GetNodeFactory().Register("ApproxLFO", "Approx LFO", NodeBuilder<ApproxLFO>);
-    GetNodeFactory().Register("AudioFilter", "Filter", NodeBuilder<AudioFilter>);
-    GetNodeFactory().Register("AudioOutputNode", "Audio Output Node", NodeBuilder<AudioOutputNode>);
-    GetNodeFactory().Register("MixNode", "Mix", NodeBuilder<MixNode>);
-    GetNodeFactory().Register("DelayNode", "Delay", NodeBuilder<DelayNode>);
-    GetNodeFactory().Register("Distortion", "Distortion", NodeBuilder<Distortion>);
-    GetNodeFactory().Register("MathsNode", "Maths", NodeBuilder<MathsNode>);
-    GetNodeFactory().Register("NoiseNode", "Noise", NodeBuilder<NoiseNode>);
-    GetNodeFactory().Register("SequencerNode", "Sequencer Node", NodeBuilder<SequencerNode>);
-    GetNodeFactory().Register("VariableNode", "Variable", NodeBuilder<VariableNode>);
-    GetNodeFactory().Register("WaveformGenerator",  "Waveform Generator",   NodeBuilder<WaveformGenerator>);
+    GetNodeFactory().Register("ADSRNode", "Synthesis", "ADSR", NodeBuilder<ADSRNode>);
+    GetNodeFactory().Register("AnalysisNode", "", "Analysis Node", NodeBuilder<AnalysisNode>);
+    GetNodeFactory().Register("ApproxLFO", "Maths", "Approx LFO", NodeBuilder<ApproxLFO>);
+    GetNodeFactory().Register("AudioFilter", "Synthesis", "Filter", NodeBuilder<AudioFilter>);
+    GetNodeFactory().Register("AudioOutputNode", "", "Audio Output Node", NodeBuilder<AudioOutputNode>);
+    GetNodeFactory().Register("MixNode", "Maths", "Mix", NodeBuilder<MixNode>);
+    GetNodeFactory().Register("DelayNode", "Synthesis", "Delay", NodeBuilder<DelayNode>);
+    GetNodeFactory().Register("Distortion", "Synthesis", "Distortion", NodeBuilder<Distortion>);
+    GetNodeFactory().Register("MathsNode", "Maths", "Maths", NodeBuilder<MathsNode>);
+    GetNodeFactory().Register("NoiseNode", "Synthesis", "Noise", NodeBuilder<NoiseNode>);
+    GetNodeFactory().Register("SequencerNode", "Sequencing", "Sequencer Node", NodeBuilder<SequencerNode>);
+    GetNodeFactory().Register("VariableNode", "", "Variable", NodeBuilder<VariableNode>);
+    GetNodeFactory().Register("WaveformGenerator", "Synthesis", "Waveform Generator",   NodeBuilder<WaveformGenerator>);
 }

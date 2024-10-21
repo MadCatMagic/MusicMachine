@@ -6,19 +6,19 @@ void MixNode::Init()
 {
 	name = "MixNode";
 	title = "Mix";
-	minSpace = v2(20.0f * numTypes, 20.0f);
+	minSpace = v2(20.0f * numTypes, 40.0f);
 }
 
 void MixNode::IO()
 {
-	AudioInput("A source", &ic1);
-	AudioInput("B source", &ic2);
-	if (type == TransformationType::WeightedAdd)
+	EnsureCorrectChannelNum();
+	for (int i = 0; i < numChannels; i++)
 	{
-		FloatInput("a volume", &weight1, 0.0f, 1.5f, true, true, FloatDisplayType::Db);
-		FloatInput("b volume", &weight2, 0.0f, 1.5f, true, true, FloatDisplayType::Db);
+		AudioInput("Source " + std::to_string(i), &ichannels[i]);
+		if (type == TransformationType::WeightedAdd)
+			FloatInput("Volume " + std::to_string(i), &weights[i], 0.0f, 1.5f, true, true, FloatDisplayType::Db);
 	}
-	AudioOutput("O", &oc);
+	AudioOutput("Out", &ochannel);
 }
 
 void MixNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
@@ -63,36 +63,74 @@ bool MixNode::OnClick(const NodeClickInfo& info)
 		return false;
 
 	int tcp = (int)(info.pos.x / 20.0f);
-	type = (TransformationType)tcp;
+	if (info.pos.y <= 20.0f)
+		type = (TransformationType)tcp;
+	else
+		numChannels += tcp * 2 - 1;
 	return true;
 }
 
 void MixNode::Work(int id)
 {
+	EnsureCorrectChannelNum();
+
 	if (type == TransformationType::WeightedAdd)
 	{
-		for (size_t i = 0; i < oc.bufferSize; i++)
-			oc.data[i] = ic1.data[i] * weight1 + ic2.data[i] * weight2;
+		for (size_t i = 0; i < ochannel.bufferSize; i++)
+			for (int j = 0; j < numChannels; j++)
+				ochannel.data[i] += ichannels[j].data[i] * weights[j];
 	}
 	else if (type == TransformationType::Multiply)
 	{
-		for (size_t i = 0; i < oc.bufferSize; i++)
-			oc.data[i] = ic1.data[i].scale(ic2.data[i]);
+		for (size_t i = 0; i < ochannel.bufferSize; i++)
+		{
+			ochannel.data[i] = 1.0f;
+			for (int j = 0; j < numChannels; j++)
+				ochannel.data[i].scale(ichannels[j].data[i] * weights[j]);
+		}
 	}
 }
 
 void MixNode::Load(JSONType& data)
 {
 	type = (TransformationType)data.obj["type"].i;
-	weight1 = (float)data.obj["w1"].f;
-	weight2 = (float)data.obj["w2"].f;
+	numChannels = (int)data.obj["numChannels"].i;
+
+	for (const JSONType& i : data.obj["weights"].arr)
+		weights.push_back((float)i.f);
 }
 
 JSONType MixNode::Save()
 {
+	std::vector<JSONType> weightArr;
+	for (float w : weights)
+		weightArr.push_back(w);
 	return JSONType({
 		{ "type", (long)type },
-		{ "w1", (double)weight1 },
-		{ "w2", (double)weight2 }
+		{ "numChannels", (long)numChannels },
+		{ "weights", weightArr }
 	});
+}
+
+void MixNode::EnsureCorrectChannelNum()
+{
+	numChannels = clamp(numChannels, 2, 16);
+
+	int s = (int)ichannels.size();
+	if (numChannels > s)
+	{
+		for (int i = 0; i < numChannels - s; i++)
+		{
+			ichannels.push_back(AudioChannel());
+			weights.push_back(1.0f);
+		}
+	}
+	else if (numChannels < s)
+	{
+		for (int i = 0; i < s - numChannels; i++)
+		{
+			ichannels.pop_back();
+			weights.pop_back();
+		}
+	}
 }

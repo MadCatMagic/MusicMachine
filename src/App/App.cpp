@@ -20,7 +20,7 @@ void App::Initialize()
     drawStyle.InitColours();
 
     c.push_back(new Canvas());
-    c[0]->LoadState("networks/init.nn", this);
+    c[0]->LoadState("networks/init.nn", this, true);
     Canvas::GenerateAllTextLODs();
     c[0]->InitCanvas();
     RegisterJSONCommands();
@@ -68,11 +68,7 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
                     }
                 // add canvas with network if not shown, otherwise delete existing canvas
                 // if ctrl held and such, delete network too
-                std::string message = "(" +
-                    (n[i]->isRoot ? "root" : std::to_string(n[i]->usedInNetworkNode.count())) +
-                    ") " +
-                    n[i]->name +
-                    (shown ? " - shown" : "");
+                std::string message = GetNetworkName(n[i]) + (shown ? " - shown" : "");
                 bool validForDeletion = false;
                 if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && n[i]->usedInNetworkNode.none() && !n[i]->isRoot)
                 {
@@ -281,7 +277,16 @@ bool App::GetAudio()
 
 void App::AddNetwork(NodeNetwork* nodes)
 {
+    if (n.size() == 0)
+        n.push_back(nullptr);
     n.push_back(nodes);
+}
+
+void App::AddCanvas(NodeNetwork* nodes)
+{
+    c.push_back(new Canvas());
+    c[c.size() - 1]->nodes = nodes;
+    c[c.size() - 1]->InitCanvas();
 }
 
 void App::DeleteNetwork(NodeNetwork* nodes)
@@ -328,4 +333,13 @@ std::pair<NodeNetwork*, int> App::GetNetwork(const std::string& name)
     NodeNetwork* network = new NodeNetwork(name);
     AddNetwork(network);
     return { network, 0 };
+}
+
+std::string App::GetNetworkName(const NodeNetwork* reference) const
+{
+    return
+        "(" +
+        (reference->isRoot ? "root" : std::to_string(reference->usedInNetworkNode.count())) +
+        ") " +
+        reference->name;
 }

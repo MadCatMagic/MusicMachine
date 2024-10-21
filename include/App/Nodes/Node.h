@@ -115,6 +115,8 @@ struct Node
 	v2 GetInputPos(const std::string& name) const;
 	v2 GetOutputPos(const std::string& name) const;
 
+	inline std::string GetName() const { return name; }
+
 	NodeRenderer renderer = NodeRenderer(this);
 
 protected:
