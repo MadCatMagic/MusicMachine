@@ -138,6 +138,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\WAV.cpp" />
+    <ClCompile Include="src\App\Nodes\NodeTypes\Sampler.cpp" />
     <ClCompile Include="src\App\Nodes\NodeRenderer.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkVariable.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkNode.cpp" />
@@ -200,10 +202,12 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkVariable.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NoiseNode.h" />
+    <ClInclude Include="include\App\Nodes\NodeTypes\Sampler.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\VariableNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\WaveformGenerator.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\SequencerNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\ADSRNode.h" />
+    <ClInclude Include="include\App\WAV.h" />
     <ClInclude Include="include\BBox.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Engine\Console.h" />

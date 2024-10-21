@@ -1,5 +1,7 @@
 #include "App/App.h"
 
+#include "App/WAV.h"
+
 #include "imgui.h"
 #include "Engine/Console.h"
 #include "App/JSON.h"
@@ -242,47 +244,11 @@ escape:
     astream.doNotMakeSound = false;
     Arranger::instance->playing = wasPlaying;
 
-    std::vector<int16_t> data = std::vector<int16_t>(dataBuf.size() * 2);
-    for (size_t i = 0; i < dataBuf.size(); i++)
-    {
-        data[i * 2] = (int16_t)(clamp(dataBuf[i].x, -1.0f, 1.0f) * INT16_MAX);
-        data[i * 2 + 1] = (int16_t)(clamp(dataBuf[i].y, -1.0f, 1.0f) * INT16_MAX);
-    }
-    
-    std::ofstream wf(filepath, std::ios::out | std::ios::binary);
-
-    if (!wf) {
-        Console::LogErr("failed to open file: " + filepath);
-        return;
-    }
-
-    uint32_t channels = 2;
-    uint32_t sampleRate = SAMPLE_RATE;
-    uint32_t bitsPerSample = 16;
-    uint32_t byteRate = SAMPLE_RATE * channels * bitsPerSample / 8;
-    uint32_t blockAlign = channels * bitsPerSample / 8;
-    uint32_t dataSize = (uint32_t)dataBuf.size() * channels * bitsPerSample / 8;
-    uint32_t fileSize = 36 + dataSize;
-
-    wf.write("RIFF", 4);                                                    // "RIFF"           4b be
-    wf.write(static_cast<char*>(static_cast<void*>(&fileSize)), 4);         // filesize         4b le
-    wf.write("WAVE", 4);                                                    // "WAVE"           4b be
-    
-    wf.write("fmt ", 4);                                                    // "fmt "           4b be
-    wf.write("\x10\x00\x00\x00", 4);                                        // 16               4b le
-    wf.write("\x01\x00", 2);                                                // 1                2b le
-    wf.write(static_cast<char*>(static_cast<void*>(&channels)), 2);         // numChannels      2b le
-    wf.write(static_cast<char*>(static_cast<void*>(&sampleRate)), 4);       // sampleRate       4b le
-    wf.write(static_cast<char*>(static_cast<void*>(&byteRate)), 4);         // byteRate         4b le
-    wf.write(static_cast<char*>(static_cast<void*>(&blockAlign)), 2);       // blockAlign       2b le
-    wf.write(static_cast<char*>(static_cast<void*>(&bitsPerSample)), 2);    // bitsPerSample    2b le
-
-    wf.write("data", 4); // "data"           4b be
-    wf.write(static_cast<char*>(static_cast<void*>(&dataSize)), 4);         // dataSize (bytes) 4b le
-    
-    wf.write(static_cast<char*>(static_cast<void*>(&data[0])), data.size() * bitsPerSample / 8);
-
-    wf.close();
+    WAV wavfile;
+    wavfile.filepath = filepath;
+    wavfile.data = dataBuf;
+    wavfile.sampleRate = SAMPLE_RATE;
+    SaveWAVFile(wavfile);
 }
 
 void App::Release()
