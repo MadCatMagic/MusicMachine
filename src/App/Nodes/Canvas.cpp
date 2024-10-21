@@ -34,7 +34,7 @@ void Canvas::InitCanvas()
 bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
 {
     std::string title = "Canvas " + std::to_string(canvasI + 1);
-    title += " - '" + nodes->name + "'";
+    title += " - " + appPointer->GetNetworkName(nodes);
     title += "###Canvas " + std::to_string(canvasI + 1);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(-1, -1));
@@ -680,23 +680,54 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
 void Canvas::SaveState(const std::string& filepath)
 {
     nodes->SaveNetworkToFile(std::string(filepath));
-    nodes->name = filepath;
 }
 
-void Canvas::LoadState(const std::string& filepath, App* appPointer)
+void Canvas::LoadState(const std::string& filepath, App* appPointer, bool forceRoot)
 {
-    if (nodes != nullptr && nodes->usedInNetworkNode.none())
-        appPointer->DeleteNetwork(nodes);
-    nodes = new NodeNetwork(std::string(filepath));
-    if (nodeRenderer != nullptr)
-        delete nodeRenderer;
-    nodeRenderer = new NodeNetworkRenderer(nodes, this);
-    // 'temporary', should not be like this but whatever
-    if (nodes->isRoot)
-        appPointer->ReplaceMainNetwork(nodes);
+    // load new network
+    NodeNetwork* killLater = nullptr;
+    NodeNetwork* newNodes = new NodeNetwork(std::string(filepath));
+    if (!(nodes != nullptr && nodes->isRoot && !newNodes->isRoot) || forceRoot)
+    {
+        if (nodeRenderer != nullptr)
+            delete nodeRenderer;
+        // replace network, don't set as root
+        if (nodes != nullptr && nodes->usedInNetworkNode.none())
+        {
+            appPointer->DeleteNetwork(nodes);
+            killLater = nodes;
+        }
+        nodeRenderer = new NodeNetworkRenderer(nodes, this);
+    }
+
+    if (nodes != nullptr && nodes->isRoot)
+    {
+        if (newNodes->isRoot)
+        {
+            nodes = newNodes;
+            appPointer->ReplaceMainNetwork(nodes);
+        }
+        else
+        {
+            // add new canvas for nodes
+            appPointer->AddCanvas(newNodes);
+        }
+    }
     else
-        appPointer->AddNetwork(nodes);
-    nodes->name = filepath;
+    {
+        nodes = newNodes;
+
+        if (forceRoot)
+            appPointer->ReplaceMainNetwork(nodes);
+        else
+        {
+            nodes->isRoot = false;
+            appPointer->AddNetwork(nodes);
+        }
+    }
+
+    if (killLater != nullptr)
+        delete killLater;
 }
 
 float Canvas::GetSFFromScalingLevel(int scaling)

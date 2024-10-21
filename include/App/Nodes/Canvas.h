@@ -24,7 +24,7 @@ public:
 
 	void PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetworkLoad, bool beginNetworkVariableCreate, App* appPointer);
 	void SaveState(const std::string& filepath);
-	void LoadState(const std::string& filepath, App* appPointer);
+	void LoadState(const std::string& filepath, App* appPointer, bool forceRoot = false);
 
 	v2 ScreenToCanvas(const v2& pos) const;
 	v2 CanvasToScreen(const v2& pos) const;

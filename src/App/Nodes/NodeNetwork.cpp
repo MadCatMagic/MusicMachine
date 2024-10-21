@@ -23,7 +23,9 @@ NodeNetwork::NodeNetwork()
 NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 {
 	JSONConverter conv;
-	name = nnFilePath;
+	// networks/
+	// 0123456789
+	name = nnFilePath.substr(9);
 	auto res = conv.DecodeFile(nnFilePath);
 	if (!res.second)
 	{
@@ -231,9 +233,9 @@ bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 	if (nodeDependencyInfoPersistent->problemConnectionExists)
 		return false;
 
+	auto emptyVec = std::vector<v2>(AudioChannel::bufferSize, v2());
 	if (!Arranger::instance->playing && setAudioStream)
 	{
-		auto emptyVec = std::vector<v2>(AudioChannel::bufferSize, v2());
 		audioStream->SetData(emptyVec);
 		return true;
 	}
@@ -241,14 +243,21 @@ bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 	// backpropagate in a sensible manner
 	for (Node* n : nodes)
 		n->hasBeenExecuted = false;
-	if (nodeDependencyInfoPersistent->endpoints.size() > 1)
-		Console::LogWarn("Multiple endpoints exist, panic!");
+	//if (nodeDependencyInfoPersistent->endpoints.size() > 1)
+	//	Console::LogWarn("Multiple endpoints exist, panic!");
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
 	{
 		e->Execute(ownedID);
 		if (setAudioStream && e->name == "AudioOutputNode")
-			audioStream->SetData(e->Result()->data);
+		{
+			auto resultVec = e->Result()->data;
+			for (size_t i = 0; i < emptyVec.size(); i++)
+				emptyVec[i] += resultVec[i];
+		}
 	}
+	// if there are no audiooutputnodes this just returns a silent vec so its fine
+	if (setAudioStream)
+		audioStream->SetData(emptyVec);
 	return true;
 }
 
@@ -270,7 +279,7 @@ void NodeNetwork::Update()
 
 void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 {
-	name = nnFilePath;
+	name = nnFilePath.substr(9);
 
 	JSONConverter conv;
 	JSONType nodeData = JSONType(JSONType::Array);

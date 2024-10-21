@@ -24,9 +24,13 @@ public:
 
 	bool GetAudio();
 
+	void AddCanvas(NodeNetwork* nodes);
+
 	void AddNetwork(NodeNetwork* nodes);
 	void DeleteNetwork(NodeNetwork* nodes);
 	void ReplaceMainNetwork(NodeNetwork* nodes);
+
+	std::string GetNetworkName(const NodeNetwork* reference) const;
 
 	std::pair<NodeNetwork*, int> GetNetwork(const std::string& name);
 
