@@ -12,6 +12,7 @@
 #include "App/Nodes/NodeTypes/Distortion.h"
 #include "App/Nodes/NodeTypes/MathsNode.h"
 #include "App/Nodes/NodeTypes/NoiseNode.h"
+#include "App/Nodes/NodeTypes/Sampler.h"
 #include "App/Nodes/NodeTypes/SequencerNode.h"
 #include "App/Nodes/NodeTypes/VariableNode.h"
 #include "App/Nodes/NodeTypes/WaveformGenerator.h"
@@ -28,6 +29,7 @@ void RegisterNodes()
     GetNodeFactory().Register("Distortion", "Synthesis", "Distortion", NodeBuilder<Distortion>);
     GetNodeFactory().Register("MathsNode", "Maths", "Maths", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("NoiseNode", "Synthesis", "Noise", NodeBuilder<NoiseNode>);
+    GetNodeFactory().Register("Sampler", "Synthesis", "Sampler", NodeBuilder<Sampler>);
     GetNodeFactory().Register("SequencerNode", "Sequencing", "Sequencer Node", NodeBuilder<SequencerNode>);
     GetNodeFactory().Register("VariableNode", "", "Variable", NodeBuilder<VariableNode>);
     GetNodeFactory().Register("WaveformGenerator", "Synthesis", "Waveform Generator",   NodeBuilder<WaveformGenerator>);

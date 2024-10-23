@@ -86,7 +86,7 @@ void MixNode::Work(int id)
 		{
 			ochannel.data[i] = 1.0f;
 			for (int j = 0; j < numChannels; j++)
-				ochannel.data[i].scale(ichannels[j].data[i] * weights[j]);
+				ochannel.data[i] = ochannel.data[i].scale(ichannels[j].data[i]);
 		}
 	}
 }

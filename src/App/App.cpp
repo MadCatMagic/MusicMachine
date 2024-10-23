@@ -19,6 +19,8 @@ void App::Initialize()
 
     drawStyle.InitColours();
 
+    AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
+
     c.push_back(new Canvas());
     c[0]->LoadState("networks/init.nn", this, true);
     Canvas::GenerateAllTextLODs();
@@ -29,10 +31,6 @@ void App::Initialize()
 
     n[0]->audioStream = &astream;
     n[0]->isRoot = true;
-
-    WAV wf = LoadWAVFile("samples/test.wav");
-    Console::Log(wf.filepath);
-    Console::Log(std::to_string(wf.sampleRate));
 }
 
 void App::Update()

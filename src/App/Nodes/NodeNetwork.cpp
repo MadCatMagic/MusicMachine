@@ -279,7 +279,7 @@ void NodeNetwork::Update()
 
 void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 {
-	name = nnFilePath.substr(9);
+	name = nnFilePath;
 
 	JSONConverter conv;
 	JSONType nodeData = JSONType(JSONType::Array);
@@ -287,13 +287,13 @@ void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 	for (Node* n : nodes)
 		nodeData.arr.push_back(n->SaveData());
 
-	conv.WriteFile(nnFilePath, JSONType({
+	conv.WriteFile("networks/" + nnFilePath, JSONType({
 		{ "nodes", nodeData },
 		{ "root", isRoot },
 		{ "dummy", false }
 	}));
 
-	Console::Log("Saved current node network data to file <" + nnFilePath + ">.");
+	Console::Log("Saved current node network data to file <networks/" + nnFilePath + ">.");
 }
 
 NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency()

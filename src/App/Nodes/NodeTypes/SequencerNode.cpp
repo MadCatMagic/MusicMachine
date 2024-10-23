@@ -15,7 +15,7 @@ void SequencerNode::IO()
 	SequencerOutput("sequence", &seq);
 	IntInput("length", &width, 4, 32, true, true);
 	IntInput("height", &height, 12, 24, true, true);
-	IntInput("octave", &octaveShift, -2, 2);
+	IntInput("octave", &octaveShift, -3, 3);
 	BoolInput("tempo sync", &tempoSync);
 	if (tempoSync)
 		TempoSyncIntInput("'bpm'", &tempoSyncV);
@@ -122,8 +122,8 @@ void SequencerNode::Work(int id)
 		float exactI = fakeTime - (float)(int)fakeTime;
 		if (io > 0)
 			exactI = 0.0f;
-		int t = (int)((1.0f - exactI) * pitchLength);
-		int ts = t;
+		float timeLeft = (1.0f - exactI) * pitchLength;
+		int t = (int)timeLeft;
 		t = (t + currLength) >= AudioChannel::bufferSize ? (int)AudioChannel::bufferSize - currLength : t;
 
 		// send pitch
@@ -131,7 +131,7 @@ void SequencerNode::Work(int id)
 		seq.length.push_back(t);
 		seq.velocity.push_back(data[(currentI + io) % width].second);
 		// dont think this actually works :)
-		seq.cumSamples.push_back((int)((pitchLength - ts) * tempoSyncToFloat(tempoSyncV)));
+		seq.cumSamples.push_back((int)(exactI * pitchLength));
 		currLength += t;
 
 		io++;
