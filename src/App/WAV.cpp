@@ -14,7 +14,81 @@ WAV LoadWAVFile(const std::string& filepath)
         return wav;
     }
     
-    f.read()
+    std::string dump = std::string(4, '\0');
+    uint16_t channels;
+    uint32_t sampleRate;
+    uint16_t bitsPerSample;
+    uint32_t byteRate;
+    uint16_t blockAlign;
+    uint32_t dataSize;
+    uint32_t fileSize;
+
+    f.read(&dump[0], 4);                                                   // "RIFF"           4b be
+    if (dump != "RIFF")
+    {
+        Console::LogErr("not RIFF file, found '" + dump + "' instead");
+        return wav;
+    }
+    f.read(reinterpret_cast<char*>(&fileSize), sizeof fileSize);           // filesize         4b le
+    f.read(&dump[0], 4);                                                   // "WAVE"           4b be
+                                                                           
+    f.read(&dump[0], 4);                                                   // "fmt "           4b be
+    f.read(&dump[0], 4);                                                   // 16               4b le
+    f.read(&dump[0], 2);                                                   // 1                2b le
+    f.read(reinterpret_cast<char*>(&channels), sizeof channels);           // numChannels      2b le
+    f.read(reinterpret_cast<char*>(&sampleRate), sizeof sampleRate);       // sampleRate       4b le
+    f.read(reinterpret_cast<char*>(&byteRate), sizeof byteRate);           // byteRate         4b le
+    f.read(reinterpret_cast<char*>(&blockAlign), sizeof blockAlign);       // blockAlign       2b le
+    f.read(reinterpret_cast<char*>(&bitsPerSample), sizeof bitsPerSample); // bitsPerSample    2b le
+                                                                           
+    f.read(&dump[0], 4);                                                   // "data"           4b be
+    f.read(reinterpret_cast<char*>(&dataSize), sizeof dataSize);           // dataSize (bytes) 4b le
+
+    wav.sampleRate = sampleRate;
+
+    if (channels != 1 && channels != 2)
+    {
+        Console::LogErr("invalid number of channels: " + std::to_string(channels));
+        return wav;
+    }
+
+    if (bitsPerSample == 8)
+    {
+        std::vector<int8_t> data = std::vector<int8_t>(dataSize, 0);
+        f.read(reinterpret_cast<char*>(&data[0]), dataSize);
+
+        if (channels == 1)
+            for (size_t i = 0; i < dataSize; i++)
+                wav.data.push_back((float)data[i] / (float)INT8_MAX);
+        else
+            for (size_t i = 0; i < dataSize / 2; i++)
+                wav.data.push_back(v2(
+                    (float)data[i * 2] / (float)INT8_MAX, 
+                    (float)data[i * 2 + 1] / (float)INT8_MAX
+                ));
+    }
+
+    else if (bitsPerSample == 16)
+    {
+        std::vector<int16_t> data = std::vector<int16_t>(dataSize / 2, 0);
+        f.read(reinterpret_cast<char*>(&data[0]), dataSize);
+
+        if (channels == 1)
+            for (size_t i = 0; i < dataSize / 2; i++)
+                wav.data.push_back((float)(*static_cast<int16_t*>(&data[i * 2])) / (float)INT16_MAX);
+        else
+            for (size_t i = 0; i < dataSize / 2; i++)
+                wav.data.push_back(v2(
+                    (float)(*static_cast<int16_t*>(&data[i * 2])) / (float)INT16_MAX,
+                    (float)(*static_cast<int16_t*>(&data[i * 2 + 1])) / (float)INT16_MAX
+                ));
+    }
+
+    else
+    {
+        Console::LogErr("invalid number of bitsPerSample: " + std::to_string(bitsPerSample));
+        return wav;
+    }
 
     return wav;
 }
@@ -35,11 +109,11 @@ void SaveWAVFile(const WAV& wav)
         return;
     }
 
-    uint32_t channels = 2;
+    uint16_t channels = 2;
     uint32_t sampleRate = wav.sampleRate;
-    uint32_t bitsPerSample = 16;
+    uint16_t bitsPerSample = 16;
     uint32_t byteRate = wav.sampleRate * channels * bitsPerSample / 8;
-    uint32_t blockAlign = channels * bitsPerSample / 8;
+    uint16_t blockAlign = channels * bitsPerSample / 8;
     uint32_t dataSize = (uint32_t)wav.data.size() * channels * bitsPerSample / 8;
     uint32_t fileSize = 36 + dataSize;
 

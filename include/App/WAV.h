@@ -8,7 +8,7 @@ struct WAV
 	size_t sampleRate = 0;
 };
 
-static WAV LoadWAVFile(const std::string& filepath);
-static void SaveWAVFile(const WAV& wav);
+extern WAV LoadWAVFile(const std::string& filepath);
+extern void SaveWAVFile(const WAV& wav);
 
-static WAV ResampleWAV(const WAV& wav, size_t newSampleRate);
+extern WAV ResampleWAV(const WAV& wav, size_t newSampleRate);
