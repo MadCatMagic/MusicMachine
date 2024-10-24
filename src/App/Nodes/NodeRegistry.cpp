@@ -12,6 +12,8 @@
 #include "App/Nodes/NodeTypes/Distortion.h"
 #include "App/Nodes/NodeTypes/MathsNode.h"
 #include "App/Nodes/NodeTypes/NoiseNode.h"
+#include "App/Nodes/NodeTypes/PitchShifter.h"
+#include "App/Nodes/NodeTypes/RoundNode.h"
 #include "App/Nodes/NodeTypes/Sampler.h"
 #include "App/Nodes/NodeTypes/SequencerNode.h"
 #include "App/Nodes/NodeTypes/VariableNode.h"
@@ -19,6 +21,11 @@
 
 void RegisterNodes()
 {
+    // categories:
+    // - Synthesis
+    // - Maths
+    // - Sequencing
+    // - <none>
     GetNodeFactory().Register("ADSRNode", "Synthesis", "ADSR", NodeBuilder<ADSRNode>);
     GetNodeFactory().Register("AnalysisNode", "", "Analysis Node", NodeBuilder<AnalysisNode>);
     GetNodeFactory().Register("ApproxLFO", "Maths", "Approx LFO", NodeBuilder<ApproxLFO>);
@@ -29,6 +36,8 @@ void RegisterNodes()
     GetNodeFactory().Register("Distortion", "Synthesis", "Distortion", NodeBuilder<Distortion>);
     GetNodeFactory().Register("MathsNode", "Maths", "Maths", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("NoiseNode", "Synthesis", "Noise", NodeBuilder<NoiseNode>);
+    GetNodeFactory().Register("PitchShifter", "Sequencing", "Pitch Shifter", NodeBuilder<PitchShifter>);
+    GetNodeFactory().Register("RoundNode", "Maths", "Rounder", NodeBuilder<RoundNode>);
     GetNodeFactory().Register("Sampler", "Synthesis", "Sampler", NodeBuilder<Sampler>);
     GetNodeFactory().Register("SequencerNode", "Sequencing", "Sequencer Node", NodeBuilder<SequencerNode>);
     GetNodeFactory().Register("VariableNode", "", "Variable", NodeBuilder<VariableNode>);
