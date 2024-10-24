@@ -12,7 +12,7 @@ void ApproxLFO::Init()
 
 void ApproxLFO::IO()
 {
-	FloatInput("shape", &shape, 0.0f, 4.0f, true, true);
+	FloatInput("shape", &shape, 0.0f, 5.0f, true, true);
 	BoolInput("tempo sync", &useSync);
 	if (useSync)
 		TempoSyncIntInput("frequency", &syncInput);

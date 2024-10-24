@@ -15,7 +15,7 @@ void DelayNode::IO()
 	AudioOutput("out", &ochannel);
 	FloatInput("feedback", &feedback, 0.0f, 1.0f, true, true);
 	FloatInput("mix", &mix, 0.0f, 1.0f, true, true);
-	FloatInput("delay", &time, 0.1f, 1.0f, true, false);
+	FloatInput("delay", &time, 0.01f, 1.0f, true, false);
 	if (delayType == DelayType::PingPong)
 		FloatInput("stereonity", &stereoWideness, -1.0f, 1.0f, true, true);
 }
@@ -112,8 +112,6 @@ v2 DelayNode::queueLerp(float index, int id) const
 
 void DelayNode::EnsureQueueSize(int id)
 {
-	if (time < 0.1f)
-		time = 0.1f;
 	queueSize[id] = (int)(time * ichannel.sampleRate * (delayType == DelayType::PingPong ? 2.0f : 1.0f));
 	size_t s = queue[id].size();
 

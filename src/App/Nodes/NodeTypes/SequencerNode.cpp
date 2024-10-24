@@ -13,7 +13,7 @@ void SequencerNode::Init()
 void SequencerNode::IO()
 {
 	SequencerOutput("sequence", &seq);
-	IntInput("length", &width, 4, 32, true, true);
+	IntInput("length", &width, 4, 32, true, false);
 	IntInput("height", &height, 12, 24, true, true);
 	IntInput("octave", &octaveShift, -3, 3);
 	BoolInput("tempo sync", &tempoSync);
@@ -26,6 +26,8 @@ void SequencerNode::IO()
 void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 	EnsureDataSize();
+
+	width = std::min(width, 128);
 
 	// begins on A
 	const bool keyboard[] = { false, true, false, false, true, false, true, false, false, true, false, true };
