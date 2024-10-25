@@ -25,3 +25,17 @@ void PitchShifter::Work(int id)
 		o.pitch[i] *= powf(2.0f, octaveShift) * powf(2.0f, pitchShift / 12.0f);
 	}
 }
+
+void PitchShifter::Load(JSONType& data)
+{
+	pitchShift = (float)data.obj["pitch"].f;
+	octaveShift = (int)data.obj["octave"].i;
+}
+
+JSONType PitchShifter::Save()
+{
+	return JSONType({
+		"pitch", (double)pitchShift,
+		"octave", (long)octaveShift
+	});
+}

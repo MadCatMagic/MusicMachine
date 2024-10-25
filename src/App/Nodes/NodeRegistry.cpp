@@ -12,6 +12,7 @@
 #include "App/Nodes/NodeTypes/Distortion.h"
 #include "App/Nodes/NodeTypes/MathsNode.h"
 #include "App/Nodes/NodeTypes/NoiseNode.h"
+#include "App/Nodes/NodeTypes/Panner.h"
 #include "App/Nodes/NodeTypes/PitchShifter.h"
 #include "App/Nodes/NodeTypes/RoundNode.h"
 #include "App/Nodes/NodeTypes/Sampler.h"
@@ -36,6 +37,7 @@ void RegisterNodes()
     GetNodeFactory().Register("Distortion", "Synthesis", "Distortion", NodeBuilder<Distortion>);
     GetNodeFactory().Register("MathsNode", "Maths", "Maths", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("NoiseNode", "Synthesis", "Noise", NodeBuilder<NoiseNode>);
+    GetNodeFactory().Register("Panner", "Synthesis", "Panner", NodeBuilder<Panner>);
     GetNodeFactory().Register("PitchShifter", "Sequencing", "Pitch Shifter", NodeBuilder<PitchShifter>);
     GetNodeFactory().Register("RoundNode", "Maths", "Rounder", NodeBuilder<RoundNode>);
     GetNodeFactory().Register("Sampler", "Synthesis", "Sampler", NodeBuilder<Sampler>);

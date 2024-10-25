@@ -12,6 +12,9 @@ protected:
 	virtual void Render(const v2& topLeft, class DrawList* dl, bool lodOn) override;
 	virtual bool OnClick(const NodeClickInfo& info) override;
 
+	virtual void Load(JSONType& data) override;
+	virtual JSONType Save() override;
+
 private:
 	bool floatInput = true;
 

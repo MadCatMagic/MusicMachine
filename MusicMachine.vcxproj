@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Nodes\NodeTypes\Panner.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\RoundNode.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\PitchShifter.cpp" />
     <ClCompile Include="src\App\WAV.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkVariable.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NoiseNode.h" />
+    <ClInclude Include="include\App\Nodes\NodeTypes\Panner.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\PitchShifter.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\RoundNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\Sampler.h" />

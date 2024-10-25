@@ -44,3 +44,13 @@ bool RoundNode::OnClick(const NodeClickInfo& info)
 	floatInput = !floatInput;
 	return true;
 }
+
+void RoundNode::Load(JSONType& data)
+{
+	floatInput = data.b;
+}
+
+JSONType RoundNode::Save()
+{
+	return JSONType(floatInput);
+}

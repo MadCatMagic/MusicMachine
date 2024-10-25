@@ -73,12 +73,18 @@ void Sampler::Work(int id)
 
 void Sampler::Load(JSONType& data)
 {
-    selectedSample = (int)data.i;
+    selectedSample = (int)data.obj["sample"].i;
+    fadein = (float)data.obj["fadein"].f;
+    fadeout = (float)data.obj["fadeout"].f;
 }
 
 JSONType Sampler::Save()
 {
-    return JSONType((long)selectedSample);
+    return JSONType({
+        "sample", (long)selectedSample,
+        "fadein", (double)fadein,
+        "fadeout", (double)fadeout
+    });
 }
 
 v2 Sampler::interp(float time, float timescale) const

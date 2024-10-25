@@ -1,7 +1,7 @@
 #pragma once
 #include "App/Nodes/Node.h"
 
-struct PitchShifter : public Node
+struct Panner : public Node
 {
 protected:
 	virtual void Init() override;
@@ -13,8 +13,8 @@ protected:
 	virtual JSONType Save() override;
 
 private:
-	float pitchShift = 0.0f;
-	int octaveShift = 0;
-	PitchSequencer i{ };
-	PitchSequencer o{ };
+	AudioChannel ichannel{ };
+	AudioChannel ochannel{ };
+
+	float pan = 0.0f;
 };
