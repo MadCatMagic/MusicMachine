@@ -1,10 +1,9 @@
 #include "App/App.h"
 
-#include "App/WAV.h"
-
 #include "imgui.h"
 #include "Engine/Console.h"
-#include "App/JSON.h"
+#include "Engine/JSON.h"
+#include "Engine/WAV.h"
 
 #include "App/Nodes/NodeRegistry.h"
 #include <filesystem>

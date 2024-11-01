@@ -33,7 +33,7 @@ struct v2
 	v2 scale(const v2& a) const;
 	v2 scale(float _x, float _y) const;
 
-	v2 normalise() const;
+	v2 normalised() const;
 	float length() const;
 	float length2() const;
 	float distanceTo(const v2& a) const;
@@ -75,7 +75,7 @@ struct v3
 	v3 reciprocal() const;
 	v3 scale(const v3& a) const;
 
-	v3 normalise() const;
+	v3 normalised() const;
 	float length() const;
 	float distanceTo(const v3& a) const;
 
@@ -115,7 +115,7 @@ struct v4
 	v4 reciprocal() const;
 	v4 scale(const v4& a) const;
 
-	v4 normalise() const;
+	v4 normalised() const;
 	float length() const;
 	float distanceTo(const v4& a) const;
 

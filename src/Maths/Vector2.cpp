@@ -51,7 +51,7 @@ v2 v2::scale(float _x, float _y) const
 	return v2(x * _x, y * _y);
 }
 
-v2 v2::normalise() const
+v2 v2::normalised() const
 {
 	const float kEpsilon = 0.000001f;
 	float mag = length();

@@ -1,6 +1,5 @@
 #include "App/Nodes/NodeNetwork.h"
 #include "App/Nodes/Canvas.h"
-#include "Random.h"
 #include <sstream>
 #include <iomanip>
 
@@ -82,7 +81,7 @@ void NodeNetworkRenderer::Draw(DrawList* drawList, std::vector<Node*>& selected,
 		srand(10);
 		std::vector<v2> positions = std::vector<v2>(absNodes.size());
 		for (size_t i = 0; i < absNodes.size(); i++)
-			positions[i] = Random::randv2() * 50.0f - 25.0f;
+			positions[i] = v2((float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX) * 50.0f - 25.0f;
 		// pretty slow
 		for (size_t iter = 0; iter < 20; iter++)
 		{

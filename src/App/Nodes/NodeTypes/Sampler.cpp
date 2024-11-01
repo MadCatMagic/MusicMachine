@@ -1,5 +1,5 @@
 #include "App/Nodes/NodeTypes/Sampler.h"
-#include "App/WAV.h"
+#include "Engine/WAV.h"
 #include "Engine/DrawList.h"
 
 std::vector<std::vector<v2>> Sampler::samplerData = {};

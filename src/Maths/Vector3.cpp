@@ -28,7 +28,7 @@ v3 v3::scale(const v3& a) const
 	return v3(x * a.x, y * a.y, z * a.z);
 }
 
-v3 v3::normalise() const
+v3 v3::normalised() const
 {
 	const float kEpsilon = 0.00001f;
 	float mag = length();

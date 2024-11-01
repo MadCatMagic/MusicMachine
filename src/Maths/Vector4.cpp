@@ -19,7 +19,7 @@ v4 v4::scale(const v4& a) const
 	return v4(x * a.x, y * a.y, z * a.z, w * a.w);
 }
 
-v4 v4::normalise() const
+v4 v4::normalised() const
 {
 	const float kEpsilon = 0.00001f;
 	float mag = length();

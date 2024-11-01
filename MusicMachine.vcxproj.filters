@@ -21,9 +21,6 @@
     <ClCompile Include="src\Engine\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Maths\Random.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Maths\Vector2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,7 +60,7 @@
     <ClCompile Include="src\Engine\DrawList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\App\JSON.cpp">
+    <ClCompile Include="src\Engine\JSON.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\App\Nodes\NodeNetworkRenderer.cpp">
@@ -138,7 +135,7 @@
     <ClCompile Include="src\App\Nodes\NodeTypes\Sampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\App\WAV.cpp">
+    <ClCompile Include="src\Engine\WAV.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\App\Nodes\NodeTypes\RoundNode.cpp">
@@ -167,9 +164,6 @@
     <ClInclude Include="include\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Random.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -188,7 +182,7 @@
     <ClInclude Include="include\Engine\DrawList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\App\JSON.h">
+    <ClInclude Include="include\Engine\JSON.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\App\Nodes\NodeFactory.h">
@@ -260,7 +254,7 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\Sampler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\App\WAV.h">
+    <ClInclude Include="include\Engine\WAV.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\App\Nodes\NodeTypes\PitchShifter.h">

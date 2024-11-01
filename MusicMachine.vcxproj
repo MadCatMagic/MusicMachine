@@ -141,7 +141,7 @@
     <ClCompile Include="src\App\Nodes\NodeTypes\Panner.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\RoundNode.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\PitchShifter.cpp" />
-    <ClCompile Include="src\App\WAV.cpp" />
+    <ClCompile Include="src\Engine\WAV.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\Sampler.cpp" />
     <ClCompile Include="src\App\Nodes\NodeRenderer.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\NodeNetworkVariable.cpp" />
@@ -164,7 +164,7 @@
     <ClCompile Include="src\App\Nodes\NodeTypes\WaveformGenerator.cpp" />
     <ClCompile Include="src\App\Sequencer.cpp" />
     <ClCompile Include="src\App\AudioChannel.cpp" />
-    <ClCompile Include="src\App\JSON.cpp" />
+    <ClCompile Include="src\Engine\JSON.cpp" />
     <ClCompile Include="src\App\Nodes\NodeNetworkRenderer.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\SequencerNode.cpp" />
     <ClCompile Include="src\Engine\DrawList.cpp" />
@@ -175,7 +175,6 @@
     <ClCompile Include="src\Engine\Console.cpp" />
     <ClCompile Include="src\Engine\Engine.cpp" />
     <ClCompile Include="src\Maths\BBox.cpp" />
-    <ClCompile Include="src\Maths\Random.cpp" />
     <ClCompile Include="src\Maths\Vector2.cpp" />
     <ClCompile Include="src\Maths\Vector2i.cpp" />
     <ClCompile Include="src\Maths\Vector3.cpp" />
@@ -213,7 +212,7 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\WaveformGenerator.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\SequencerNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\ADSRNode.h" />
-    <ClInclude Include="include\App\WAV.h" />
+    <ClInclude Include="include\Engine\WAV.h" />
     <ClInclude Include="include\BBox.h" />
     <ClInclude Include="include\Engine\CircularQueue.h" />
     <ClInclude Include="include\Engine.h" />
@@ -221,9 +220,8 @@
     <ClInclude Include="include\Engine\DrawList.h" />
     <ClInclude Include="include\Engine\Texture\Image.h" />
     <ClInclude Include="include\Engine\Texture\ImageLoader.h" />
-    <ClInclude Include="include\App\JSON.h" />
+    <ClInclude Include="include\Engine\JSON.h" />
     <ClInclude Include="include\Maths.h" />
-    <ClInclude Include="include\Random.h" />
     <ClInclude Include="include\Vector.h" />
     <ClInclude Include="include\App\Sequencer.h" />
   </ItemGroup>
