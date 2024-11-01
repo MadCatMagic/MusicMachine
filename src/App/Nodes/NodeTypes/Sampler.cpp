@@ -81,9 +81,9 @@ void Sampler::Load(JSONType& data)
 JSONType Sampler::Save()
 {
     return JSONType({
-        "sample", (long)selectedSample,
-        "fadein", (double)fadein,
-        "fadeout", (double)fadeout
+        { "sample", (long)selectedSample },
+        { "fadein", (double)fadein },
+        { "fadeout", (double)fadeout }
     });
 }
 

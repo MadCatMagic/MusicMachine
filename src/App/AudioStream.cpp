@@ -50,7 +50,7 @@ void AudioStream::SetData(std::vector<v2>& v)
         Console::LogErr("Tried adding audio data queue while queue is full!");
         return;
     }
-    audioData[(audioQueueStart + (audioQueueLength++)) % MAX_QUEUE_LENGTH] = v;
+    audioData.push(v);
 }
 
 std::vector<v2> AudioStream::GetData()
@@ -60,15 +60,13 @@ std::vector<v2> AudioStream::GetData()
         Console::LogErr("Tried getting audio data from queue while queue is empty!");
         return {};
     }
-    int qs = audioQueueStart++;
-    audioQueueStart %= MAX_QUEUE_LENGTH;
-    audioQueueLength--;
-    return audioData[qs];
+    return audioData.pop();
 }
 
 void AudioStream::EmptyQueue()
 {
-    audioQueueLength = 0;
+    while (!audioData.empty())
+        audioData.pop();
 }
 
 void AudioStream::Init()

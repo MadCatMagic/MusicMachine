@@ -216,7 +216,7 @@ void NodeNetworkRenderer::DrawNode(Node* node, bool cullBody)
 void NodeNetworkRenderer::DrawInput(const v2& cursor, const Node::NodeInput& inp, float width)
 {
 	float sf = canvas->GetSF().x;
-	if (inp.target != nullptr && inp.source == nullptr)
+	if (inp.target != nullptr)
 	{
 		// interaction for floats and integers
 		if ((inp.type == Node::NodeType::Float || inp.type == Node::NodeType::Int))
@@ -235,7 +235,7 @@ void NodeNetworkRenderer::DrawInput(const v2& cursor, const Node::NodeInput& inp
 					std::min(std::max(proportion, 0.0f), 1.0f) * width,
 					8.0f
 				);
-				currentList->RectFilled(tl, br, DrawColour::Node_BGHeader, 4.0f / canvas->GetSF().x);
+				currentList->RectFilled(tl, br, (inp.source == nullptr) ? DrawColour::Node_DragSliderActive : DrawColour::Node_DragSliderInactive, 4.0f / canvas->GetSF().x);
 			}
 			float renderedValue = value;
 			if (inp.displayType == Node::FloatDisplayType::Db)
@@ -281,7 +281,7 @@ void NodeNetworkRenderer::DrawInput(const v2& cursor, const Node::NodeInput& inp
 			v2 ftpos = cursor + v2(width - (convertedString.size() + 1) * 6.0f, -6.0f);
 			currentList->Text(
 				ftpos,
-				DrawColour::TextFaded,
+				(inp.source == nullptr) ? DrawColour::TextFaded : DrawColour::TextSuperFaded,
 				convertedString.c_str()
 			);
 		}
@@ -289,9 +289,18 @@ void NodeNetworkRenderer::DrawInput(const v2& cursor, const Node::NodeInput& inp
 		else if (inp.type == Node::NodeType::Bool)
 		{
 			v2 centre = cursor + v2(width - 10.0f, 0.0f);
-			currentList->Circle(centre, 4.0f / sf, DrawColour::TextFaded, 1.0f / sf);
+			currentList->Circle(
+				centre, 
+				4.0f / sf, 
+				(inp.source == nullptr) ? DrawColour::TextFaded : DrawColour::TextSuperFaded, 
+				1.0f / sf
+			);
 			if (*(bool*)inp.target)
-				currentList->CircleFilled(centre, 2.0f / sf, DrawColour::TextFaded);
+				currentList->CircleFilled(
+					centre, 
+					2.0f / sf, 
+					(inp.source == nullptr) ? DrawColour::TextFaded : DrawColour::TextSuperFaded
+				);
 		}
 	}
 	v2 pos = cursor + v2(8.0f, -6.0f);

@@ -3,14 +3,15 @@
 #include <functional>
 #include "imgui.h"
 
-const size_t NUM_DRAW_COLOURS = 23;
+const size_t NUM_DRAW_COLOURS = 26;
 enum DrawColour {
-	Text, TextFaded,
+	Text, TextFaded, TextSuperFaded,
 
 	Canvas_BG, Canvas_Edge,
 	Canvas_GridLinesHeavy, Canvas_GridLinesLight,
 
 	Node_BGFill, Node_BGOutline, Node_BGHeader,
+	Node_DragSliderActive, Node_DragSliderInactive,
 	Node_IOBool, Node_IOFloat, Node_IOInt, Node_IOAudio, Node_IOSequencer,
 	Node_IO, Node_IOSelected,
 	Node_Connector, Node_ConnectorInvalid,

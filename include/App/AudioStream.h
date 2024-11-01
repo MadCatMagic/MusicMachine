@@ -7,22 +7,22 @@
 #define BUFFER_SIZE (256)
 #define MAX_QUEUE_LENGTH (10)
 
+#include "Engine/CircularQueue.h"
+
 class AudioStream
 {
 public:
 	void SetData(std::vector<v2>& v);
 	std::vector<v2> GetData();
 	void EmptyQueue();
-	inline bool NoData() const { return audioQueueLength == 0; }
-	inline bool QueueFull() const { return audioQueueLength == MAX_QUEUE_LENGTH; }
+	inline bool NoData() const { return audioData.empty(); }
+	inline bool QueueFull() const { return audioData.full(); }
 
 	void Init();
 	void Release();
 
-	std::vector<v2> audioData[MAX_QUEUE_LENGTH]{};
-	int audioQueueStart = 0;
-	int audioQueueLength = 0;
-
+	CircularQueue<std::vector<v2>> audioData = CircularQueue<std::vector<v2>>(MAX_QUEUE_LENGTH);
+	
 	bool doNotMakeSound = false;
 
 	PaStream* stream = nullptr;

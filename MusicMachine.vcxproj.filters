@@ -272,5 +272,8 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\Panner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Engine\CircularQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

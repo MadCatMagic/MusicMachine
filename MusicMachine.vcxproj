@@ -215,6 +215,7 @@
     <ClInclude Include="include\App\Nodes\NodeTypes\ADSRNode.h" />
     <ClInclude Include="include\App\WAV.h" />
     <ClInclude Include="include\BBox.h" />
+    <ClInclude Include="include\Engine\CircularQueue.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Engine\Console.h" />
     <ClInclude Include="include\Engine\DrawList.h" />

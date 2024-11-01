@@ -8,6 +8,8 @@ ImColor DrawStyle::GetCol(DrawColour colour)
 }
 
 #pragma region colours
+#define QUOTE(x) #x
+#define DrawColourSwitchThing(_name, value) case DrawColour::_name: c.name = QUOTE(_name); c.col = value; break
 void DrawStyle::InitColours()
 {
 	for (int i = 0; i < NUM_DRAW_COLOURS; i++)
@@ -15,116 +17,38 @@ void DrawStyle::InitColours()
 		ColourData c;
 		switch ((DrawColour)i)
 		{
-		case DrawColour::Text:
-			c.name = "Text";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
-			break;
+			DrawColourSwitchThing(Text, ImGui::GetStyleColorVec4(ImGuiCol_Text));
+			DrawColourSwitchThing(TextFaded, ImColor(1.0f, 1.0f, 1.0f, 0.4f));
+			DrawColourSwitchThing(TextSuperFaded, ImColor(1.0f, 1.0f, 1.0f, 0.1f));
 
-		case DrawColour::TextFaded:
-			c.name = "TextFaded";
-			c.col = ImColor(1.0f, 1.0f, 1.0f, 0.4f);
-			break;
+			DrawColourSwitchThing(Canvas_BG, IM_COL32(50, 50, 50, 255));
+			DrawColourSwitchThing(Canvas_Edge, IM_COL32(255, 255, 255, 255));
+			DrawColourSwitchThing(Canvas_GridLinesHeavy, IM_COL32(200, 200, 200, 40));
+			DrawColourSwitchThing(Canvas_GridLinesLight, IM_COL32(200, 200, 200, 20));
 
-		case DrawColour::Canvas_BG:
-			c.name = "Canvas_BG";
-			c.col = IM_COL32(50, 50, 50, 255);
-			break;
+			DrawColourSwitchThing(Node_BGFill, ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
+			DrawColourSwitchThing(Node_BGOutline, ImColor(0.0f, 0.0f, 0.4f, 0.8f));
+			DrawColourSwitchThing(Node_BGHeader, ImGui::GetStyleColorVec4(ImGuiCol_Header));
 
-		case DrawColour::Canvas_Edge:
-			c.name = "Canvas_Edge";
-			c.col = IM_COL32(255, 255, 255, 255);
-			break;
+			DrawColourSwitchThing(Node_DragSliderActive, ImGui::GetStyleColorVec4(ImGuiCol_Header));
+			DrawColourSwitchThing(Node_DragSliderInactive, IM_COL32(34, 53, 76, 79));
 
-		case DrawColour::Canvas_GridLinesHeavy:
-			c.name = "Canvas_GridLinesHeavy";
-			c.col = IM_COL32(200, 200, 200, 40);
-			break;
+			DrawColourSwitchThing(Node_IOBool, ImColor(1.0f, 0.2f, 0.6f));
+			DrawColourSwitchThing(Node_IOFloat, ImColor(0.4f, 0.6f, 0.9f));
+			DrawColourSwitchThing(Node_IOInt, ImColor(0.2f, 0.7f, 0.6f));
+			DrawColourSwitchThing(Node_IOAudio, ImColor(1.0f, 0.7f, 0.1f));
+			DrawColourSwitchThing(Node_IOSequencer, ImColor(0.3f, 1.0f, 0.2f));
+			DrawColourSwitchThing(Node_IO, ImColor(0.1f, 0.1f, 0.1f));
+			DrawColourSwitchThing(Node_IOSelected, ImColor(0.6f, 0.6f, 0.6f));
 
-		case DrawColour::Canvas_GridLinesLight:
-			c.name = "Canvas_GridLinesLight";
-			c.col = IM_COL32(200, 200, 200, 20);
-			break;
+			DrawColourSwitchThing(Node_Connector, ImGui::GetStyleColorVec4(ImGuiCol_Text));
+			DrawColourSwitchThing(Node_ConnectorInvalid, ImColor(1.0f, 0.0f, 0.0f, 1.0f));
 
-		case DrawColour::Node_BGFill:
-			c.name = "Node_BGFill";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
-			break;
-
-		case DrawColour::Node_BGOutline:
-			c.name = "Node_BGOutline";
-			c.col = ImColor(0.0f, 0.0f, 0.4f, 0.8f);
-			break;
-
-		case DrawColour::Node_BGHeader:
-			c.name = "Node_BGHeader";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Header);
-			break;
-
-		case DrawColour::Node_IOBool:
-			c.name = "Node_IOBool";
-			c.col = ImColor(1.0f, 0.2f, 0.6f);
-			break;
-
-		case DrawColour::Node_IOFloat:
-			c.name = "Node_IOFloat";
-			c.col = ImColor(0.4f, 0.6f, 0.9f);
-			break;
-
-		case DrawColour::Node_IOInt:
-			c.name = "Node_IOInt";
-			c.col = ImColor(0.2f, 0.7f, 0.6f);
-			break;
-
-		case DrawColour::Node_IOAudio:
-			c.name = "Node_IOAudio";
-			c.col = ImColor(1.0f, 0.7f, 0.1f);
-			break;
-
-		case DrawColour::Node_IOSequencer:
-			c.name = "Node_IOAudio";
-			c.col = ImColor(0.3f, 1.0f, 0.2f);
-			break;
-
-		case DrawColour::Node_IO:
-			c.name = "Node_IO";
-			c.col = ImColor(0.1f, 0.1f, 0.1f);
-			break;
-
-		case DrawColour::Node_IOSelected:
-			c.name = "Node_IOSelected";
-			c.col = ImColor(0.6f, 0.6f, 0.6f);
-			break;
-
-		case DrawColour::Node_Connector:
-			c.name = "Node_Connector";
-			c.col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
-			break;
-
-		case DrawColour::Node_ConnectorInvalid:
-			c.name = "Node_ConnectorInvalid";
-			c.col = ImColor(1.0f, 0.0f, 0.0f, 1.0f);
-			break;
-
-		case DrawColour::Node_SelectedOutline:
-			c.name = "Node_SelectedOutline";
-			c.col = ImColor(0.2f, 0.6f, 1.0f, 0.8f);
-			break;
-		case DrawColour::Node_TopSelectedOutline:
-			c.name = "Node_TopSelectedOutline";
-			c.col = ImColor(0.5f, 0.8f, 1.0f, 0.8f);
-			break;
-		case DrawColour::Node_SelectedFill:
-			c.name = "Node_SelectedFill";
-			c.col = ImColor(0.2f, 0.2f, 0.5f, 1.0f);
-			break;
-		case DrawColour::Node_SelectionOutline:
-			c.name = "Node_SelectionOutline";
-			c.col = ImColor(1.0f, 0.8f, 0.2f, 0.8f);
-			break;
-		case DrawColour::Node_SelectionFill:
-			c.name = "Node_SelectionFill";
-			c.col = ImColor(1.0f, 0.8f, 0.2f, 0.2f);
-			break;
+			DrawColourSwitchThing(Node_SelectedOutline, ImColor(0.2f, 0.6f, 1.0f, 0.8f));
+			DrawColourSwitchThing(Node_TopSelectedOutline, ImColor(0.5f, 0.8f, 1.0f, 0.8f));
+			DrawColourSwitchThing(Node_SelectedFill, ImColor(0.2f, 0.2f, 0.5f, 1.0f));
+			DrawColourSwitchThing(Node_SelectionOutline, ImColor(1.0f, 0.8f, 0.2f, 0.8f));
+			DrawColourSwitchThing(Node_SelectionFill, ImColor(1.0f, 0.8f, 0.2f, 0.2f));
 		}
 		colours.push_back(c);
 	}
