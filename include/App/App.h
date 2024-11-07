@@ -46,8 +46,6 @@ private:
 	float averageTimeWindow[FRAME_TIME_MOVING_WINDOW_SIZE]{ };
 	int frameTimeI = 0;
 
-	float t_fake = 0.0f;
-
 	float exportBegin = 0.0f;
 	float exportEnd = 10.0f;
 

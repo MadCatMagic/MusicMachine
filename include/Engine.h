@@ -9,9 +9,7 @@
 class Engine
 {
 public:
-	Engine();
-
-	void Mainloop(bool debugging);
+	void Mainloop();
 
 	bool CreateWindow(const v2i& windowSize, const std::string& name);
 
@@ -22,8 +20,6 @@ private:
 	v2i winSize;
 
 	GLFWwindow* window = nullptr;
-
-	bool debug = false; 
 
 	void Initialize();
 	void Update();

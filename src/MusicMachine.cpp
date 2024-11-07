@@ -11,7 +11,7 @@ int main(int, char**)
 
     if (!engine.CreateWindow(v2i(1280, 720), "aaaa"))
         std::printf("error: you are an idiot\n");
-    engine.Mainloop(true);
+    engine.Mainloop();
 
     return 0;
 }

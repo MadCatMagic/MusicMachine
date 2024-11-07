@@ -26,5 +26,4 @@ private:
 	float release = 0.01f;
 
 	float lastSample[MAX_OWNED_NETWORKS]{};
-	float timer[MAX_OWNED_NETWORKS]{};
 };
