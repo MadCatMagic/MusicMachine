@@ -15,7 +15,7 @@ void DelayNode::IO()
 	AudioOutput("out", &ochannel);
 	FloatInput("feedback", &feedback, 0.0f, 1.0f, true, true);
 	FloatInput("mix", &mix, 0.0f, 1.0f, true, true);
-	FloatInput("delay", &time, 0.01f, 1.0f, true, false);
+	FloatInput("delay", &time, 0.0005f, 1.0f, true, false);
 	if (delayType == DelayType::PingPong)
 		FloatInput("stereonity", &stereoWideness, -1.0f, 1.0f, true, true);
 }

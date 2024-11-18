@@ -19,8 +19,6 @@ public:
 	friend class NodeNetworkRenderer;
 	friend Node;
 
-	static NodeNetwork* context;
-
 	NodeNetwork();
 	NodeNetwork(const std::string& nnFilePath);
 	~NodeNetwork();
