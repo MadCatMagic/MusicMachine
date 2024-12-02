@@ -21,6 +21,8 @@ private:
 
 	AudioChannel c{ };
 	float kv[MAX_OWNED_NETWORKS]{};
+	float freq[MAX_OWNED_NETWORKS]{};
+	float vel[MAX_OWNED_NETWORKS]{};
 
 	float GetValue(float phase, int shape) const;
 	float Bilinear(float phase) const;

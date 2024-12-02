@@ -62,7 +62,7 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	}
 
 	// render play cursor
-	dl->RectFilled(topLeft + v2(currentI * cellSize, 0.0f), topLeft + v2(currentI * cellSize + cellSize, cellSize * height), ImColor(1.0f, 0.2f, 0.1f, 0.4f));
+	dl->RectFilled(topLeft + v2(currentBeatIndex * cellSize, 0.0f), topLeft + v2(currentBeatIndex * cellSize + cellSize, cellSize * height), ImColor(1.0f, 0.2f, 0.1f, 0.4f));
 }
 
 bool SequencerNode::OnClick(const NodeClickInfo& info)
@@ -96,9 +96,9 @@ void SequencerNode::Work(int id)
 	EnsureDataSize();
 
 	if (tempoSync)
-		currentI = Arranger::instance->getBeat(width, tempoSyncToFloat(tempoSyncV));
+		currentBeatIndex = Arranger::instance->getBeat(width, tempoSyncToFloat(tempoSyncV));
 	else
-		currentI = (int)(AudioChannel::t * (bpm / 60.0f)) % width;
+		currentBeatIndex = (int)(AudioChannel::t * (bpm / 60.0f)) % width;
 
 	float pitchLength;
 	if (tempoSync)
@@ -108,35 +108,35 @@ void SequencerNode::Work(int id)
 
 	seq = PitchSequencer();
 
-	float fakeTime;
+	float timeInBeats;
 	if (tempoSync)
-		fakeTime = Arranger::instance->getTiming(tempoSyncToFloat(tempoSyncV));
+		timeInBeats = Arranger::instance->getTiming(tempoSyncToFloat(tempoSyncV));
 	else
-		fakeTime = AudioChannel::t * (bpm / 60.0f);
+		timeInBeats = AudioChannel::t * (bpm / 60.0f);
 
-	int currLength = 0;
-	int io = 0;
-	while (currLength < AudioChannel::bufferSize)
+	int cumulativeSamplesSet = 0;
+	int beatOffset = 0;
+	while (cumulativeSamplesSet < AudioChannel::bufferSize)
 	{
-		float p = GetPitch((currentI + io) % width);
+		float pitch = GetPitch((currentBeatIndex + beatOffset) % width);
 
 		// number of samples the sound should play for *THIS* buffer
-		float exactI = fakeTime - (float)(int)fakeTime;
-		if (io > 0)
-			exactI = 0.0f;
-		float timeLeft = (1.0f - exactI) * pitchLength;
-		int t = (int)timeLeft;
-		t = (t + currLength) >= AudioChannel::bufferSize ? (int)AudioChannel::bufferSize - currLength : t;
+		float beatFraction = timeInBeats - (float)(int)timeInBeats;
+		if (beatOffset > 0)
+			beatFraction = 0.0f;
+		float timeLeft = (1.0f - beatFraction) * pitchLength;
+		int samplesToPlayFor = (int)timeLeft;
+		samplesToPlayFor = (samplesToPlayFor + cumulativeSamplesSet) >= AudioChannel::bufferSize ? ((int)AudioChannel::bufferSize - cumulativeSamplesSet) : samplesToPlayFor;
 
 		// send pitch
-		seq.pitch.push_back(p);
-		seq.length.push_back(t);
-		seq.velocity.push_back(data[(currentI + io) % width].second);
+		seq.pitch.push_back(pitch);
+		seq.length.push_back(samplesToPlayFor);
+		seq.velocity.push_back(data[(currentBeatIndex + beatOffset) % width].second);
 		// dont think this actually works :)
-		seq.cumSamples.push_back((int)(exactI * pitchLength));
-		currLength += t;
+		seq.cumulativeSamples.push_back((int)(beatFraction * pitchLength));
+		cumulativeSamplesSet += samplesToPlayFor;
 
-		io++;
+		beatOffset++;
 	}
 
 }

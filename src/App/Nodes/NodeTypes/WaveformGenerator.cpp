@@ -50,40 +50,47 @@ void WaveformGenerator::Work(int id)
 	if (seq.length.size() == 0)
 		return;
 
+	int frequencyIndex = 0;
+	size_t sampleCounter = 0;
 
-	int freq = 0;
-	size_t scounter = 0;
-
-	float samplesPerCycle = (c.sampleRate / seq.pitch[freq]);
-	float increment = 1.0f / samplesPerCycle;
-
-	if (seq.cumSamples[0] == 0)
+	if (seq.cumulativeSamples[0] <= AudioChannel::bufferSize && seq.pitch[0] != freq[id] && seq.pitch[0] != 0.0f)
+	{
 		kv[id] = 0.0f;
+		freq[id] = seq.pitch[0];
+		vel[id] = seq.velocity[0];
+	}
+
+	float samplesPerCycle = (AudioChannel::sampleRate / freq[id]);
+	float kvIncrement = 1.0f / samplesPerCycle;
 
 	for (size_t i = 0; i < c.bufferSize; i++)
 	{
-		if (scounter >= seq.length[freq])
+		if (sampleCounter >= seq.length[frequencyIndex])
 		{
-			scounter = 0;
-			freq++;
-			if (freq >= seq.length.size())
+			sampleCounter = 0;
+			frequencyIndex++;
+			if (frequencyIndex >= seq.length.size())
 				return;
 
-			samplesPerCycle = (c.sampleRate / seq.pitch[freq]);
-			increment = 1.0f / samplesPerCycle;
-
-			if (seq.cumSamples[freq] == 0)
+			if (seq.cumulativeSamples[frequencyIndex] == 0 && seq.pitch[frequencyIndex] != freq[id] && seq.pitch[frequencyIndex] != 0.0f)
+			{
 				kv[id] = 0.0f;
+				freq[id] = seq.pitch[frequencyIndex];
+				vel[id] = seq.velocity[frequencyIndex];
+			}
+
+			samplesPerCycle = (AudioChannel::sampleRate / freq[id]);
+			kvIncrement = 1.0f / samplesPerCycle;
 		}
 
-		if (seq.pitch[freq] != 0.0f)
+		if (freq[id] != 0.0f)
 		{
-			kv[id] += increment;
+			kv[id] += kvIncrement;
 			if (kv[id] >= 1.0f) kv[id] -= 1.0f;
-			c.data[i] = Bilinear(kv[id]) * seq.velocity[freq];
+			c.data[i] = Bilinear(kv[id]) * vel[id];
 		}
 
-		scounter++;
+		sampleCounter++;
 	}
 }
 

@@ -16,8 +16,10 @@ protected:
 	virtual JSONType Save() override;
 
 private:
-	v2 previousData[256]{};
+	v2 previousData[8192]{};
 	unsigned int previousDataP = 0;
+
+	int previousDataDivider = 0;
 
 	float volume = 0.2f;
 	AudioChannel c{ };

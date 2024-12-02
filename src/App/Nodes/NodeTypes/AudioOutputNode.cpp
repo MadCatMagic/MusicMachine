@@ -13,6 +13,7 @@ void AudioOutputNode::IO()
 {
 	AudioInput("ain", &c);
 	FloatInput("volume", &volume, 0.0f, 1.0f, true, true, Node::FloatDisplayType::Db);
+	IntInput("viewScale", &previousDataDivider, 0, 5, true, true);
 }
 
 AudioChannel* AudioOutputNode::Result()
@@ -22,9 +23,10 @@ AudioChannel* AudioOutputNode::Result()
 
 void AudioOutputNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
-	int skip = lodOn ? 4 : 1;
-	const float bw = 200.0f / 256.0f;
-	for (int i = 0; i < 255; i += skip)
+	int bufferSize = 8192 / (1 << previousDataDivider);
+	int skip = (lodOn ? 128 : 32) / (1 << previousDataDivider);
+	const float bw = 200.0f / (float)bufferSize;
+	for (int i = 0; i < (bufferSize - skip); i += skip)
 	{
 		dl->Line(
 			topLeft + v2(bw * i, 25.0f + previousData[i].x * 25.0f),
@@ -41,13 +43,11 @@ void AudioOutputNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 
 void AudioOutputNode::Work(int id)
 {
+	previousDataP %= 8192 / (1 << previousDataDivider);
 	for (size_t i = 0; i < c.bufferSize; i++)
 	{
-		if (i % 32 == 0)
-		{
-			previousData[previousDataP++] = -c.data[i];
-			previousDataP %= 256;
-		}
+		previousData[previousDataP++] = -c.data[i];
+		previousDataP %= 8192 / (1 << previousDataDivider);
 		c.data[i] *= volume;
 	}
 }

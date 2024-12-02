@@ -58,7 +58,7 @@ void ADSRNode::Work(int id)
 
 		if (isequencer.pitch[freq] != 0.0f)
 		{
-			lastSample[id] = adsr(scounter + isequencer.cumSamples[freq]);
+			lastSample[id] = adsr(scounter + isequencer.cumulativeSamples[freq]);
 			ochannel.data[i] = lastSample[id];
 		}
 		else

@@ -56,7 +56,7 @@ void Sampler::Work(int id)
     for (size_t i = 0; i < seq.length.size(); i++)
     {
         // dont need to bother writing anything as should already be empty
-        if (seq.cumSamples[i] < (float)kv[id] * (float)AudioChannel::sampleRate && seq.pitch[i] != 0.0f)
+        if (seq.cumulativeSamples[i] < (float)kv[id] * (float)AudioChannel::sampleRate && seq.pitch[i] != 0.0f)
         {
             kv[id] = 0.0f;
             ts[id] = seq.pitch[i] / root;
