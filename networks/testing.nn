@@ -1,0 +1,301 @@
+{
+  "nodes": [
+    {
+      "id": "0000000048230002_SequencerNode",
+      "inputs": [
+        {
+          "name": "length",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "height",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "octave",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "tempo sync",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "'bpm'",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ -126, 263 ],
+      "mini": false,
+      "name": "SequencerNode",
+      "node": {
+        "width": 11,
+        "height": 15,
+        "octave": 0,
+        "data": [
+          {
+            "p": 1,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 2,
+            "v": 0.699999988079071
+          },
+          {
+            "p": -1,
+            "v": 0
+          },
+          {
+            "p": 4,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 6,
+            "v": 0.699999988079071
+          },
+          {
+            "p": -1,
+            "v": 0
+          },
+          {
+            "p": 7,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 8,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 10,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 12,
+            "v": 0.699999988079071
+          },
+          {
+            "p": 14,
+            "v": 0.699999988079071
+          }
+        ],
+        "bpm": 120,
+        "tempoSync": true,
+        "syncv": -2
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "shape",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "tempo sync",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "frequency",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "000000002cd60006_ApproxLFO",
+      "pos": [ 104, 488 ],
+      "mini": false,
+      "name": "ApproxLFO",
+      "node": {
+        "frequency": 3.332613229751587,
+        "shape": 1.531735777854919,
+        "sync": false,
+        "syncv": 0
+      }
+    },
+    {
+      "id": "000000000029003f_AudioOutputNode",
+      "inputs": [
+        {
+          "name": "ain",
+          "source": "0000000067840003_WaveformGenerator",
+          "sourceName": "aout"
+        },
+        {
+          "name": "volume",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "viewScale",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 600, 320 ],
+      "mini": false,
+      "name": "AudioOutputNode",
+      "node": 0.5652478337287903
+    },
+    {
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "pregain",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "distortion",
+          "source": "000000002cd60006_ApproxLFO",
+          "sourceName": "LFO"
+        },
+        {
+          "name": "mix",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "000000004ae10004_Distortion",
+      "pos": [ 432, 328 ],
+      "mini": false,
+      "name": "Distortion",
+      "node": {
+        "mix": 1,
+        "pregain": 1.221005916595459,
+        "mode": 3,
+        "distortion": 0.9041101932525635
+      }
+    },
+    {
+      "id": "000000003d6c0005_MixNode",
+      "inputs": [
+        {
+          "name": "Source 0",
+          "source": "0000000018be0002_ADSRNode",
+          "sourceName": "adsr"
+        },
+        {
+          "name": "Source 1",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 256, 208 ],
+      "mini": true,
+      "name": "MixNode",
+      "node": {
+        "type": 1,
+        "numChannels": 2,
+        "weights": [ 1, 1 ]
+      }
+    },
+    {
+      "id": "0000000018be0002_ADSRNode",
+      "inputs": [
+        {
+          "name": "sequence",
+          "source": "0000000048230002_SequencerNode",
+          "sourceName": "sequence"
+        },
+        {
+          "name": "attack",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "decay",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "sustain",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "release",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 80, 112 ],
+      "mini": false,
+      "name": "ADSRNode",
+      "node": {
+        "attack": 0.001000000047497451,
+        "decay": 0.2157194167375565,
+        "sustain": 0.1581736207008362,
+        "release": 0.2832651138305664
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "inp",
+          "source": "000000003d6c0005_MixNode",
+          "sourceName": "Out"
+        },
+        {
+          "name": "feedback",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "mix",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "delay",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "stereonity",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000072ae0007_DelayNode",
+      "pos": [ 272, 240 ],
+      "mini": false,
+      "name": "DelayNode",
+      "node": {
+        "feedback": 0.866908073425293,
+        "mix": 0.4247367978096008,
+        "time": 0.008500933647155762,
+        "stereo": 0,
+        "type": 1
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "sequence",
+          "source": "0000000048230002_SequencerNode",
+          "sourceName": "sequence"
+        },
+        {
+          "name": "shape",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000067840003_WaveformGenerator",
+      "pos": [ 72, 296 ],
+      "mini": false,
+      "name": "WaveformGenerator",
+      "node": { "shape": 3 }
+    }
+  ],
+  "root": true,
+  "dummy": false
+}

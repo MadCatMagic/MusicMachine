@@ -53,7 +53,7 @@ void WaveformGenerator::Work(int id)
 	int frequencyIndex = 0;
 	size_t sampleCounter = 0;
 
-	if (seq.cumulativeSamples[0] <= AudioChannel::bufferSize && seq.pitch[0] != freq[id] && seq.pitch[0] != 0.0f)
+	if (seq.cumulativeSamples[0] < AudioChannel::bufferSize || ( seq.pitch[0] != freq[id] && seq.pitch[0] != 0.0f))
 	{
 		kv[id] = 0.0f;
 		freq[id] = seq.pitch[0];
@@ -72,7 +72,7 @@ void WaveformGenerator::Work(int id)
 			if (frequencyIndex >= seq.length.size())
 				return;
 
-			if (seq.cumulativeSamples[frequencyIndex] == 0 && seq.pitch[frequencyIndex] != freq[id] && seq.pitch[frequencyIndex] != 0.0f)
+			if (seq.cumulativeSamples[frequencyIndex] == 0 || ( seq.pitch[frequencyIndex] != freq[id] && seq.pitch[frequencyIndex] != 0.0f))
 			{
 				kv[id] = 0.0f;
 				freq[id] = seq.pitch[frequencyIndex];
