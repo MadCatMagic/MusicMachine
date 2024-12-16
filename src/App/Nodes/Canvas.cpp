@@ -45,23 +45,23 @@ bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
     ImGui::PopStyleVar();
 
     // Using InvisibleButton() as a convenience
-    canvasPixelPos = (v2)ImGui::GetCursorScreenPos();
-    canvasPixelSize = ImGui::GetContentRegionAvail();
-    if (canvasPixelSize.x < 50.0f) canvasPixelSize.x = 50.0f;
-    if (canvasPixelSize.y < 50.0f) canvasPixelSize.y = 50.0f;
-    v2 canvasBottomRight = canvasPixelPos + canvasPixelSize;
+    arrangerPixelPos = (v2)ImGui::GetCursorScreenPos();
+    arrangerPixelSize = ImGui::GetContentRegionAvail();
+    if (arrangerPixelSize.x < 50.0f) arrangerPixelSize.x = 50.0f;
+    if (arrangerPixelSize.y < 50.0f) arrangerPixelSize.y = 50.0f;
+    v2 canvasBottomRight = arrangerPixelPos + arrangerPixelSize;
 
     // Draw border and background color
     ImGuiIO& io = ImGui::GetIO();
     drawList.dl = ImGui::GetWindowDrawList();
     drawList.style = drawStyle;
     drawList.convertPosition = false;
-    drawList.RectFilled(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_BG);
-    drawList.Rect(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
+    drawList.RectFilled(arrangerPixelPos, canvasBottomRight, DrawColour::Canvas_BG);
+    drawList.Rect(arrangerPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
     drawList.scaleFactor = scale.x;
 
     // This will catch our interactions
-    ImGui::InvisibleButton("canvas", canvasPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
+    ImGui::InvisibleButton("canvas", arrangerPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
     const bool isHovered = ImGui::IsItemHovered(); // Hovered
     const bool isActive = ImGui::IsItemActive();   // Held
     const v2 mouseCanvasPos = ScreenToCanvas((v2)io.MousePos);
@@ -326,32 +326,32 @@ nodeInteractionsEscape:
     PopupWindows(beginSaveAs, beginLoad, beginNetworkThings.first, beginNetworkThings.second, appPointer);
 
     // Draw grid + all lines in the canvas
-    drawList.dl->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
+    drawList.dl->PushClipRect((arrangerPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
     const v2 gridStep = scale.reciprocal() * 32.0f;
     const v2 gridStepSmall = scale.reciprocal() * 8.0f;
-    for (float x = fmodf(-position.x / scale.x, gridStep.x) - gridStep.x; x < canvasPixelSize.x; x += gridStep.x)
+    for (float x = fmodf(-position.x / scale.x, gridStep.x) - gridStep.x; x < arrangerPixelSize.x; x += gridStep.x)
     {
-        drawList.Line(v2(canvasPixelPos.x + x, canvasPixelPos.y), v2(canvasPixelPos.x + x, canvasBottomRight.y), DrawColour::Canvas_GridLinesHeavy);
+        drawList.Line(v2(arrangerPixelPos.x + x, arrangerPixelPos.y), v2(arrangerPixelPos.x + x, canvasBottomRight.y), DrawColour::Canvas_GridLinesHeavy);
         if (scalingLevel < 21)
             for (int dx = 1; dx < 4; dx++)
                 drawList.Line(
-                    ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasPixelPos.y), 
-                    ImVec2(canvasPixelPos.x + x + dx * gridStepSmall.x, canvasBottomRight.y), DrawColour::Canvas_GridLinesLight);
+                    ImVec2(arrangerPixelPos.x + x + dx * gridStepSmall.x, arrangerPixelPos.y), 
+                    ImVec2(arrangerPixelPos.x + x + dx * gridStepSmall.x, canvasBottomRight.y), DrawColour::Canvas_GridLinesLight);
     }
-    for (float y = fmodf(-position.y / scale.y, gridStep.y) - gridStep.y; y < canvasPixelSize.y; y += gridStep.y)
+    for (float y = fmodf(-position.y / scale.y, gridStep.y) - gridStep.y; y < arrangerPixelSize.y; y += gridStep.y)
     {
-        drawList.Line(v2(canvasPixelPos.x, canvasPixelPos.y + y), v2(canvasBottomRight.x, canvasPixelPos.y + y), DrawColour::Canvas_GridLinesHeavy);
+        drawList.Line(v2(arrangerPixelPos.x, arrangerPixelPos.y + y), v2(canvasBottomRight.x, arrangerPixelPos.y + y), DrawColour::Canvas_GridLinesHeavy);
         if (scalingLevel < 21)
             for (int dy = 1; dy < 4; dy++)
                 drawList.Line(
-                    v2(canvasPixelPos.x, canvasPixelPos.y + y + dy * gridStepSmall.y),
-                    v2(canvasBottomRight.x, canvasPixelPos.y + y + dy * gridStepSmall.y), DrawColour::Canvas_GridLinesLight);
+                    v2(arrangerPixelPos.x, arrangerPixelPos.y + y + dy * gridStepSmall.y),
+                    v2(canvasBottomRight.x, arrangerPixelPos.y + y + dy * gridStepSmall.y), DrawColour::Canvas_GridLinesLight);
     }
 
     ImGui::PushFont(textLODs[scalingLevel]);
     drawList.convertPosition = true;
     nodeRenderer->drawDebugInformation = nodes->doIDrawDebug();
-    nodeRenderer->Draw(&drawList, selectedStack, bbox2(stctp(canvasPixelPos), stctp(canvasBottomRight)));
+    nodeRenderer->Draw(&drawList, selectedStack, bbox2(stctp(arrangerPixelPos), stctp(canvasBottomRight)));
 
     // draw dragged connection
     if (draggingConnection)
@@ -740,12 +740,12 @@ float Canvas::GetSFFromScalingLevel(int scaling)
 
 v2 Canvas::ScreenToCanvas(const v2& pos) const // c = s + p
 {
-    return canvasPixelPos - pos;
+    return arrangerPixelPos - pos;
 }
 
 v2 Canvas::CanvasToScreen(const v2& pos) const // s = c - p
 {
-    return canvasPixelPos - pos;
+    return arrangerPixelPos - pos;
 }
 
 v2 Canvas::CanvasToPosition(const v2& pos) const // position = offset - canvas * scale

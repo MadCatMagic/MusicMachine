@@ -110,6 +110,12 @@ public:
 		return &data[head];
 	}
 
+	inline void clear()
+	{
+		while (!empty())
+			pop();
+	}
+
 	// length of current queue
 	inline size_t length() const { return _length; }
 	// total available space

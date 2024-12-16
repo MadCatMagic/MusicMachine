@@ -235,7 +235,7 @@ bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 	auto emptyVec = std::vector<v2>(AudioChannel::bufferSize, v2());
 	if (!Arranger::instance->playing && setAudioStream)
 	{
-		audioStream->SetData(emptyVec);
+		audioStream->AddData(emptyVec);
 		return true;
 	}
 
@@ -256,7 +256,7 @@ bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 	}
 	// if there are no audiooutputnodes this just returns a silent vec so its fine
 	if (setAudioStream)
-		audioStream->SetData(emptyVec);
+		audioStream->AddData(emptyVec);
 	return true;
 }
 

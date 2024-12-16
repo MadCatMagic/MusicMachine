@@ -58,16 +58,15 @@ void DelayNode::Work(int id)
 	if (delayType == DelayType::Mono)
 		for (int i = 0; i < ichannel.bufferSize; i++)
 		{
-			queue[id][queuePointer[id]] = queue[id][queuePointer[id]] * feedback + ichannel.data[i];
 			ochannel.data[i].x = queue[id][queuePointer[id]].x * mix + ichannel.data[i].x * (1.0f - mix);
 			ochannel.data[i].y = queue[id][queuePointer[id]].y * mix + ichannel.data[i].y * (1.0f - mix);
+			queue[id][queuePointer[id]] = queue[id][queuePointer[id]] * feedback + ichannel.data[i];
 			queuePointer[id]++;
 			queuePointer[id] %= queueSize[id];
 		}
 	else
 		for (int i = 0; i < ichannel.bufferSize; i++)
 		{
-			queue[id][queuePointer[id]] = queue[id][queuePointer[id]] * feedback + ichannel.data[i];
 			// need to take wideness into account somehow
 			v2 lr = v2(
 				queue[id][queuePointer[id]].x, 
@@ -79,6 +78,9 @@ void DelayNode::Work(int id)
 			);
 
 			ochannel.data[i] = lr * mix + ichannel.data[i] * (1.0f - mix);
+			
+			// update queue after setting output data so incoming signal is not immediately delayed
+			queue[id][queuePointer[id]] = queue[id][queuePointer[id]] * feedback + ichannel.data[i];
 			queuePointer[id]++;
 			queuePointer[id] %= queueSize[id];
 		}

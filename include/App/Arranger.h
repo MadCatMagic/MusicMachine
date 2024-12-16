@@ -61,8 +61,8 @@ private:
 	v2 position = 0.0f;
 	v2 scale = 1.0f;
 
-	v2 canvasPixelPos;
-	v2 canvasPixelSize;
+	v2 arrangerPixelPos;
+	v2 arrangerPixelSize;
 
 	DrawList drawList;
 };

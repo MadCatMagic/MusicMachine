@@ -37,7 +37,7 @@ void App::Update()
     for (NodeNetwork* network : n)
         network->Update();
     c[0]->nodes->isRoot = true;
-    while (!astream.QueueFull() && GetAudio()) {}
+    while (!astream.audioData.full() && GetAudio()) {}
 }
 
 void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
@@ -220,7 +220,7 @@ void App::Export(const std::string& filepath)
     Arranger::instance->setTime(exportBegin);
 
     astream.doNotMakeSound = true;
-    astream.EmptyQueue();
+    astream.audioData.clear();
     bool wasPlaying = Arranger::instance->playing;
     Arranger::instance->playing = true;
 

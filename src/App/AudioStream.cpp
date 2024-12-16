@@ -21,7 +21,7 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     (void)inputBuffer; /* Prevent unused variable warning. */
 
     // check if any data is filled; if none is, something went wrong probably
-    if (data->NoData() || data->doNotMakeSound)
+    if (data->audioData.empty() || data->doNotMakeSound)
     {
         Console::LogWarn("NO DATA!!!");
         // wipe clean
@@ -43,9 +43,9 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     return 0;
 }
 
-void AudioStream::SetData(std::vector<v2>& v)
+void AudioStream::AddData(std::vector<v2>& v)
 {
-    if (QueueFull())
+    if (audioData.full())
     {
         Console::LogErr("Tried adding audio data queue while queue is full!");
         return;
@@ -55,18 +55,12 @@ void AudioStream::SetData(std::vector<v2>& v)
 
 std::vector<v2> AudioStream::GetData()
 {
-    if (NoData())
+    if (audioData.empty())
     {
         Console::LogErr("Tried getting audio data from queue while queue is empty!");
         return {};
     }
     return audioData.pop();
-}
-
-void AudioStream::EmptyQueue()
-{
-    while (!audioData.empty())
-        audioData.pop();
 }
 
 void AudioStream::Init()

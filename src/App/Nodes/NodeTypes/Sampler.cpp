@@ -103,11 +103,11 @@ void Sampler::PopulateData()
 {
     const int numFiles = 5;
     const std::string files[numFiles] = {
-        "samples/kick.wav",
-        "samples/snare.wav",
-        "samples/closed_hihat.wav",
-        "samples/open_hihat.wav",
-        "samples/crash.wav"
+        "res/samples/kick.wav",
+        "res/samples/snare.wav",
+        "res/samples/closed_hihat.wav",
+        "res/samples/open_hihat.wav",
+        "res/samples/crash.wav"
     };
 
     for (int i = 0; i < numFiles; i++)

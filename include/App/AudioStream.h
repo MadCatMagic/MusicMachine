@@ -12,11 +12,8 @@
 class AudioStream
 {
 public:
-	void SetData(std::vector<v2>& v);
+	void AddData(std::vector<v2>& v);
 	std::vector<v2> GetData();
-	void EmptyQueue();
-	inline bool NoData() const { return audioData.empty(); }
-	inline bool QueueFull() const { return audioData.full(); }
 
 	void Init();
 	void Release();

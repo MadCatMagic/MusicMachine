@@ -81,22 +81,22 @@ void Arranger::UI(DrawStyle* drawStyle)
     {
         ImGui::BeginChild("ChildR", ImVec2(0.0f, 0.0f));
 
-        canvasPixelPos = (v2)ImGui::GetCursorScreenPos();
-        canvasPixelSize = v2(ImGui::GetContentRegionAvail());
-        if (canvasPixelSize.x < 50.0f) canvasPixelSize.x = 50.0f;
-        v2 canvasBottomRight = canvasPixelPos + canvasPixelSize;
+        arrangerPixelPos = (v2)ImGui::GetCursorScreenPos();
+        arrangerPixelSize = v2(ImGui::GetContentRegionAvail());
+        if (arrangerPixelSize.x < 50.0f) arrangerPixelSize.x = 50.0f;
+        v2 canvasBottomRight = arrangerPixelPos + arrangerPixelSize;
 
         // Draw border and background color
         ImGuiIO& io = ImGui::GetIO();
         drawList.dl = ImGui::GetWindowDrawList();
         drawList.style = drawStyle;
         drawList.convertPosition = false;
-        drawList.RectFilled(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_BG);
-        drawList.Rect(canvasPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
+        drawList.RectFilled(arrangerPixelPos, canvasBottomRight, DrawColour::Canvas_BG);
+        drawList.Rect(arrangerPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
         drawList.scaleFactor = scale.x;
 
         // This will catch our interactions
-        ImGui::InvisibleButton("canvas", canvasPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
+        ImGui::InvisibleButton("canvas", arrangerPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
         const bool isHovered = ImGui::IsItemHovered(); // Hovered
         const bool isActive = ImGui::IsItemActive();   // Held
         const v2 mouseCanvasPos = ScreenToCanvas((v2)io.MousePos);
@@ -249,22 +249,22 @@ void Arranger::UI(DrawStyle* drawStyle)
         position.y = std::max(0.0f, position.y);
 
         // Draw grid + all lines in the canvas
-        drawList.dl->PushClipRect((canvasPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
+        drawList.dl->PushClipRect((arrangerPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
         float gridStep = 1.0f / scale.x * pixelsPerBeat * 4.0f;
         float gridStepSmall = 1.0f / scale.x * pixelsPerBeat;
-        for (float x = fmodf(-position.x / scale.x, gridStep) - gridStep; x < canvasPixelSize.x; x += gridStep)
+        for (float x = fmodf(-position.x / scale.x, gridStep) - gridStep; x < arrangerPixelSize.x; x += gridStep)
         {
-            drawList.Line(v2(padding + canvasPixelPos.x + x, canvasPixelPos.y), v2(padding + canvasPixelPos.x + x, canvasBottomRight.y), DrawColour::Canvas_GridLinesHeavy);
+            drawList.Line(v2(padding + arrangerPixelPos.x + x, arrangerPixelPos.y), v2(padding + arrangerPixelPos.x + x, canvasBottomRight.y), DrawColour::Canvas_GridLinesHeavy);
             if (scalingLevel.x < 21)
                 for (int dx = 1; dx < 4; dx++)
                     drawList.Line(
-                        ImVec2(padding + canvasPixelPos.x + x + dx * gridStepSmall, canvasPixelPos.y),
-                        ImVec2(padding + canvasPixelPos.x + x + dx * gridStepSmall, canvasBottomRight.y), DrawColour::Canvas_GridLinesLight);
+                        ImVec2(padding + arrangerPixelPos.x + x + dx * gridStepSmall, arrangerPixelPos.y),
+                        ImVec2(padding + arrangerPixelPos.x + x + dx * gridStepSmall, canvasBottomRight.y), DrawColour::Canvas_GridLinesLight);
         }
 
         drawList.Line(
-            canvasPixelPos + v2(0.0f, padding),
-            canvasPixelPos + v2(canvasPixelSize.x, padding),
+            arrangerPixelPos + v2(0.0f, padding),
+            arrangerPixelPos + v2(arrangerPixelSize.x, padding),
             DrawColour::Canvas_GridLinesHeavy
         );
 
@@ -280,10 +280,10 @@ void Arranger::UI(DrawStyle* drawStyle)
                         ptcts(node->points[0].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
                         ImColor(1.0f, 1.0f, 1.0f)
                     );
-                if (position.x + canvasPixelSize.x * scale.x >= node->points[node->points.size() - 1].x * pixelsPerBeat)
+                if (position.x + arrangerPixelSize.x * scale.x >= node->points[node->points.size() - 1].x * pixelsPerBeat)
                     drawList.Line(
                         ptcts(node->points[node->points.size() - 1].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
-                        ptcts(v2(position.x + canvasPixelSize.x * scale.x, node->points[node->points.size() - 1].y * rowHeight + rowHeight * j)),
+                        ptcts(v2(position.x + arrangerPixelSize.x * scale.x, node->points[node->points.size() - 1].y * rowHeight + rowHeight * j)),
                         ImColor(1.0f, 1.0f, 1.0f)
                     );
 
@@ -296,8 +296,8 @@ void Arranger::UI(DrawStyle* drawStyle)
             }
 
             drawList.Line(
-                canvasPixelPos + v2(0.0f, -position.y / scale.y + padding + rowHeight * (j + 1) / scale.y - 1.0f),
-                canvasPixelPos + v2(canvasPixelSize.x, -position.y / scale.y + padding + rowHeight * (j + 1) / scale.y - 1.0f),
+                arrangerPixelPos + v2(0.0f, -position.y / scale.y + padding + rowHeight * (j + 1) / scale.y - 1.0f),
+                arrangerPixelPos + v2(arrangerPixelSize.x, -position.y / scale.y + padding + rowHeight * (j + 1) / scale.y - 1.0f),
                 DrawColour::Canvas_GridLinesHeavy
             );
 
@@ -316,8 +316,8 @@ void Arranger::UI(DrawStyle* drawStyle)
         }
 
         drawList.Line(
-            canvasPixelPos + v2(padding + (time * pixelsPerBeat - position.x) / scale.x, 0.0f),
-            canvasPixelPos + v2(padding + (time * pixelsPerBeat - position.x) / scale.x, canvasPixelSize.y),
+            arrangerPixelPos + v2(padding + (time * pixelsPerBeat - position.x) / scale.x, 0.0f),
+            arrangerPixelPos + v2(padding + (time * pixelsPerBeat - position.x) / scale.x, arrangerPixelSize.y),
             DrawColour::Node_IOFloat
         );
 
@@ -388,12 +388,12 @@ void Arranger::DeleteNodesOnSelectedStack()
 
 v2 Arranger::ScreenToCanvas(const v2& pos) const // c = s + p
 {
-    return canvasPixelPos + padding - pos;
+    return arrangerPixelPos + padding - pos;
 }
 
 v2 Arranger::CanvasToScreen(const v2& pos) const // s = c - p
 {
-    return canvasPixelPos + padding - pos;
+    return arrangerPixelPos + padding - pos;
 }
 
 v2 Arranger::CanvasToPosition(const v2& pos) const // position = offset - canvas * scale

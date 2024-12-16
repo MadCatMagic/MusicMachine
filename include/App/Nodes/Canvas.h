@@ -63,8 +63,8 @@ private:
 	v2 position = v2::zero;
 	v2 scale = v2::one;
 
-	v2 canvasPixelPos;
-	v2 canvasPixelSize;
+	v2 arrangerPixelPos;
+	v2 arrangerPixelSize;
 
 	DrawList drawList;
 
