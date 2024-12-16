@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\Nodes\NodeTypes\ExampleNode.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\Panner.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\RoundNode.cpp" />
     <ClCompile Include="src\App\Nodes\NodeTypes\PitchShifter.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="include\App\Nodes\NodeRegistry.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\DelayNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\Distortion.h" />
+    <ClInclude Include="include\App\Nodes\NodeTypes\ExampleNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\MathsNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkNode.h" />
     <ClInclude Include="include\App\Nodes\NodeTypes\NodeNetworkVariable.h" />

@@ -147,6 +147,9 @@
     <ClCompile Include="src\App\Nodes\NodeTypes\Panner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\Nodes\NodeTypes\ExampleNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App\App.h">
@@ -267,6 +270,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Engine\CircularQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\App\Nodes\NodeTypes\ExampleNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
