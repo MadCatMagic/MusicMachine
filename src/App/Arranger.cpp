@@ -278,20 +278,20 @@ void Arranger::UI(DrawStyle* drawStyle)
                     drawList.Line(
                         ptcts(v2(position.x, node->points[0].y * rowHeight + rowHeight * j)),
                         ptcts(node->points[0].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
-                        ImColor(1.0f, 1.0f, 1.0f)
+                        v4(1.0f, 1.0f, 1.0f)
                     );
                 if (position.x + arrangerPixelSize.x * scale.x >= node->points[node->points.size() - 1].x * pixelsPerBeat)
                     drawList.Line(
                         ptcts(node->points[node->points.size() - 1].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
                         ptcts(v2(position.x + arrangerPixelSize.x * scale.x, node->points[node->points.size() - 1].y * rowHeight + rowHeight * j)),
-                        ImColor(1.0f, 1.0f, 1.0f)
+                        v4(1.0f, 1.0f, 1.0f)
                     );
 
                 for (size_t i = 0; i < node->points.size() - 1; i++)
                     drawList.Line(
                         ptcts(node->points[i].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
                         ptcts(node->points[i + 1].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
-                        ImColor(1.0f, 1.0f, 1.0f)
+                        v4(1.0f, 1.0f, 1.0f)
                     );
             }
 
@@ -307,11 +307,11 @@ void Arranger::UI(DrawStyle* drawStyle)
                 v2 centre = ptcts(node->points[i].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j));
 
                 if (inSelectedStack((int)j, (int)i))
-                    drawList.Rect(centre - cellR - 2.0f, centre + cellR + 2.0f, ImColor(1.0f, 0.0f, 1.0f));
+                    drawList.Rect(centre - cellR - 2.0f, centre + cellR + 2.0f, v4(1.0f, 0.0f, 1.0f));
                 if (j == hoveredID)
-                    drawList.RectFilled(centre - cellR, centre + cellR, ImColor(1.0f, i == closestCell ? 0.0f : 1.0f, 1.0f));
+                    drawList.RectFilled(centre - cellR, centre + cellR, v4(1.0f, i == closestCell ? 0.0f : 1.0f, 1.0f));
                 else
-                    drawList.Rect(centre - cellR, centre + cellR, ImColor(1.0f, 1.0f, 1.0f));
+                    drawList.Rect(centre - cellR, centre + cellR, v4(1.0f, 1.0f, 1.0f));
             }
         }
 

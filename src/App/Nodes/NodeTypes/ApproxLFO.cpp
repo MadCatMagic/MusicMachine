@@ -36,11 +36,11 @@ void ApproxLFO::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 				(i + (float)skip) / 33.0f * 100.0f,
 				25.0f - 25.0f * (lfoWaveData[(int)floorf(shape)][(int)i + skip] * (1.0f - fmodf(shape, 1.0f)) + lfoWaveData[(int)floorf(shape + 1.0f)][(int)i + skip] * fmodf(shape, 1.0f))
 			),
-			ImColor(0.0f, 1.0f, 1.0f)
+			v4(0.0f, 1.0f, 1.0f)
 		);
 	
 	float phase = GetPhase() * 100.0f;
-	dl->Line(topLeft + v2(phase, 0.0f), topLeft + v2(phase, 50.0f), ImColor(1.0f, 1.0f, 0.0f));
+	dl->Line(topLeft + v2(phase, 0.0f), topLeft + v2(phase, 50.0f), v4(1.0f, 1.0f, 0.0f));
 }
 
 void ApproxLFO::Work(int id)

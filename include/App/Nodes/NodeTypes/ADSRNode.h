@@ -18,7 +18,7 @@ private:
 	AudioChannel ochannel{ };
 	PitchSequencer isequencer{ };
 
-	float adsr(int sample) const;
+	float adsr(int sample, float last) const;
 
 	float attack = 0.005f;
 	float decay = 0.001f;

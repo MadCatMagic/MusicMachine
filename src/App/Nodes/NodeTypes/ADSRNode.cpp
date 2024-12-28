@@ -32,7 +32,7 @@ void ADSRNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 		topLeft + v2(k * (attack + decay * 1.5f), minSpace.y * (1.0f - sustain)),
 		topLeft + minSpace
 	};
-	dl->Lines(curve, ImColor(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
+	dl->Lines(curve, v4(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
 }
 
 void ADSRNode::Work(int id)
@@ -58,7 +58,7 @@ void ADSRNode::Work(int id)
 
 		if (isequencer.pitch[freq] != 0.0f)
 		{
-			lastSample[id] = adsr(scounter + isequencer.cumulativeSamples[freq]);
+			lastSample[id] = adsr(scounter + isequencer.cumulativeSamples[freq], lastSample[id]);
 			ochannel.data[i] = lastSample[id];
 		}
 		else
@@ -89,11 +89,16 @@ JSONType ADSRNode::Save()
 	});
 }
 
-float ADSRNode::adsr(int sample) const
+float ADSRNode::adsr(int sample, float last) const
 {
 	float t = (float)sample / ochannel.sampleRate;
 	if (t <= attack)
-		return t / attack;
+	{
+		float x = t / attack;
+		if (last > x)
+			return last;
+		return x;
+	}
 	else if (t <= attack + decay)
 		return 1.0f - ((t - attack) / decay) * (1.0f - sustain);
 	else

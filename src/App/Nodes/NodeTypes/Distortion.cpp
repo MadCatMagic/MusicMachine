@@ -22,8 +22,8 @@ void Distortion::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 	tanConstant = tanf(1.0f / (2.7f - 2.05f * distortion));
 
-	dl->Line(topLeft + v2(50.0f, 20.0f), topLeft + v2(50.0f, 100.0f), ImColor(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
-	dl->Line(topLeft + v2(0.0f, 60.0f), topLeft + v2(100.0f, 60.0f), ImColor(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
+	dl->Line(topLeft + v2(50.0f, 20.0f), topLeft + v2(50.0f, 100.0f), v4(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
+	dl->Line(topLeft + v2(0.0f, 60.0f), topLeft + v2(100.0f, 60.0f), v4(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
 
 	int skip = lodOn ? 4 : 1;
 	for (float i = 0; i < 127; i += skip)
@@ -36,15 +36,15 @@ void Distortion::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 				(float)(i + skip) / 128.0f * 100.0f,
 				60.0f - 40.0f * (convert((float)(i + skip) / 64.0f - 1.0f) * mix + ((float)(i + skip) / 64.0f - 1.0f) * (1.0f - mix))
 			),
-			ImColor(0.0f, 1.0f, 1.0f)
+			v4(0.0f, 1.0f, 1.0f)
 		);
 
 	for (int i = 0; i < 4; i++)
 	{
 		if ((int)mode == i)
-			dl->RectFilled(topLeft + v2(i * 25.0f, 0.0f), topLeft + v2(i * 25.0f + 25.0f, 18.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
+			dl->RectFilled(topLeft + v2(i * 25.0f, 0.0f), topLeft + v2(i * 25.0f + 25.0f, 18.0f), v4(0.2f, 0.3f, 0.7f, 0.8f));
 		else
-			dl->RectFilled(topLeft + v2(i * 25.0f, 0.0f), topLeft + v2(i * 25.0f + 25.0f, 18.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
+			dl->RectFilled(topLeft + v2(i * 25.0f, 0.0f), topLeft + v2(i * 25.0f + 25.0f, 18.0f), v4(0.1f, 0.2f, 0.5f, 0.3f));
 	}
 
 	if (lodOn)
@@ -79,7 +79,7 @@ void Distortion::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 		std::vector<v2> k;
 		for (const v2& v : lineData[j])
 			k.push_back(v.scale(v2(12.5f, 9.0f)) + topLeft + v2(12.5f + j * 25.0f, 9.0f));
-		dl->Lines(k, ImColor(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
+		dl->Lines(k, v4(1.0f, 1.0f, 1.0f), 1.0f / dl->scaleFactor);
 	}
 }
 
