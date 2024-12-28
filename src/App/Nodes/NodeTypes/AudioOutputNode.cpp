@@ -31,12 +31,12 @@ void AudioOutputNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 		dl->Line(
 			topLeft + v2(bw * i, 25.0f + previousData[i].x * 25.0f),
 			topLeft + v2(bw * i + bw * skip, 25.0f + previousData[i + skip].x * 25.0f),
-			ImColor(1.0f, 0.0f, 0.0f, 0.5f)
+			v4(1.0f, 0.0f, 0.0f, 0.5f)
 		);
 		dl->Line(
 			topLeft + v2(bw * i, 25.0f + previousData[i].y * 25.0f),
 			topLeft + v2(bw * i + bw * skip, 25.0f + previousData[i + skip].y * 25.0f),
-			ImColor(0.0f, 1.0f, 0.0f, 0.5f)
+			v4(0.0f, 1.0f, 0.0f, 0.5f)
 		);
 	}
 }

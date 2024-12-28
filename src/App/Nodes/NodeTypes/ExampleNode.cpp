@@ -22,6 +22,6 @@ void ExampleNode::IO()
 
 void ExampleNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
-	dl->Rect(topLeft, topLeft + minSpace, ImColor(0.8f, 0.8f, 0.8f));
-	dl->Line(topLeft, topLeft + minSpace, ImColor(0.8f, 0.8f, 0.8f));
+	dl->Rect(topLeft, topLeft + minSpace, v4(0.8f, 0.8f, 0.8f));
+	dl->Line(topLeft, topLeft + minSpace, v4(0.8f, 0.8f, 0.8f));
 }

@@ -58,7 +58,7 @@ void AnalysisNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
     if (points.size() > 1)
     {
         for (size_t i = 0; i < points.size() - 1; i++)
-            dl->Line(points[i] + topLeft, points[i + 1] + topLeft, ImColor(1.0f, 1.0f, 1.0f));
+            dl->Line(points[i] + topLeft, points[i + 1] + topLeft, v4(1.0f, 1.0f, 1.0f));
     }
 }
 

@@ -27,9 +27,9 @@ void Sampler::Render(const v2& topLeft, DrawList* dl, bool lodOn)
     for (int i = 0; i < samplerData.size(); i++)
     {
         if (selectedSample == i)
-            dl->RectFilled(topLeft + v2(i * 15.0f, 0.0f), topLeft + v2(i * 15.0f + 15.0f, 20.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
+            dl->RectFilled(topLeft + v2(i * 15.0f, 0.0f), topLeft + v2(i * 15.0f + 15.0f, 20.0f), v4(0.2f, 0.3f, 0.7f, 0.8f));
         else
-            dl->RectFilled(topLeft + v2(i * 15.0f, 0.0f), topLeft + v2(i * 15.0f + 15.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
+            dl->RectFilled(topLeft + v2(i * 15.0f, 0.0f), topLeft + v2(i * 15.0f + 15.0f, 20.0f), v4(0.1f, 0.2f, 0.5f, 0.3f));
     }
 }
 

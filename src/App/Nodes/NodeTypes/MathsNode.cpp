@@ -20,9 +20,9 @@ void MathsNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	for (int i = 0; i < 4; i++)
 	{
 		if ((int)op == i)
-			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
+			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), v4(0.2f, 0.3f, 0.7f, 0.8f));
 		else
-			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
+			dl->RectFilled(topLeft + v2(i * 20.0f, 0.0f), topLeft + v2(i * 20.0f + 20.0f, 20.0f), v4(0.1f, 0.2f, 0.5f, 0.3f));
 	}
 
 	if (lodOn)
@@ -53,7 +53,7 @@ void MathsNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 			dl->Line(
 				topLeft + v2(10.0f + j * 20.0f, 10.0f) + lineData[j][i * 2] * 10.0f,
 				topLeft + v2(10.0f + j * 20.0f, 10.0f) + lineData[j][i * 2 + 1] * 10.0f,
-				ImColor(1.0f, 1.0f, 1.0f),
+				v4(1.0f, 1.0f, 1.0f),
 				1.0f / dl->scaleFactor
 			);
 	}
