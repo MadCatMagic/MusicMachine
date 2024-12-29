@@ -14,6 +14,7 @@ public:
 	bool CreateWindow(const v2i& windowSize, const std::string& name);
 
 private:
+	// circular buffer for frame times - passed to App for debugging
 	double lastFrameTime[FRAME_TIME_MOVING_WINDOW_SIZE]{ };
 	int lastFrameTimeI = 0;
 
@@ -25,10 +26,9 @@ private:
 	void Update();
 	void Release();
 
-	// aa
+	// used for user io
 	ImGuiIO* io = nullptr;
 
 	App app;
 	Console console;
 };
-

@@ -13,6 +13,10 @@ inline T clamp(const T& a, const T& min, const T& max)
 	return a <= min ? min : (a >= max ? max : a);
 }
 
+// basically a v2 with extra steps
+// used to simplify the FFT algorithms - 
+// a complex number is one with a real part and an imaginary part
+// where the imaginary part is multiplied by i, a constant where i^2=-1.
 struct Complex {
 	inline Complex() : re(0.0f), im(0.0f) { }
 	inline Complex(float _re, float _im) : re(_re), im(_im) { }
@@ -39,16 +43,18 @@ struct Complex {
 	inline bool operator==(const Complex& a) const { return re == a.re && im == a.im; }
 	inline bool operator!=(const Complex& a) const { return re != a.re || im != a.im; }
 
-	// returns e^z
+	// if we represent z as r(cos a + i sin a) = re^(ia)
+	// then phase() returns a
+	// and modulus() returns r
 	float phase() const;
 	float modulus() const;
 
+	// returns e^z
 	Complex exp() const;
 
 	std::string str() const;
 };
 
+// Cooley-tukey FFT algorithm
 extern std::vector<Complex> FFT(const std::vector<Complex>& x);
 extern std::vector<Complex> IFFT(const std::vector<Complex>& X);
-extern std::vector<Complex> _FFT(const std::vector<Complex>& x, size_t n, size_t s = 1, size_t o = 0);
-extern std::vector<Complex> _IFFT(const std::vector<Complex>& X, size_t n, size_t s = 1, size_t o = 0);

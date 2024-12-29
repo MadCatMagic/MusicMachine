@@ -3,8 +3,10 @@
 
 std::vector<Complex> FFT(const std::vector<Complex>& x)
 {
+    // ensure that the data exists and provide some initial values to actual recursive function
     assert(x.size() != 0);
-    auto data = _FFT(x, x.size());
+    auto data = _FFT(x, x.size(), 1, 0);
+    // need to reduce magnitude of resulting data as final step
     for (auto& v : data)
         v /= (float)x.size();
     return data;
@@ -12,11 +14,13 @@ std::vector<Complex> FFT(const std::vector<Complex>& x)
 
 std::vector<Complex> IFFT(const std::vector<Complex>& X)
 {
-    return _IFFT(X, X.size());
+    // add some initial values to recursive function
+    return _IFFT(X, X.size(), 1, 0);
 }
 
 std::vector<Complex> _FFT(const std::vector<Complex>& x, size_t n, size_t s, size_t o)
 {
+    // see python code example for explanation
     if (n == 1)
         return { x[o] };
 
@@ -111,7 +115,7 @@ Complex& Complex::operator/=(const Complex& a)
 
 float Complex::phase() const
 {
-    // thank you computer man for removing my headache
+    // atan2f returns the angle from the horizontal positive x-axis
     return atan2f(im, re);
 }
 

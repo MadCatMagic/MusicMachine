@@ -178,8 +178,6 @@
     <ClCompile Include="src\Maths\BBox.cpp" />
     <ClCompile Include="src\Maths\Vector2.cpp" />
     <ClCompile Include="src\Maths\Vector2i.cpp" />
-    <ClCompile Include="src\Maths\Vector3.cpp" />
-    <ClCompile Include="src\Maths\Vector3i.cpp" />
     <ClCompile Include="src\Maths\Vector4.cpp" />
     <ClCompile Include="src\Maths\Vector4i.cpp" />
     <ClCompile Include="src\MusicMachine.cpp" />

@@ -9,10 +9,9 @@ struct bbox2
 	v2 a; // "bottomLeft"
 	v2 b; // "topRight"
 
+	// returns true if 'o' overlaps this bbox2
 	bool overlaps(const bbox2& o) const;
+	// returns true if 'p' is inside this bbox2
 	bool contains(const v2& p) const;
 	bool containsLeniant(const v2& p, float leniancy);
-
-	static bbox2 Min(const bbox2& a, const bbox2& b);
-	static bbox2 Max(const bbox2& a, const bbox2& b);
 };

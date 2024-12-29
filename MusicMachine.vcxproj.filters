@@ -27,12 +27,6 @@
     <ClCompile Include="src\Maths\Vector2i.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Maths\Vector3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Maths\Vector3i.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Maths\Vector4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

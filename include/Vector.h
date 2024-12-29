@@ -1,11 +1,12 @@
 #pragma once
 #include "Maths.h"
 
+// v3 and v3i are excluded as they are never used in this project
 struct v2;
-struct v3;
+//struct v3;
 struct v4;
 struct v2i;
-struct v3i;
+//struct v3i;
 struct v4i;
 
 struct v2
@@ -57,47 +58,6 @@ struct v2
 	static v2 one;
 };
 
-struct v3
-{
-	float x;
-	float y;
-	float z;
-
-	inline v3() : x(0.0f), y(0.0f), z(0.0f) { }
-	inline v3(float a) : x(a), y(a), z(a) { }
-	inline v3(float x, float y, float z) : x(x), y(y), z(z) { }
-	v3(const v4& wis1);
-	v3(const v3i& i);
-
-	float dot(const v3& a) const;
-	v3 cross(const v3& a) const;
-
-	v3 reciprocal() const;
-	v3 scale(const v3& a) const;
-
-	v3 normalised() const;
-	float length() const;
-	float distanceTo(const v3& a) const;
-
-	inline v3 operator+(const v3& a) const { return v3(x + a.x, y + a.y, z + a.z); }
-	inline v3 operator-() const { return v3(-x, -y, -z); }
-	inline v3 operator-(const v3& a) const { return v3(x - a.x, y - a.y, z - a.z); }
-	inline v3 operator*(float a) const { return v3(x * a, y * a, z * a); }
-	inline v3 operator/(float a) const { return v3(x / a, y / a, z / a); }
-	v3& operator+=(const v3& a);
-	v3& operator-=(const v3& a);
-	v3& operator*=(float a);
-	v3& operator/=(float a);
-
-	inline bool operator==(const v3& a) const { return x == a.x && y == a.y && z == a.z; }
-	inline bool operator!=(const v3& a) const { return x != a.x || y != a.y || z != a.z; }
-
-	std::string str() const;
-
-	static v3 zero;
-	static v3 one;
-};
-
 struct v4
 {
 	float x;
@@ -107,7 +67,6 @@ struct v4
 
 	inline v4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) { }
 	inline v4(float x, float y, float z, float w = 1.0f) : x(x), y(y), z(z), w(w) { }
-	v4(const v3& wtobe1);
 	v4(const v4i& i);
 
 	float dot(const v4& a) const;
@@ -167,36 +126,6 @@ struct v2i
 	static v2i one;
 };
 
-struct v3i
-{
-	int x;
-	int y;
-	int z;
-
-	inline v3i() : x(0), y(0), z(0) { }
-	inline v3i(int a) : x(a), y(a), z(a) { }
-	inline v3i(int x, int y, int z) : x(x), y(y), z(z) { }
-	inline explicit v3i(const v3& f) : x((int)f.x), y((int)f.y), z((int)f.z) { }
-
-	inline v3i operator+(const v3i& a) const { return v3i(x + a.x, y + a.y, z + a.z); }
-	inline v3i operator-() const { return v3i(-x, -y, -z); }
-	inline v3i operator-(const v3i& a) const { return v3i(x - a.x, y - a.y, z - a.z); }
-	inline v3i operator*(int a) const { return v3i(x * a, y * a, z * a); }
-	inline v3i operator/(int a) const { return v3i(x / a, y / a, z / a); }
-	v3i& operator+=(const v3i& a);
-	v3i& operator-=(const v3i& a);
-	v3i& operator*=(int a);
-	v3i& operator/=(int a);
-
-	inline bool operator==(const v3i& a) const { return x == a.x && y == a.y && z == a.z; }
-	inline bool operator!=(const v3i& a) const { return x != a.x || y != a.y || z != a.z; }
-
-	std::string str() const;
-
-	static v3i zero;
-	static v3i one;
-};
-
 struct v4i
 {
 	int x;
@@ -238,15 +167,6 @@ namespace vecHash
 		{
 			return std::hash<vecType>()(k.x) ^
 				(std::hash<vecType>()(k.y) << 32);
-		};
-	};
-	template<class vec, class vecType>
-	struct KeyHash3 {
-		inline std::size_t operator()(const vec& k) const
-		{
-			return std::hash<vecType>()(k.x) ^
-				(std::hash<vecType>()(k.y) << 16) ^
-				(std::hash<vecType>()(k.z) << 32);
 		};
 	};
 	template<class vec, class vecType>
