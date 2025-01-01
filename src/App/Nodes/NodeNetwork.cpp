@@ -15,14 +15,10 @@
 #include <sstream>
 #include <unordered_map>
 
-NodeNetwork::NodeNetwork()
-{
-}
-
 NodeNetwork::NodeNetwork(const std::string& nnFilePath)
 {
 	JSONConverter conv;
-	// networks/
+	// networks/...
 	// 0123456789
 	name = nnFilePath.substr(9);
 	auto res = conv.DecodeFile(nnFilePath);
@@ -102,7 +98,7 @@ Node* NodeNetwork::AddNodeFromName(const std::string& type, const v2& initPos, b
 	if (skipInitialisation)
 		return n;
 
-	// random enough for now but unreliable
+	// random enough hash for now but possibly unreliable for massive networks
 	n->NodeInit(this, (uint64_t)rand() << 16 ^ nodes.size());
 	n->Init();
 	n->renderer.UpdateDimensions();
@@ -114,12 +110,16 @@ Node* NodeNetwork::AddNodeFromName(const std::string& type, const v2& initPos, b
 
 Node* NodeNetwork::GetNodeAtPosition(const v2& pos, Node* currentSelection, size_t offset)
 {
+	// either just gets the first node it finds
 	if (currentSelection == nullptr)
 	{
 		for (Node* node : nodes)
 			if (node->renderer.getBounds().containsLeniant(pos, 4.0f))
 				return node;
 	}
+	// or will start the search *from* currentSelection, wrapping round,
+	// so it will pick the next node
+	// this way if you click multiple times it will cycle through different overlapping nodes
 	else
 	{
 		size_t index = std::find(nodes.begin(), nodes.end(), currentSelection) - nodes.begin() + offset;
@@ -165,11 +165,13 @@ void NodeNetwork::TryEndConnection(Node* origin, const std::string& originName, 
 
 void NodeNetwork::DeleteNode(Node* node)
 {
+	// disconnect all inputs and outputs
 	for (Node* n : nodes)
 		for (size_t i = 0; i < n->inputs.size(); i++)
 			if (n->inputs[i].source != nullptr && n->inputs[i].source == node)
 				n->Disconnect(i);
 
+	// delete node utterly and completely
 	nodes.erase(std::find(nodes.begin(), nodes.end(), node));
 	nodeIDMap.erase(node->id_s());
 	delete node;
@@ -178,6 +180,7 @@ void NodeNetwork::DeleteNode(Node* node)
 
 std::pair<bool, bool> NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos)
 {
+	// menu created from NodeFactory folders displaying all the different types of possible node
 	if (ImGui::BeginMenu("Nodes"))
 	{
 		for (auto& folder : GetNodeFactory().Folders())
@@ -189,6 +192,7 @@ std::pair<bool, bool> NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos
 			if (end || folder.first == "")
 				for (auto& pair : folder.second)
 				{
+					// cannot add analysis node except in root
 					if (!isRoot && pair.second == "Analysis")
 						continue;
 					if (ImGui::MenuItem(pair.second.c_str()))
@@ -201,6 +205,7 @@ std::pair<bool, bool> NodeNetwork::DrawContextMenu(const v2& contextMenuClickPos
 		ImGui::EndMenu();
 	}
 
+	// have special menus so are apart from regular node menu
 	bool beginNetworkNodePrompt = false;
 	if (ImGui::MenuItem("New Network Node"))
 		beginNetworkNodePrompt = true;
@@ -224,7 +229,8 @@ Node* NodeNetwork::GetNodeFromID(const std::string& id)
 
 bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 {
-	// help
+	// have to just fail if there is no info, 
+	// as we cannot know whether network is executable
 	if (nodeDependencyInfoPersistent == nullptr)
 		return false;
 
@@ -232,6 +238,7 @@ bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 	if (nodeDependencyInfoPersistent->problemConnectionExists)
 		return false;
 
+	// if not playing just play silence
 	auto emptyVec = std::vector<v2>(AudioChannel::bufferSize, v2());
 	if (!Arranger::instance->playing && setAudioStream)
 	{
@@ -239,11 +246,11 @@ bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 		return true;
 	}
 
-	// backpropagate in a sensible manner
+	// backpropagate through network
+	// first set hasBeenExecuted flags to false
 	for (Node* n : nodes)
 		n->hasBeenExecuted = false;
-	//if (nodeDependencyInfoPersistent->endpoints.size() > 1)
-	//	Console::LogWarn("Multiple endpoints exist, panic!");
+	// then loop through endpoints, execute, and add results together
 	for (Node* e : nodeDependencyInfoPersistent->endpoints)
 	{
 		e->Execute(ownedID);
@@ -254,7 +261,7 @@ bool NodeNetwork::Execute(bool setAudioStream, int ownedID)
 				emptyVec[i] += resultVec[i];
 		}
 	}
-	// if there are no audiooutputnodes this just returns a silent vec so its fine
+	// if there are no audiooutputnodes this just returns silence
 	if (setAudioStream)
 		audioStream->AddData(emptyVec);
 	return true;
@@ -284,6 +291,7 @@ void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 	JSONType nodeData = JSONType(JSONType::Array);
 
 	for (Node* n : nodes)
+		// get data from nodes
 		nodeData.arr.push_back(n->SaveData());
 
 	conv.WriteFile(nnFilePath, JSONType({
@@ -305,6 +313,8 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 
 	std::vector<size_t> endpointIDs;
 
+	// create abstract nodes with corresponding inputs and outputs,
+	// as well as marking endpoint nodes
 	for (size_t i = 0; i < nodes.size(); i++)
 	{
 		AbstractNode* n = new AbstractNode();
@@ -314,7 +324,7 @@ NodeNetwork::NodeDependencyInformation* NodeNetwork::CheckForCircularDependency(
 			endpoints.push_back(nodes[i]);
 			n->isEndpoint = true;
 		}
-		// fuckery to get it to detect problems properly
+
 		bool isUnusedEndpoint = true;
 		for (auto& aaa : nodes[i]->outputs)
 			if (aaa.connections > 0)

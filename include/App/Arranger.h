@@ -46,7 +46,7 @@ private:
 	float tempo = 120.0f;
 	bool draggingTimeCursor = false;
 
-	// variableID, nodeID
+	// <variableID, nodeID>
 	std::vector<std::pair<int, int>> selectedStack;
 	bool selectingStuff = false;
 	v2 selectionStart;

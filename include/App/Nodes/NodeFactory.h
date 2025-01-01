@@ -2,8 +2,6 @@
 #include <functional>
 #include "App/Nodes/Node.h"
 
-// from https://stackoverflow.com/questions/5450742/is-it-possible-in-c-to-loop-over-all-subclasses-of-an-abstract-class
-// lol
 class NodeFactory
 {
 public:
@@ -19,8 +17,8 @@ public:
         return map.insert(std::make_pair(key, obj)).second;
     }
 
-    /// returns a pointer to a new instance of Foo (or a derived class)
-    /// if the key was found, 0 otherwise
+    // returns a pointer to a new instance of Node (or a derived class)
+    // if the key was found, 0 otherwise
     inline Node* Build(const std::string& key) const 
     {
         auto it = map.find(key);
@@ -73,4 +71,5 @@ private:
 template <typename Derived>
 extern inline Node* NodeBuilder() { return new Derived(); }
 
+// singleton object
 extern inline NodeFactory& GetNodeFactory() { static NodeFactory F; return F; }

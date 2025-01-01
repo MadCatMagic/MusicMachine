@@ -60,7 +60,7 @@ void Console::AddCommand(ConsoleCommandCallback callback, const std::string& nam
     instance->commands.push_back(c);
 }
 
-// largely taken from the ImGui example console window demo
+// this function largely taken from the ImGui example console window demo
 // https://github.com/ocornut/imgui/blob/master/imgui_demo.cpp
 void Console::GUI()
 {
@@ -80,7 +80,7 @@ void Console::GUI()
 
     ImGui::Separator();
 
-    // Reserve enough left-over height for 1 separator + 1 input text
+    // reserve enough left-over height for 1 separator + 1 input text
     const float footerHeightToReserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
     if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footerHeightToReserve), false, ImGuiWindowFlags_HorizontalScrollbar))
     {
@@ -90,7 +90,8 @@ void Console::GUI()
             ImGui::EndPopup();
         }
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+        // tighten spacing
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1));
         if (copyToClipboard)
             ImGui::LogToClipboard();
         for (const Entry& entry : entries)
@@ -132,10 +133,10 @@ void Console::GUI()
     }
 
     // Auto-focus on window apparition
-    // who knows what this does :)
     ImGui::SetItemDefaultFocus();
     if (reclaimFocus)
-        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+        // Auto focus previous widget
+        ImGui::SetKeyboardFocusHere(-1);
 
 	ImGui::End();
 }

@@ -18,6 +18,7 @@ void AnalysisNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
     if (inputChanged && inputBuffer.size() != 0)
     {
+        // converts to a complex buffer
         std::vector<Complex> cbufferLeft = std::vector<Complex>(inputBuffer.size());
         std::vector<Complex> cbufferRight = std::vector<Complex>(inputBuffer.size());
         for (int i = 0; i < inputBuffer.size(); i++)
@@ -27,9 +28,11 @@ void AnalysisNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
             cbufferRight[i] = Complex(inputBuffer[i].y, 0.0f) * window;
         }
 
+        // does fft on buffers
         cbufferLeft = FFT(cbufferLeft);
         cbufferRight = FFT(cbufferRight);
 
+        // integrates new data into existing fftBuffer data
         points.clear();
         float logConstant = 200.0f / log2f(ichannel.sampleRate / 40.0f);
         for (int i = 0; i < cbufferLeft.size() / 2; i++)
@@ -55,6 +58,7 @@ void AnalysisNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
         inputChanged = false;
     }
 
+    // draws points
     if (points.size() > 1)
     {
         for (size_t i = 0; i < points.size() - 1; i++)

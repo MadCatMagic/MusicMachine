@@ -13,14 +13,13 @@ struct AudioChannel
 
 	void ResetData();
 
-	// either 1 or 2
+	// always 2 (why is this a variable?)
 	int channels = 2;
 	static size_t sampleRate;
 	static size_t bufferSize;
 	static float t;
 	static float dt;
 
-	// wasteful, just treat single value for mono channel
 	std::vector<v2> data = std::vector<v2>();
 
 private:

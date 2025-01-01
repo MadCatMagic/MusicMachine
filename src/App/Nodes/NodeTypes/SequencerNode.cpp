@@ -132,7 +132,7 @@ void SequencerNode::Work(int id)
 		seq.pitch.push_back(pitch);
 		seq.length.push_back(samplesToPlayFor);
 		seq.velocity.push_back(data[(currentBeatIndex + beatOffset) % width].second);
-		// dont think this actually works :)
+		// works well enough
 		seq.cumulativeSamples.push_back((int)(beatFraction * pitchLength));
 
 		cumulativeSamplesSet += samplesToPlayFor;

@@ -82,7 +82,7 @@ override 'void IO()' to create your own inputs and outputs.
 override 'void Init()' instead of using a constructor for anything which needs to be done before runtime but after initialisation
 override 'void Work()' to actually serve your function, taking your inputs and turning them into the output. Called every frame.
 
-do not use a regular constructor pwease
+do not use a regular constructor
 in Init assign 'name' and 'minSpace' do declare, respectively, the name of the node and the minimum space it wants for ui.
 */
 
@@ -156,6 +156,7 @@ protected:
 	void DefaultOutput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type);
 
 	// returns in terms of beats
+	// really just returns 2^v
 	float tempoSyncToFloat(int v) const;
 
 	NodeNetwork* parent = nullptr;

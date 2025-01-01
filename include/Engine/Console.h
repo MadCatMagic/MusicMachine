@@ -10,6 +10,8 @@ public:
 	
 	Console();
 
+	// different types of logging display in different colours
+	// white, yellow, or red respectively
 	static void Log(const std::string& data);
 	static void LogWarn(const std::string& data);
 	static void LogErr(const std::string& data);

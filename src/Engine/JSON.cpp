@@ -193,14 +193,10 @@ std::pair<std::unordered_map<std::string, JSONType>, bool> JSONConverter::Decode
     {
         t = JSONType::FromTokens(tokens);
     }
-    // bad but whatever
+    // bad to do a catch any error but whatever
     catch (...)
     {
         Console::LogErr("Failed to decode tokens in JSONDecoder::Decode");
-        //std::vector<JSONType> res;
-        //for (auto& t : tokens)
-        //    res.push_back(JSONType(t));
-        //Console::LogErr(JSONType(res).ToString());
         return { {}, false };
     }
 
@@ -214,7 +210,7 @@ void JSONConverter::WriteFile(const std::string& filename, const JSONType& type)
 {
     std::ofstream stream(filename, std::ios::out | std::ios::trunc);
     if (type.t != JSONType::Object)
-        throw "AAAA";
+        throw "CANNOT WRITE NON-OBJECT TYPE TO FILE";
     
     std::string dat = type.ToString(true);
     stream.write(dat.c_str(), dat.size());
@@ -245,7 +241,7 @@ std::vector<std::string> JSONConverter::Tokenise(const std::string& inp) const
     std::string tot = sum.str();
 
     // tokenise with regex
-    // made this bad boy up all by myself (pain and suffering was endured at heroic length)
+    // custom regex expression made by me
     std::regex tokenise("(?:\"(?:(?:\\\\\")|[^\"])*\")|(?:[-]?\\d+(?:[.]\\d+)?)|[{}[\\]:,]|(?:true)|(?:false)|(?:ERRTYPE)");
     std::vector<std::string> result;
     auto begin = std::sregex_iterator(tot.begin(), tot.end(), tokenise);

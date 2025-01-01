@@ -19,7 +19,7 @@ public:
 	friend class NodeNetworkRenderer;
 	friend Node;
 
-	NodeNetwork();
+	inline NodeNetwork() { }
 	NodeNetwork(const std::string& nnFilePath);
 	~NodeNetwork();
 

@@ -9,7 +9,6 @@ void ADSRNode::Init()
 	minSpace = v2(100.0f, 50.0f);
 }
 
-// TODOODODODODODOD
 void ADSRNode::IO()
 {
 	SequencerInput("sequence", &isequencer);
@@ -43,7 +42,7 @@ void ADSRNode::Work(int id)
 	int freq = 0;
 	int scounter = 0;
 
-	// amazingly works pretty well
+	// exponential decrease
 	float releaseFactor = powf(0.005f, 1.0f / (release * ochannel.sampleRate));
 
 	for (size_t i = 0; i < ochannel.bufferSize; i++)
@@ -95,6 +94,7 @@ float ADSRNode::adsr(int sample, float last) const
 	if (t <= attack)
 	{
 		float x = t / attack;
+		// waits so there is no jumping from last to 0 on new attack
 		if (last > x)
 			return last;
 		return x;

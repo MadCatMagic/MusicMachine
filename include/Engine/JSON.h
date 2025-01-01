@@ -1,29 +1,12 @@
 #pragma once
 #include "Vector.h"
-
-// should provide util for a custom json implementation used for storing node data, canvas position, settings, etc.
-/*
-"sectionName": {
-	"data": "string",
-	"num": 1234,
-	"float": 1.04,
-	"array": [
-		42,
-		"name", // comment
-		"obj",
-		{
-			"nestedObject": 42,
-			"okay": true
-		}
-	]
-}
-*/
-// "{\"data\": \"string\",\"num\" : 1234,\"float\" : 1.04,\"array\" : [42,	\"name\",	\"obj\",{\"nestedObject\": 42,\"okay\" : true}]}"
-
 #include <unordered_map>
 #include <map>
 #include <fstream>
 
+// should provide util for a custom json implementation used for storing node data, canvas position, settings, etc.
+
+// can be any type
 struct JSONType
 {
 	enum Type { None, Num, Float, String, Bool, Array, Object };

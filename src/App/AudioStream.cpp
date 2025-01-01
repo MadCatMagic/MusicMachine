@@ -1,24 +1,21 @@
-
 #include "App/AudioStream.h"
 
 #include "Engine/Console.h"
 #include "App/App.h"
 
-/* This routine will be called by the PortAudio engine when audio is needed.
- * It may called at interrupt level on some machines so don't do anything
- * that could mess up the system like calling malloc() or free().
-*/
-static int patestCallback(const void* inputBuffer, void* outputBuffer,
+// This routine will be called by the PortAudio engine when audio is needed.
+// It may called at interrupt level on some machines so don't do anything
+// that could mess up the system like calling malloc() or free().
+static int paCallback(const void* inputBuffer, void* outputBuffer,
     unsigned long framesPerBuffer,
     const PaStreamCallbackTimeInfo* timeInfo,
     PaStreamCallbackFlags statusFlags,
     void* userData)
 {
-    /* Cast data passed through stream to our structure. */
     AudioStream* data = (AudioStream*)userData;
     float* out = (float*)outputBuffer;
     unsigned int i;
-    (void)inputBuffer; /* Prevent unused variable warning. */
+    (void)inputBuffer;
 
     // check if any data is filled; if none is, something went wrong probably
     if (data->audioData.empty() || data->doNotMakeSound)
@@ -33,11 +30,12 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
         return 0;
     }
 
+    // set data to output buffer
     auto audioData = data->GetData();
     for (i = 0; i < framesPerBuffer; i++)
     {
-        out[i * 2] = audioData[i].x;  /* left */
-        out[i * 2 + 1] = audioData[i].y;  /* right */
+        out[i * 2] = audioData[i].x;
+        out[i * 2 + 1] = audioData[i].y;
     }
 
     return 0;
@@ -69,24 +67,15 @@ void AudioStream::Init()
     PaError err = Pa_Initialize();
     if (err != paNoError) goto error;
 
-    //astream = AudioStream(SAMPLE_RATE);
-
-    /* Open an audio I/O stream. */
+    // open an audio I/O stream
     err = Pa_OpenDefaultStream(&stream,
-        0,          /* no input channels */
-        2,          /* stereo output */
-        paFloat32,  /* 32 bit floating point output */
+        0,              // no input channels
+        2,              // stereo output
+        paFloat32,      // 32 bit floating point output
         SAMPLE_RATE,
-        BUFFER_SIZE,        /* frames per buffer, i.e. the number
-                           of sample frames that PortAudio will
-                           request from the callback. Many apps
-                           may want to use
-                           paFramesPerBufferUnspecified, which
-                           tells PortAudio to pick the best,
-                           possibly changing, buffer size.*/
-        patestCallback, /* this is your callback function */
-        this); /*This is a pointer that will be passed to
-                           your callback*/
+        BUFFER_SIZE,    // samples per buffer
+        paCallback, // callback function
+        this);          // a pointer that will be passed to the callback by PA
     if (err != paNoError) goto error;
 
     err = Pa_StartStream(stream);

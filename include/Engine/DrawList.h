@@ -1,7 +1,6 @@
 #pragma once
 #include "Vector.h"
 #include <functional>
-//#include "imgui.h"
 
 const size_t NUM_DRAW_COLOURS = 26;
 enum DrawColour {
@@ -33,25 +32,6 @@ struct DrawStyle
 	v4 GetCol(DrawColour colour);
 };
 
-typedef int DLDrawFlags;
-enum DLDrawFlags_
-{
-	DLDrawFlags_None = 0,
-	DLDrawFlags_Closed = 1 << 0, // PathStroke(), AddPolyline(): specify that shape should be closed (Important: this is always == 1 for legacy reason)
-	DLDrawFlags_RoundCornersTopLeft = 1 << 4, // AddRect(), AddRectFilled(), PathRect(): enable rounding top-left corner only (when rounding > 0.0f, we default to all corners). Was 0x01.
-	DLDrawFlags_RoundCornersTopRight = 1 << 5, // AddRect(), AddRectFilled(), PathRect(): enable rounding top-right corner only (when rounding > 0.0f, we default to all corners). Was 0x02.
-	DLDrawFlags_RoundCornersBottomLeft = 1 << 6, // AddRect(), AddRectFilled(), PathRect(): enable rounding bottom-left corner only (when rounding > 0.0f, we default to all corners). Was 0x04.
-	DLDrawFlags_RoundCornersBottomRight = 1 << 7, // AddRect(), AddRectFilled(), PathRect(): enable rounding bottom-right corner only (when rounding > 0.0f, we default to all corners). Wax 0x08.
-	DLDrawFlags_RoundCornersNone = 1 << 8, // AddRect(), AddRectFilled(), PathRect(): disable rounding on all corners (when rounding > 0.0f). This is NOT zero, NOT an implicit flag!
-	DLDrawFlags_RoundCornersTop = DLDrawFlags_RoundCornersTopLeft | DLDrawFlags_RoundCornersTopRight,
-	DLDrawFlags_RoundCornersBottom = DLDrawFlags_RoundCornersBottomLeft | DLDrawFlags_RoundCornersBottomRight,
-	DLDrawFlags_RoundCornersLeft = DLDrawFlags_RoundCornersBottomLeft | DLDrawFlags_RoundCornersTopLeft,
-	DLDrawFlags_RoundCornersRight = DLDrawFlags_RoundCornersBottomRight | DLDrawFlags_RoundCornersTopRight,
-	DLDrawFlags_RoundCornersAll = DLDrawFlags_RoundCornersTopLeft | DLDrawFlags_RoundCornersTopRight | DLDrawFlags_RoundCornersBottomLeft | DLDrawFlags_RoundCornersBottomRight,
-	DLDrawFlags_RoundCornersDefault_ = DLDrawFlags_RoundCornersAll, // Default to ALL corners if none of the _RoundCornersXX flags are specified.
-	DLDrawFlags_RoundCornersMask_ = DLDrawFlags_RoundCornersAll | DLDrawFlags_RoundCornersNone,
-};
-
 // wrapper around ImGui drawlist to provide easier functionality
 class DrawList
 {
@@ -60,8 +40,8 @@ public:
 
 	void Rect(const v2& tl, const v2& br, DrawColour col, float rounding = 1.0f, float thickness = 1.0f);
 	void Rect(const v2& tl, const v2& br, const v4& col, float rounding = 1.0f, float thickness = 1.0f);
-	void RectFilled(const v2& tl, const v2& br, DrawColour col, float rounding = 1.0f, DLDrawFlags flags = 0);
-	void RectFilled(const v2& tl, const v2& br, const v4& col, float rounding = 1.0f, DLDrawFlags flags = 0);
+	void RectFilled(const v2& tl, const v2& br, DrawColour col, float rounding = 1.0f, int flags = 0);
+	void RectFilled(const v2& tl, const v2& br, const v4& col, float rounding = 1.0f, int flags = 0);
 
 	void Triangle(const v2& a, const v2& b, const v2& c, DrawColour col, float thickness = 1.0f);
 	void Triangle(const v2& a, const v2& b, const v2& c, const v4& col, float thickness = 1.0f);
@@ -78,7 +58,7 @@ public:
 	void Line(const v2& a, const v2& b, DrawColour col, float thickness = 1.0f);
 	void Line(const v2& a, const v2& b, const v4& col, float thickness = 1.0f);
 
-	void Lines(const std::vector<v2>& points, const v4& col, float thickness = 1.0f, DLDrawFlags flags = 0);
+	void Lines(const std::vector<v2>& points, const v4& col, float thickness = 1.0f, int flags = 0);
 
 	void BezierCubic(const v2& a, const v2& b, const v2& c, const v2& d, DrawColour col, float thickness = 1.0f);
 

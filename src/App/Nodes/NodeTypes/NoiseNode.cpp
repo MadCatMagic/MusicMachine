@@ -13,6 +13,7 @@ void NoiseNode::IO()
 
 void NoiseNode::Work(int id)
 {
+	// i dont think pure random noise is actually white noise but whatever
 	for (int i = 0; i < c.bufferSize; i++)
 		c.data[i] = v2((float)rand() / (float)RAND_MAX, (float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
 }

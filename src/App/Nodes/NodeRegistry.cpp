@@ -1,5 +1,4 @@
 #include "App/Nodes/NodeRegistry.h"
-
 #include "App/Nodes/NodeFactory.h"
 
 #include "App/Nodes/NodeTypes/ADSRNode.h"
@@ -10,7 +9,6 @@
 #include "App/Nodes/NodeTypes/AudioTransformer.h"
 #include "App/Nodes/NodeTypes/DelayNode.h"
 #include "App/Nodes/NodeTypes/Distortion.h"
-#include "App/Nodes/NodeTypes/ExampleNode.h" // testing
 #include "App/Nodes/NodeTypes/MathsNode.h"
 #include "App/Nodes/NodeTypes/NoiseNode.h"
 #include "App/Nodes/NodeTypes/Panner.h"
@@ -36,7 +34,6 @@ void RegisterNodes()
     GetNodeFactory().Register("MixNode", "Maths", "Mix", NodeBuilder<MixNode>);
     GetNodeFactory().Register("DelayNode", "Synthesis", "Delay", NodeBuilder<DelayNode>);
     GetNodeFactory().Register("Distortion", "Synthesis", "Distortion", NodeBuilder<Distortion>);
-    GetNodeFactory().Register("ExampleNode", "", "Example Node", NodeBuilder<ExampleNode>);
     GetNodeFactory().Register("MathsNode", "Maths", "Maths", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("NoiseNode", "Synthesis", "Noise", NodeBuilder<NoiseNode>);
     GetNodeFactory().Register("Panner", "Synthesis", "Panner", NodeBuilder<Panner>);

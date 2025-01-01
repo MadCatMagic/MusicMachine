@@ -8,9 +8,7 @@ struct PitchSequencer
 	std::vector<float> pitch;
 	std::vector<int> length;
 	std::vector<float> velocity;
-	// cumulative samples
 	std::vector<int> cumulativeSamples;
 
 	void CopyTo(PitchSequencer* target);
-
 };

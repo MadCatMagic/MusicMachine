@@ -88,12 +88,12 @@ void DrawList::Rect(const v2& tl, const v2& br, const v4& col, float rounding, f
 	);
 }
 
-void DrawList::RectFilled(const v2& tl, const v2& br, DrawColour col, float rounding, DLDrawFlags flags)
+void DrawList::RectFilled(const v2& tl, const v2& br, DrawColour col, float rounding, int flags)
 {
 	RectFilled(tl, br, style->GetCol(col), rounding, flags);
 }
 
-void DrawList::RectFilled(const v2& tl, const v2& br, const v4& col, float rounding, DLDrawFlags flags)
+void DrawList::RectFilled(const v2& tl, const v2& br, const v4& col, float rounding, int flags)
 {
 	dl->AddRectFilled(
 		convPos(tl).ImGui(),
@@ -190,7 +190,7 @@ void DrawList::Line(const v2& a, const v2& b, const v4& col, float thickness)
 	);
 }
 
-void DrawList::Lines(const std::vector<v2>& points, const v4& col, float thickness, DLDrawFlags flags)
+void DrawList::Lines(const std::vector<v2>& points, const v4& col, float thickness, int flags)
 {
 	std::vector<ImVec2> v;
 	for (const v2& p : points)

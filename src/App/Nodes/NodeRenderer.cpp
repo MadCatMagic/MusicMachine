@@ -38,9 +38,7 @@ v2 NodeRenderer::GetInputPos(size_t index) const
 	}
 	if (node->inputs.size() > 1)
 	{
-		// fuck this shit
-		// ahhh they should take up the same spacing as the most populous node type (input/output)
-		// fuck
+		// arranges inputs in a nice circular shape when minimised
 		float amountOfCircle = 0.6f;
 		if (node->outputs.size() > 1)
 			amountOfCircle *= std::min(1.0f, (float)(node->inputs.size() - 1) / (float)(node->outputs.size() - 1));

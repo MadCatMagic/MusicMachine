@@ -27,30 +27,40 @@ WAV LoadWAVFile(const std::string& filepath)
     uint16_t blockAlign{};
     uint32_t fileSize{};
 
-    f.read(&dump[0], 4);                                                   // "RIFF"           4b be
+    // "RIFF"           4b be
+    f.read(&dump[0], 4);
     if (dump != "RIFF")
     {
         Console::LogErr("not RIFF file, found '" + dump + "' instead");
         return wav;
     }
-    f.read(reinterpret_cast<char*>(&fileSize), sizeof fileSize);           // filesize         4b le
-    f.read(&dump[0], 4);                                                   // "WAVE"           4b be
+    // filesize         4b le
+    f.read(reinterpret_cast<char*>(&fileSize), sizeof fileSize);
+    // "WAVE"           4b be
+    f.read(&dump[0], 4);
     
     while (f.tellg() != length)
     {
         // get chunk data
-        f.read(&dump[0], 4);                                                   // "fmt "           4b be
+        // "fmt "           4b be
+        f.read(&dump[0], 4);
         uint32_t chunkSize{};
         f.read(reinterpret_cast<char*>(&chunkSize), sizeof chunkSize);
 
         if (dump == "fmt ")
         {
-            f.read(&dump[0], 2);                                                   // 1                2b le
-            f.read(reinterpret_cast<char*>(&channels), sizeof channels);           // numChannels      2b le
-            f.read(reinterpret_cast<char*>(&sampleRate), sizeof sampleRate);       // sampleRate       4b le
-            f.read(reinterpret_cast<char*>(&byteRate), sizeof byteRate);           // byteRate         4b le
-            f.read(reinterpret_cast<char*>(&blockAlign), sizeof blockAlign);       // blockAlign       2b le
-            f.read(reinterpret_cast<char*>(&bitsPerSample), sizeof bitsPerSample); // bitsPerSample    2b le
+            // 1                2b le
+            f.read(&dump[0], 2);
+            // numChannels      2b le
+            f.read(reinterpret_cast<char*>(&channels), sizeof channels);
+            // sampleRate       4b le
+            f.read(reinterpret_cast<char*>(&sampleRate), sizeof sampleRate);
+            // byteRate         4b le
+            f.read(reinterpret_cast<char*>(&byteRate), sizeof byteRate);
+            // blockAlign       2b le
+            f.read(reinterpret_cast<char*>(&blockAlign), sizeof blockAlign);
+            // bitsPerSample    2b le
+            f.read(reinterpret_cast<char*>(&bitsPerSample), sizeof bitsPerSample);
 
             if (channels != 1 && channels != 2)
             {

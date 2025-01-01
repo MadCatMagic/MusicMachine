@@ -26,15 +26,16 @@ Canvas::~Canvas()
 
 void Canvas::InitCanvas()
 {
+    // use lambda function as callback
     drawList.SetConversionCallback([this](const v2& p) -> v2 { return this->ptcts(p); });
     if (nodeRenderer != nullptr)
         delete nodeRenderer;
     nodeRenderer = new NodeNetworkRenderer(nodes, this);
 }
 
-// a lot of this code is taken from the ImGui canvas example
 bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
 {
+    // uses ###ids so that the canvases remember where they were even if the name changes
     std::string title = "Canvas " + std::to_string(canvasI + 1);
     title += " - " + appPointer->GetNetworkName(nodes);
     title += "###Canvas " + std::to_string(canvasI + 1);
@@ -46,14 +47,14 @@ bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
         ImGui::Begin(title.c_str(), &shouldStayOpen);
     ImGui::PopStyleVar();
 
-    // Using InvisibleButton() as a convenience
+    // get size of window
     arrangerPixelPos = (v2)ImGui::GetCursorScreenPos();
     arrangerPixelSize = ImGui::GetContentRegionAvail();
     if (arrangerPixelSize.x < 50.0f) arrangerPixelSize.x = 50.0f;
     if (arrangerPixelSize.y < 50.0f) arrangerPixelSize.y = 50.0f;
     v2 canvasBottomRight = arrangerPixelPos + arrangerPixelSize;
 
-    // Draw border and background color
+    // draw border and background color
     ImGuiIO& io = ImGui::GetIO();
     drawList.dl = ImGui::GetWindowDrawList();
     drawList.style = drawStyle;
@@ -62,7 +63,7 @@ bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
     drawList.Rect(arrangerPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
     drawList.scaleFactor = scale.x;
 
-    // This will catch our interactions
+    // this will catch our interactions
     ImGui::InvisibleButton("canvas", arrangerPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
     const bool isHovered = ImGui::IsItemHovered(); // Hovered
     const bool isActive = ImGui::IsItemActive();   // Held
@@ -77,7 +78,7 @@ bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
         if (node == nullptr)
             goto nodeInteractionsEscape;
 
-        // truly horrible code
+        // gets info for NodeClickInfo object
         NodeClickInfo info;
         // handled later
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
@@ -107,7 +108,7 @@ bool Canvas::CreateWindow(DrawStyle* drawStyle, App* appPointer, int canvasI)
     }
 nodeInteractionsEscape:
 
-    // Pan
+    // pan
     if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right) && !handledInteractionAlready)
     {
         position.x -= io.MouseDelta.x * scale.x;
@@ -237,6 +238,7 @@ nodeInteractionsEscape:
         }
         else
         {
+            // drag around nodes
             for (Node* n : selectedStack)
             {
                 v2 diff = v2(io.MouseDelta.x * scale.x, io.MouseDelta.y * scale.y);
@@ -278,22 +280,19 @@ nodeInteractionsEscape:
     if (ImGui::IsKeyPressed(ImGuiKey_Escape) && selectedStack.size() > 0 || ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !isActive)
         selectedStack.clear();
 
-    // taken from LevelEditor\...\Editor.cpp
+    // zoom in and out
     if (isHovered && io.MouseWheel != 0.0f)
     {
         scalingLevel -= (int)io.MouseWheel;
-        // clamp(zoomLevel, 0, 31) inclusive
-        scalingLevel = scalingLevel >= 0 ? (scalingLevel < NUM_SCALING_LEVELS ? scalingLevel : NUM_SCALING_LEVELS - 1) : 0;
-        // 1.1 ^ -15
+        scalingLevel = clamp(scalingLevel, 0, NUM_SCALING_LEVELS - 1);
+        
         v2 prevScale = scale;
         scale = GetSFFromScalingLevel(scalingLevel);
-        // position + (mousePosBefore = canvasPos * scaleBefore + position) - (mousePosAfter = canvasPos * scaleAfter + position)
-        // position + canvasPos * (scaleBefore - scaleAfter)
-        // somehow it has to be negative... I hate you linear algebra!!!
+        // translate so mouse position is stationary during zoom
         position -= mouseCanvasPos.scale(prevScale - scale);
     }
 
-    // Context menu (under default mouse threshold)
+    // context menu (under default mouse threshold)
     ImVec2 drag_delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Right);
     if (drag_delta.x == 0.0f && drag_delta.y == 0.0f)
     {
@@ -305,11 +304,13 @@ nodeInteractionsEscape:
     bool beginLoad = false;
     std::pair<bool, bool> beginNetworkThings = std::make_pair(false, false);
 
+    // do context menu stuff
     if (ImGui::BeginPopup("context"))
     {
+        // section of menu for adding new nodes
         beginNetworkThings = nodes->DrawContextMenu(contextMenuClickPos);
 
-        // save
+        // saving and loading
         if (ImGui::MenuItem("Save"))
         {
             if (nodes->name != "new network")
@@ -327,27 +328,44 @@ nodeInteractionsEscape:
 
     PopupWindows(beginSaveAs, beginLoad, beginNetworkThings.first, beginNetworkThings.second, appPointer);
 
-    // Draw grid + all lines in the canvas
-    drawList.dl->PushClipRect((arrangerPixelPos + 1.0f).ImGui(), (canvasBottomRight - 1.0f).ImGui(), true);
+    // draw grid + all lines in the canvas
+    // has a larger grid and smaller grid - the smaller grid is not drawn if the scaling level is too high
+    drawList.dl->PushClipRect(
+        (arrangerPixelPos + 1.0f).ImGui(), 
+        (canvasBottomRight - 1.0f).ImGui(), 
+        true
+    );
     const v2 gridStep = scale.reciprocal() * 32.0f;
     const v2 gridStepSmall = scale.reciprocal() * 8.0f;
     for (float x = fmodf(-position.x / scale.x, gridStep.x) - gridStep.x; x < arrangerPixelSize.x; x += gridStep.x)
     {
-        drawList.Line(v2(arrangerPixelPos.x + x, arrangerPixelPos.y), v2(arrangerPixelPos.x + x, canvasBottomRight.y), DrawColour::Canvas_GridLinesHeavy);
+        drawList.Line(
+            v2(arrangerPixelPos.x + x, arrangerPixelPos.y), 
+            v2(arrangerPixelPos.x + x, canvasBottomRight.y), 
+            DrawColour::Canvas_GridLinesHeavy
+        );
         if (scalingLevel < 21)
             for (int dx = 1; dx < 4; dx++)
                 drawList.Line(
                     ImVec2(arrangerPixelPos.x + x + dx * gridStepSmall.x, arrangerPixelPos.y), 
-                    ImVec2(arrangerPixelPos.x + x + dx * gridStepSmall.x, canvasBottomRight.y), DrawColour::Canvas_GridLinesLight);
+                    ImVec2(arrangerPixelPos.x + x + dx * gridStepSmall.x, canvasBottomRight.y), 
+                    DrawColour::Canvas_GridLinesLight
+                );
     }
     for (float y = fmodf(-position.y / scale.y, gridStep.y) - gridStep.y; y < arrangerPixelSize.y; y += gridStep.y)
     {
-        drawList.Line(v2(arrangerPixelPos.x, arrangerPixelPos.y + y), v2(canvasBottomRight.x, arrangerPixelPos.y + y), DrawColour::Canvas_GridLinesHeavy);
+        drawList.Line(
+            v2(arrangerPixelPos.x, arrangerPixelPos.y + y), 
+            v2(canvasBottomRight.x, arrangerPixelPos.y + y), 
+            DrawColour::Canvas_GridLinesHeavy
+        );
         if (scalingLevel < 21)
             for (int dy = 1; dy < 4; dy++)
                 drawList.Line(
                     v2(arrangerPixelPos.x, arrangerPixelPos.y + y + dy * gridStepSmall.y),
-                    v2(canvasBottomRight.x, arrangerPixelPos.y + y + dy * gridStepSmall.y), DrawColour::Canvas_GridLinesLight);
+                    v2(canvasBottomRight.x, arrangerPixelPos.y + y + dy * gridStepSmall.y), 
+                    DrawColour::Canvas_GridLinesLight
+                );
     }
 
     ImGui::PushFont(textLODs[scalingLevel]);
@@ -379,6 +397,7 @@ nodeInteractionsEscape:
         }
         else
         {
+            // stop dragging connection if lets go
             nodes->TryEndConnection(connectionOrigin, connectionOriginName, mousePos, connectionReversed);
             connectionOrigin = nullptr;
             connectionOriginName = "";
@@ -414,7 +433,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
         memset(buf, 0, 64);
     }
 
-    // Always center this window when appearing
+    // always center this window when appearing
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
@@ -493,9 +512,14 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
 
     if (ImGui::BeginPopupModal("Load", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        if (ImGui::BeginTable("3ways", 1, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody))
+        // draw table for files that have been found that could be loaded
+        if (ImGui::BeginTable("3ways", 1, 
+            ImGuiTableFlags_BordersV | 
+            ImGuiTableFlags_BordersOuterH | 
+            ImGuiTableFlags_Resizable | 
+            ImGuiTableFlags_RowBg | 
+            ImGuiTableFlags_NoBordersInBody))
         {
-            // The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 300.0f);
             ImGui::TableHeadersRow();
 
@@ -519,6 +543,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
             ImGui::EndTable();
         }
 
+        // only can click load if a network has been selected
         ImGui::BeginDisabled(selected == -1);
         if (ImGui::Button("Load"))
         {
@@ -541,9 +566,14 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
 
     if (ImGui::BeginPopupModal("New Network Node", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        if (ImGui::BeginTable("3ways", 1, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody))
+        // draw first table for files that have been found that could be loaded
+        if (ImGui::BeginTable("3ways", 1, 
+            ImGuiTableFlags_BordersV | 
+            ImGuiTableFlags_BordersOuterH | 
+            ImGuiTableFlags_Resizable | 
+            ImGuiTableFlags_RowBg | 
+            ImGuiTableFlags_NoBordersInBody))
         {
-            // The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 300.0f);
             ImGui::TableHeadersRow();
 
@@ -567,11 +597,15 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
             ImGui::EndTable();
         }
 
-        // idk about this one chief
-        // need to exclude the isRoot network and the currently inside of network
-        if (ImGui::BeginTable("3ways", 1, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody))
+        // draw second table for networks that are already loaded
+        // only shows ones with available space to be used
+        if (ImGui::BeginTable("3ways", 1, 
+            ImGuiTableFlags_BordersV | 
+            ImGuiTableFlags_BordersOuterH | 
+            ImGuiTableFlags_Resizable | 
+            ImGuiTableFlags_RowBg | 
+            ImGuiTableFlags_NoBordersInBody))
         {
-            // The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 300.0f);
             ImGui::TableHeadersRow();
 
@@ -601,6 +635,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
             ImGui::EndTable();
         }
 
+        // can create a new empty network for nodenetworknode
         if (ImGui::Button("Create Empty"))
         {
             NodeNetworkNode* newNode = (NodeNetworkNode*)(nodes->AddNodeFromName("NodeNetworkNode", contextMenuClickPos));
@@ -611,6 +646,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
             ImGui::CloseCurrentPopup();
         }
 
+        // or use existing network
         ImGui::BeginDisabled(selectedExisting == -1);
         if (ImGui::Button("Use"))
         {
@@ -627,6 +663,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
         }
         ImGui::EndDisabled();
 
+        // or load network from .nn file to use
         ImGui::BeginDisabled(selected == -1);
         if (ImGui::Button("Load"))
         {
@@ -654,6 +691,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
         memcpy_s(buf, 64, "new variable", 13);
     }
 
+    // just asks for a name for the variable, that is all
     if (ImGui::BeginPopupModal("New Network Variable", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::InputText("name", buf, 64);
@@ -702,6 +740,8 @@ void Canvas::LoadState(const std::string& filepath, App* appPointer, bool forceR
         nodeRenderer = new NodeNetworkRenderer(nodes, this);
     }
 
+    // either replaces network, replaces *root* network
+    // or creates new canvas for network
     if (nodes != nullptr && nodes->isRoot)
     {
         if (newNodes->isRoot)
@@ -729,6 +769,7 @@ void Canvas::LoadState(const std::string& filepath, App* appPointer, bool forceR
         }
     }
 
+    // possibly delete node network if it is not used anywhere
     if (killLater != nullptr)
         delete killLater;
 }
@@ -763,11 +804,13 @@ v2 Canvas::PositionToCanvas(const v2& pos) const // canvas = (offset - position)
 
 void Canvas::GenerateAllTextLODs()
 {
+    // only generate graphics for these characters
     static ImVector<ImWchar> ranges;
     ImFontGlyphRangesBuilder builder;
     builder.AddText("abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.<>/?;:'@#~[]{}()-_=+\\|*&^%$£\"!1234567890 ");
     builder.BuildRanges(&ranges);
 
+    // generate font atlases
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
     for (int i = 0; i < NUM_SCALING_LEVELS; i++)
@@ -776,6 +819,7 @@ void Canvas::GenerateAllTextLODs()
 
 std::string Canvas::SanitiseName(const std::string& o)
 {
+    // adds underscores to the name until it is unique
     std::string id = o;
     while (true)
     {

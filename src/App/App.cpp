@@ -17,17 +17,18 @@ void App::Initialize()
     RegisterNodes();
 
     drawStyle.InitColours();
-
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
 
+    // create root canvas
     Canvas::GenerateAllTextLODs();
     c.push_back(new Canvas());
+
+    // check if init.nn exists to load
     if (std::filesystem::exists("networks/init.nn"))
-    {
         c[0]->LoadState("networks/init.nn", this, true);
-    }
     else
     {
+        // if not, create a new network and save to init.nn
         NodeNetwork* nodes = new NodeNetwork();
         nodes->AddNodeFromName("AudioOutputNode", v2(100.0f, 0.0f));
         nodes->SaveNetworkToFile("networks/init.nn");
@@ -35,25 +36,33 @@ void App::Initialize()
         c[0]->nodes = nodes;
     }
     c[0]->InitCanvas();
+
     RegisterJSONCommands();
 
+    // initialises port audio
     astream.Init();
 
+    // make sure current network is root
     n[0]->audioStream = &astream;
     n[0]->isRoot = true;
 }
 
 void App::Update()
 {
+    // update networks - checks for cycles in networks
     for (NodeNetwork* network : n)
         network->Update();
+    // if a new network is loaded as root this ensures it knows it is root
     c[0]->nodes->isRoot = true;
+    // loop to fill up audioData - GetAudio() adds audio to astream
+    // runs until audioData is full
     while (!astream.audioData.full() && GetAudio()) {}
 }
 
 void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 {
     bool beginExport = false;
+    // creates the main menu bar at the top of the screen
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Menu"))
@@ -70,6 +79,8 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
         {
             for (size_t i = 0; i < n.size(); i++)
             {
+                // loop to find whether each network is being displayed by a canvas,
+                // and if so which canvas it is
                 bool shown = false;
                 size_t ownedCanvas = 0;
                 for (; ownedCanvas < c.size(); ownedCanvas++)
@@ -78,8 +89,10 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
                         shown = true;
                         break;
                     }
+
                 // add canvas with network if not shown, otherwise delete existing canvas
                 // if ctrl held and such, delete network too
+
                 std::string message = GetNetworkName(n[i]) + (shown ? " - shown" : "");
                 bool validForDeletion = false;
                 if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && n[i]->usedInNetworkNode.none() && !n[i]->isRoot)
@@ -87,7 +100,7 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
                     message = "DELETE " + message;
                     validForDeletion = true;
                 }
-
+                // only deletes the network if it is not used anywhere, otherwise just removes the canvas
                 if (ImGui::MenuItem(message.c_str()) && !n[i]->isRoot)
                 {
                     if (shown)
@@ -117,12 +130,14 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
     
 	ImGui::DockSpaceOverViewport();
 
+    // draw debug window and arranger
     DebugWindow(io, lastFrameTime, averageFrameTime);
-
     ImGui::Begin("Arranger");
     arranger.UI(&drawStyle);
     ImGui::End();
-
+    
+    // only one CreateWindow call can return true (meaning it should be deleted)
+    // each frame, so this checks for that and then deletes the canvas if so
     int toDestroyI = -1;
     for (int i = 0; i < (int)c.size(); i++)
         if (c[i]->CreateWindow(&drawStyle, this, i))
@@ -138,13 +153,14 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
         c.erase(c.begin() + toDestroyI);
     }
 
+    // popups for exporting audio
     static char buf[64] = { 0 };
     if (beginExport)
     {
         ImGui::OpenPopup("Export");
         memset(buf, 0, 64);
 
-        // Always center this window when appearing
+        // always center this window when appearing
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     }
@@ -154,7 +170,7 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
         ImGui::InputText("name", buf, 64);
         ImGui::DragFloatRange2("time range", &exportBegin, &exportEnd, 0.1f, 0.0f, 10000.0f, "%.2f");
 
-        // disable if filename is empty
+        // disable export button if filename is empty
         ImGui::BeginDisabled(buf[0] == '\0');
         if (ImGui::Button("Export"))
         {
@@ -176,6 +192,8 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
         ImGui::SameLine();
         if (ImGui::Button("Cancel")) { ImGui::CloseCurrentPopup(); }
 
+        // overwriting file popup
+        // if they decide to overwrite the file it has to close both popups
         bool closeBoth = false;
         if (ImGui::BeginPopupModal("Overwriting File", NULL, ImGuiWindowFlags_AlwaysAutoResize))
         {
@@ -201,6 +219,7 @@ void App::UI(struct ImGuiIO* io, double averageFrameTime, double lastFrameTime)
 
 void App::DebugWindow(ImGuiIO* io, double lastFrameTime, double averageFrameTime)
 {
+    // adds data to circular buffers
     frameTimeWindow[frameTimeI] = (float)lastFrameTime;
     averageTimeWindow[frameTimeI] = (float)averageFrameTime;
     frameTimeI = (++frameTimeI) % FRAME_TIME_MOVING_WINDOW_SIZE;
@@ -208,12 +227,15 @@ void App::DebugWindow(ImGuiIO* io, double lastFrameTime, double averageFrameTime
     if (!showDebug) return;
     ImGui::Begin("Debug", &showDebug);
 
+    // show framerate and 'potential' frame rate
+    // since vsync is on, potential fps approximates what the max fps could be if it was not locked to 60Hz.
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
     ImGui::Text("Update average %.3f ms/frame (%.1f potential FPS)", averageFrameTime, 1000.0f / averageFrameTime);
-    // draw graph
+    // draw graphs of frame time over time
     ImGui::PlotHistogram("frame times", frameTimeWindow, FRAME_TIME_MOVING_WINDOW_SIZE, 0, 0, 0.0f, 10.0f, ImVec2(0.0f, 40.0f));
     ImGui::PlotHistogram("avg frame times", averageTimeWindow, FRAME_TIME_MOVING_WINDOW_SIZE, 0, 0, 0.0f, 10.0f, ImVec2(0.0f, 40.0f));
 
+    // just shows all the colours for the current drawStyle
     if (ImGui::BeginMenu("Colours"))
     {
         for (int i = 0; i < NUM_DRAW_COLOURS; i++)
@@ -226,15 +248,18 @@ void App::DebugWindow(ImGuiIO* io, double lastFrameTime, double averageFrameTime
 
 void App::Export(const std::string& filepath)
 {
+    // create a buffer of the right length for the data
     size_t bufSize = (size_t)((exportEnd - exportBegin) * SAMPLE_RATE) + 1;
     std::vector<v2> dataBuf = std::vector<v2>(bufSize);
+    
+    // reset audio streams and arranger to the beginning of the required section
     Arranger::instance->setTime(exportBegin);
-
     astream.doNotMakeSound = true;
     astream.audioData.clear();
     bool wasPlaying = Arranger::instance->playing;
     Arranger::instance->playing = true;
 
+    // loop through buffer and fill with audio data
     size_t tick = 0;
     while (Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f <= exportEnd)
     {
@@ -242,16 +267,22 @@ void App::Export(const std::string& filepath)
         std::vector<v2> v = astream.GetData();
         for (size_t i = 0; i < v.size(); i++)
         {
+            // if we have exceeded buffer size, (buffer size does not match up with end of astream buffer)
+            // then escape the loop
             if (i + tick * BUFFER_SIZE >= bufSize)
                 goto escape;
+            // otherwise just add sample to buffer
             dataBuf[i + tick * BUFFER_SIZE] = v[i];
         }
         tick += 1;
     }
+
+    // reset arranger and astream to settings before exporting audio
 escape:
     astream.doNotMakeSound = false;
     Arranger::instance->playing = wasPlaying;
 
+    // exports audio info as a WAV file
     WAV wavfile;
     wavfile.filepath = filepath;
     wavfile.data = dataBuf;
@@ -261,6 +292,7 @@ escape:
 
 void App::Release()
 {
+    // clean up stuff
     astream.Release();
 
     for (auto* p : n)
@@ -272,13 +304,14 @@ void App::Release()
 
 bool App::GetAudio()
 {
-    // execute networks, send sound data off
+    // check that audio can be outputted first
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
     if (n.size() == 0)
     {
         Console::LogWarn("NETWORK EXECUTING SKIPPED");
         return false;
     }
+    // then actually execute root network
     arranger.Work();
     if (!n[0]->Execute(true, 0)) {
         Console::LogWarn("NETWORK EXECUTING FAILED");
@@ -289,8 +322,10 @@ bool App::GetAudio()
 
 void App::AddNetwork(NodeNetwork* nodes)
 {
+    // this is so a new network does not become root if it is not supposed to be
     if (n.size() == 0)
         n.push_back(nullptr);
+    // add network to array
     n.push_back(nodes);
 }
 
@@ -307,6 +342,7 @@ void App::DeleteNetwork(NodeNetwork* nodes)
         if (n[i] == nodes)
         {
             if (i == 0)
+                // keep *something* in n[0], even if just a nullptr
                 n[0] = nullptr;
             else
                 n.erase(n.begin() + i);
@@ -331,6 +367,7 @@ void App::ReplaceMainNetwork(NodeNetwork* nodes)
 
 std::pair<NodeNetwork*, int> App::GetNetwork(const std::string& name)
 {
+    // first tries to find a matching existing network with space
     for (NodeNetwork* network : n)
         if (network != nullptr && network->name == name && !network->isRoot && !network->usedInNetworkNode.all())
         {
@@ -339,16 +376,20 @@ std::pair<NodeNetwork*, int> App::GetNetwork(const std::string& name)
                     return { network, i };
         }
 
+    // then just skips if the network name is invalid
     if (name == "new network")
         return { nullptr, 0 };
 
+    // then tries to load network
     NodeNetwork* network = new NodeNetwork("networks/" + name);
     AddNetwork(network);
+
     return { network, 0 };
 }
 
 std::string App::GetNetworkName(const NodeNetwork* reference) const
 {
+    // just pads name with some extra info
     return
         "(" +
         (reference->isRoot ? "root" : std::to_string(reference->usedInNetworkNode.count())) +

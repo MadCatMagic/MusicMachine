@@ -18,10 +18,7 @@ void Panner::Work(int id)
 {
 	for (size_t i = 0; i < AudioChannel::bufferSize; i++)
 	{
-		// if pan = 1 should be (0, xy)
-		// if pan = -1 should be (xy, 0)
-		// if pan = 0 should be (x, y)
-		// if pan = 0.5 should be (0.5x, y + 0.5x
+		// pan audio
 		ochannel.data[i] = v2(
 			std::max(0.0f, -pan) * ichannel.data[i].y + (1.0f + std::min(0.0f, -pan)) * ichannel.data[i].x,
 			std::max(0.0f, pan) * ichannel.data[i].x + (1.0f + std::min(0.0f, pan)) * ichannel.data[i].y

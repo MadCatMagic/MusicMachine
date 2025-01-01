@@ -16,7 +16,6 @@ protected:
 	virtual JSONType Save() override;
 
 private:
-
 	float inputA = 0.0f;
 	float inputB = 0.0f;
 	float output = 0.0f;

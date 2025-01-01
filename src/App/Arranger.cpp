@@ -13,18 +13,21 @@ Arranger::Arranger()
 void Arranger::Work()
 {
     if (!playing) return;
+    // sets values for variable nodes
 	for (VariableNode* node : VariableNode::variableNodes)
 		node->output = node->getValue(time) * (node->maxV - node->minV) + node->minV;
+    // increments time by fixed amount
 	time += AudioChannel::dt * tempo / 60.0f;
 }
 
-// in our own window
+// already in our own window
 void Arranger::UI(DrawStyle* drawStyle)
 {
     ImGui::Text("time = %.2f", time * (tempo / 240.0f));
 	ImGui::InputFloat("tempo", &tempo, 20.0f, 300.0f);
 	tempo = clamp(tempo, 20.0f, 600.0f);
 
+    // play, stop, and reset buttons
     ImGui::BeginDisabled(playing);
     if (ImGui::Button("Play"))
         playing = true;
@@ -38,14 +41,15 @@ void Arranger::UI(DrawStyle* drawStyle)
     if (ImGui::Button("Reset"))
         time = 0.0f;
 
+    // play and pause with space
     if (!ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_Space))
         playing = !playing;
+    // delete points with delete
     if (!ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_Delete))
         DeleteNodesOnSelectedStack();
 
-    // Child 1: list of input nodes
+    // child 1: list of input nodes
     {
-        
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, padding));
         ImGui::BeginChild("ChildL", ImVec2(ImGui::GetContentRegionAvail().x * 0.4f, ImGui::GetContentRegionAvail().y), true);
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 0.0f));
@@ -63,6 +67,7 @@ void Arranger::UI(DrawStyle* drawStyle)
             strcpy_s<32>(buf, node->id.c_str());
             ImGui::InputText("id", buf, 32);
             node->id = std::string(buf);
+
             ImGui::DragFloatRange2("range", &node->minV, &node->maxV, 0.01f, 0.0f, 100.0f);
 
             ImGui::PopStyleVar();
@@ -77,7 +82,7 @@ void Arranger::UI(DrawStyle* drawStyle)
 
     ImGui::SameLine();
 
-    // Child 2: node data
+    // child 2: node data - section which displays timelines
     {
         ImGui::BeginChild("ChildR", ImVec2(0.0f, 0.0f));
 
@@ -86,7 +91,7 @@ void Arranger::UI(DrawStyle* drawStyle)
         if (arrangerPixelSize.x < 50.0f) arrangerPixelSize.x = 50.0f;
         v2 canvasBottomRight = arrangerPixelPos + arrangerPixelSize;
 
-        // Draw border and background color
+        // draw border and background color
         ImGuiIO& io = ImGui::GetIO();
         drawList.dl = ImGui::GetWindowDrawList();
         drawList.style = drawStyle;
@@ -95,7 +100,7 @@ void Arranger::UI(DrawStyle* drawStyle)
         drawList.Rect(arrangerPixelPos, canvasBottomRight, DrawColour::Canvas_Edge);
         drawList.scaleFactor = scale.x;
 
-        // This will catch our interactions
+        // this will catch our interactions
         ImGui::InvisibleButton("canvas", arrangerPixelSize.ImGui(), ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
         const bool isHovered = ImGui::IsItemHovered(); // Hovered
         const bool isActive = ImGui::IsItemActive();   // Held
@@ -107,14 +112,14 @@ void Arranger::UI(DrawStyle* drawStyle)
         if (hoveredID < 0 || hoveredID >= VariableNode::variableNodes.size() || !isHovered)
             hoveredID = -1;
 
-        // Pan
+        // pan
         if (isActive && ImGui::IsMouseDragging(ImGuiMouseButton_Right))
         {
             position.x -= io.MouseDelta.x * scale.x;
             position.y -= io.MouseDelta.y * scale.y;
         }
 
-        // test for node changes
+        // test for changes to points
         int closestCell = -1;
         float closestDist = 1000.0f;
         if (hoveredID != -1)
@@ -132,7 +137,7 @@ void Arranger::UI(DrawStyle* drawStyle)
             }
         }
 
-        // create new nodes
+        // create new points
         int targetIndex = -1;
         if (hoveredID != -1 && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && isActive && isNearLine(mousePos, hoveredID, targetIndex))
         {
@@ -140,7 +145,7 @@ void Arranger::UI(DrawStyle* drawStyle)
                 VariableNode::variableNodes[hoveredID]->points.begin() + targetIndex,
                 mousePos.scale(1.0f / pixelsPerBeat, 1.0f / rowHeight) - v2(0.0f, (float)hoveredID)
             );
-            // select newly created node
+            // select newly created point
             selectedStack.clear();
             selectedStack.push_back({ hoveredID, targetIndex });
             isDraggingNode = true;
@@ -182,12 +187,12 @@ void Arranger::UI(DrawStyle* drawStyle)
                 }
             }
         }
-        // moving nodes
+        // moving points
         else if (!isDraggingNode && closestCell != -1 && isActive && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
         {
             isDraggingNode = true;
 
-            // put clicked on node onto stack if not already
+            // put clicked on point onto stack if not already
             bool selectedAlready = inSelectedStack(hoveredID, closestCell);
             if (!io.KeyShift && !selectedAlready)
                 selectedStack.clear();
@@ -225,7 +230,7 @@ void Arranger::UI(DrawStyle* drawStyle)
         else if (isDraggingNode)
             isDraggingNode = false;
 
-        // taken from LevelEditor\...\Editor.cpp
+        // zooming in and out
         if (isHovered && io.MouseWheel != 0.0f)
         {
             if (io.KeyShift)
@@ -233,16 +238,13 @@ void Arranger::UI(DrawStyle* drawStyle)
             else
                 scalingLevel.x -= (int)io.MouseWheel;
 
-            // clamp(zoomLevel, 0, 31) inclusive
-            scalingLevel.x = scalingLevel.x >= 0 ? (scalingLevel.x < NUM_SCALING_LEVELS ? scalingLevel.x : NUM_SCALING_LEVELS - 1) : 0;
-            scalingLevel.y = scalingLevel.y >= 0 ? (scalingLevel.y < NUM_SCALING_LEVELS ? scalingLevel.y : NUM_SCALING_LEVELS - 1) : 0;
-            // 1.1 ^ -15
+            scalingLevel.x = clamp(scalingLevel.x, 0, NUM_SCALING_LEVELS - 1);
+            scalingLevel.y = clamp(scalingLevel.y, 0, NUM_SCALING_LEVELS - 1);
+
             v2 prevScale = scale;
             scale.x = GetSFFromScalingLevel(scalingLevel.x);
             scale.y = GetSFFromScalingLevel(scalingLevel.y);
-            // position + (mousePosBefore = canvasPos * scaleBefore + position) - (mousePosAfter = canvasPos * scaleAfter + position)
-            // position + canvasPos * (scaleBefore - scaleAfter)
-            // somehow it has to be negative... I hate you linear algebra!!!
+            // translate to keep the mouse cursor stationary around zoom
             position -= mouseCanvasPos.scale(prevScale - scale);
         }
         position.x = std::max(0.0f, position.x);
@@ -262,31 +264,36 @@ void Arranger::UI(DrawStyle* drawStyle)
                         ImVec2(padding + arrangerPixelPos.x + x + dx * gridStepSmall, canvasBottomRight.y), DrawColour::Canvas_GridLinesLight);
         }
 
+        // draw time=0 line
         drawList.Line(
             arrangerPixelPos + v2(0.0f, padding),
             arrangerPixelPos + v2(arrangerPixelSize.x, padding),
             DrawColour::Canvas_GridLinesHeavy
         );
 
+        // draw lines connecting points
+        // annoying finickery
         for (size_t j = 0; j < VariableNode::variableNodes.size(); j++)
         {
             VariableNode* node = VariableNode::variableNodes[j];
 
             if (node->points.size() != 0)
             {
+                // draw from first point straight backwards
                 if (position.x <= node->points[0].x * pixelsPerBeat)
                     drawList.Line(
                         ptcts(v2(position.x, node->points[0].y * rowHeight + rowHeight * j)),
                         ptcts(node->points[0].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
                         v4(1.0f, 1.0f, 1.0f)
                     );
+                // draw from last point straight forwards
                 if (position.x + arrangerPixelSize.x * scale.x >= node->points[node->points.size() - 1].x * pixelsPerBeat)
                     drawList.Line(
                         ptcts(node->points[node->points.size() - 1].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
                         ptcts(v2(position.x + arrangerPixelSize.x * scale.x, node->points[node->points.size() - 1].y * rowHeight + rowHeight * j)),
                         v4(1.0f, 1.0f, 1.0f)
                     );
-
+                // connect up remaining points
                 for (size_t i = 0; i < node->points.size() - 1; i++)
                     drawList.Line(
                         ptcts(node->points[i].scale(pixelsPerBeat, rowHeight) + v2(0.0f, rowHeight * j)),
@@ -301,6 +308,7 @@ void Arranger::UI(DrawStyle* drawStyle)
                 DrawColour::Canvas_GridLinesHeavy
             );
 
+            // draw actual points as little squares 
             const float cellR = 3.0f;
             for (size_t i = 0; i < node->points.size(); i++)
             {
@@ -315,6 +323,7 @@ void Arranger::UI(DrawStyle* drawStyle)
             }
         }
 
+        // draw time cursor
         drawList.Line(
             arrangerPixelPos + v2(padding + (time * pixelsPerBeat - position.x) / scale.x, 0.0f),
             arrangerPixelPos + v2(padding + (time * pixelsPerBeat - position.x) / scale.x, arrangerPixelSize.y),
@@ -378,9 +387,10 @@ bool Arranger::isNearLine(const v2& pos, int hovered, int& target) const
 
 void Arranger::DeleteNodesOnSelectedStack()
 {
-    // how the fuck am i gonna do this one then
+    // first flag points for deletion
     for (auto& pair : selectedStack)
         VariableNode::variableNodes[pair.first]->FlagForDeletion(pair.second);
+    // then delete flag points
     for (VariableNode* n : VariableNode::variableNodes)
         n->DeleteFlaggedPoints();
     selectedStack.clear();

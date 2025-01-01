@@ -6,9 +6,8 @@
 // will act as a file which contains all of the nodes, but only as a reference grid point
 // all of the transformations between local and canvas coordinates happen here
 // as well as all of the maths for scaling and moving around and such
-// but all node interactions happen elsewhere
+// user-node interactions are managed here too
 
-// CreateWindow renders everything, including all the nodes that are passed to it.
 #define NUM_SCALING_LEVELS 32
 #define MIN_SCALE 0.23939204f
 
@@ -16,7 +15,6 @@ class Canvas
 {
 public:
 	inline Canvas() {}
-	/// IMPLEMENT COPY AND MOVE ASSIGNMENT OPERATORS ???
 	~Canvas();
 
 	void InitCanvas();
@@ -34,7 +32,7 @@ public:
 	inline v2 GetSF() const { return scale; }
 	static float GetSFFromScalingLevel(int scaling);
 
-	// shortcut
+	// shortcut functions
 	inline v2 ptcts(const v2& pos) const { return CanvasToScreen(PositionToCanvas(pos)); }
 	inline v2 stctp(const v2& pos) const { return CanvasToPosition(ScreenToCanvas(pos)); }
 
@@ -56,7 +54,7 @@ private:
 		float dm = doMin && (f < min) ? min : f;
 		return doMax && dm > max ? max : dm;
 	}
-	// text stuff
+	// so text scales properly
 	static struct ImFont* textLODs[NUM_SCALING_LEVELS];
 
 	int scalingLevel = 15;
@@ -68,7 +66,8 @@ private:
 
 	DrawList drawList;
 
-	// stuff
+	// node interaction variables
+	
 	// always the top element is the selected item
 	std::vector<Node*> selectedStack = std::vector<Node*>();
 	bool selectingArea = false;
