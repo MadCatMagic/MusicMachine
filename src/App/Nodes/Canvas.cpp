@@ -737,7 +737,7 @@ void Canvas::LoadState(const std::string& filepath, App* appPointer, bool forceR
             appPointer->DeleteNetwork(nodes);
             killLater = nodes;
         }
-        nodeRenderer = new NodeNetworkRenderer(nodes, this);
+        nodeRenderer = new NodeNetworkRenderer(newNodes, this);
     }
 
     // either replaces network, replaces *root* network

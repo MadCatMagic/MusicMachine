@@ -1,23 +1,6 @@
 #include "Maths.h"
 #include <assert.h>
 
-std::vector<Complex> FFT(const std::vector<Complex>& x)
-{
-    // ensure that the data exists and provide some initial values to actual recursive function
-    assert(x.size() != 0);
-    auto data = _FFT(x, x.size(), 1, 0);
-    // need to reduce magnitude of resulting data as final step
-    for (auto& v : data)
-        v /= (float)x.size();
-    return data;
-}
-
-std::vector<Complex> IFFT(const std::vector<Complex>& X)
-{
-    // add some initial values to recursive function
-    return _IFFT(X, X.size(), 1, 0);
-}
-
 std::vector<Complex> _FFT(const std::vector<Complex>& x, size_t n, size_t s, size_t o)
 {
     // see python code example for explanation
@@ -57,6 +40,23 @@ std::vector<Complex> _IFFT(const std::vector<Complex>& X, size_t n, size_t s, si
     }
 
     return x;
+}
+
+std::vector<Complex> FFT(const std::vector<Complex>& x)
+{
+    // ensure that the data exists and provide some initial values to actual recursive function
+    assert(x.size() != 0);
+    auto data = _FFT(x, x.size(), 1, 0);
+    // need to reduce magnitude of resulting data as final step
+    for (auto& v : data)
+        v /= (float)x.size();
+    return data;
+}
+
+std::vector<Complex> IFFT(const std::vector<Complex>& X)
+{
+    // add some initial values to recursive function
+    return _IFFT(X, X.size(), 1, 0);
 }
 
 Complex Complex::operator*(const Complex& a) const

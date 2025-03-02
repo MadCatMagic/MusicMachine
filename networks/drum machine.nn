@@ -1,0 +1,287 @@
+{
+  "nodes": [
+    {
+      "inputs": [
+        {
+          "name": "out",
+          "source": "00000000428b0001_MixNode",
+          "sourceName": "Out"
+        }
+      ],
+      "id": "0000000066bb0000_NodeNetworkVariable",
+      "pos": [ 360, 88 ],
+      "mini": false,
+      "name": "NodeNetworkVariable",
+      "node": {
+        "isO": true,
+        "type": 3,
+        "id": "out"
+      }
+    },
+    {
+      "id": "00000000428b0001_MixNode",
+      "inputs": [
+        {
+          "name": "Source 0",
+          "source": "0000000026a60002_Sampler",
+          "sourceName": "samplerrr"
+        },
+        {
+          "name": "Volume 0",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "Source 1",
+          "source": "00000000701f0003_Sampler",
+          "sourceName": "samplerrr"
+        },
+        {
+          "name": "Volume 1",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "Source 2",
+          "source": "000000005d030004_Sampler",
+          "sourceName": "samplerrr"
+        },
+        {
+          "name": "Volume 2",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "Source 3",
+          "source": "000000007a5a0005_Sampler",
+          "sourceName": "samplerrr"
+        },
+        {
+          "name": "Volume 3",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "Source 4",
+          "source": "00000000767d0006_Sampler",
+          "sourceName": "samplerrr"
+        },
+        {
+          "name": "Volume 4",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 216, 80 ],
+      "mini": false,
+      "name": "MixNode",
+      "node": {
+        "type": 0,
+        "numChannels": 5,
+        "weights": [ 1, 1, 1, 1, 1 ]
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "seq",
+          "source": "0000000045090007_NodeNetworkVariable",
+          "sourceName": "in"
+        },
+        {
+          "name": "fade in",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "fade out",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "0000000026a60002_Sampler",
+      "pos": [ 32, 48 ],
+      "mini": false,
+      "name": "Sampler",
+      "node": {
+        "sample": 0,
+        "fadein": 0.00001,
+        "fadeout": 0.05000000074505806
+      }
+    },
+    {
+      "id": "000000007a5a0005_Sampler",
+      "inputs": [
+        {
+          "name": "seq",
+          "source": "0000000063cb000a_NodeNetworkVariable",
+          "sourceName": "in"
+        },
+        {
+          "name": "fade in",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "fade out",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "pos": [ 32, 408 ],
+      "mini": false,
+      "name": "Sampler",
+      "node": {
+        "sample": 3,
+        "fadein": 0.00001,
+        "fadeout": 0.1560177206993103
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "seq",
+          "source": "000000007f96000b_NodeNetworkVariable",
+          "sourceName": "in"
+        },
+        {
+          "name": "fade in",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "fade out",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "00000000767d0006_Sampler",
+      "pos": [ 32, 528 ],
+      "mini": false,
+      "name": "Sampler",
+      "node": {
+        "sample": 4,
+        "fadein": 0.00001,
+        "fadeout": 0.05000000074505806
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "seq",
+          "source": "000000001e1f0008_NodeNetworkVariable",
+          "sourceName": "in"
+        },
+        {
+          "name": "fade in",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "fade out",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "00000000701f0003_Sampler",
+      "pos": [ 32, 168 ],
+      "mini": false,
+      "name": "Sampler",
+      "node": {
+        "sample": 1,
+        "fadein": 0.00001,
+        "fadeout": 0.1279589235782623
+      }
+    },
+    {
+      "id": "0000000045090007_NodeNetworkVariable",
+      "inputs": [],
+      "pos": [ -136, 88 ],
+      "mini": false,
+      "name": "NodeNetworkVariable",
+      "node": {
+        "isO": false,
+        "type": 4,
+        "id": "kick"
+      }
+    },
+    {
+      "id": "000000001e1f0008_NodeNetworkVariable",
+      "inputs": [],
+      "pos": [ -136, 176 ],
+      "mini": false,
+      "name": "NodeNetworkVariable",
+      "node": {
+        "isO": false,
+        "type": 4,
+        "id": "snare"
+      }
+    },
+    {
+      "id": "0000000063cb000a_NodeNetworkVariable",
+      "inputs": [],
+      "pos": [ -136, 352 ],
+      "mini": false,
+      "name": "NodeNetworkVariable",
+      "node": {
+        "isO": false,
+        "type": 4,
+        "id": "open hihat"
+      }
+    },
+    {
+      "inputs": [],
+      "id": "000000001ad40009_NodeNetworkVariable",
+      "pos": [ -136, 264 ],
+      "mini": false,
+      "name": "NodeNetworkVariable",
+      "node": {
+        "isO": false,
+        "type": 4,
+        "id": "close hihat"
+      }
+    },
+    {
+      "inputs": [],
+      "id": "000000007f96000b_NodeNetworkVariable",
+      "pos": [ -136, 440 ],
+      "mini": false,
+      "name": "NodeNetworkVariable",
+      "node": {
+        "isO": false,
+        "type": 4,
+        "id": "crash"
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "seq",
+          "source": "000000001ad40009_NodeNetworkVariable",
+          "sourceName": "in"
+        },
+        {
+          "name": "fade in",
+          "source": "",
+          "sourceName": ""
+        },
+        {
+          "name": "fade out",
+          "source": "",
+          "sourceName": ""
+        }
+      ],
+      "id": "000000005d030004_Sampler",
+      "pos": [ 32, 288 ],
+      "mini": false,
+      "name": "Sampler",
+      "node": {
+        "sample": 2,
+        "fadein": 0.00001,
+        "fadeout": 0.05000000074505806
+      }
+    }
+  ],
+  "root": false,
+  "dummy": false
+}

@@ -81,7 +81,9 @@ void NodeNetworkNode::IO()
 {
 	if (network == nullptr)
 		return;
-	
+
+	title = network->name;
+
 	EnsureDataCorrect();
 
 	size_t ii = 0;
@@ -160,10 +162,53 @@ void NodeNetworkNode::Work(int id)
 
 void NodeNetworkNode::Load(JSONType& data)
 {
-	AssignNetwork(App::instance->GetNetwork(data.s));
+	// only for migration
+	if (data.s != "")
+	{
+		AssignNetwork(App::instance->GetNetwork(data.s));
+		return;
+	}
+
+	AssignNetwork(App::instance->GetNetwork(data.obj["title"].s));
+	
+	EnsureDataCorrect();
+
+	int pi = -1;
+	int ii = 0;
+	for (NodeNetworkVariable* v : network->ioVariables)
+		if (!v->isOutput)
+		{
+			pi++;
+			if (v->nodeType == NodeType::Float)
+				idata[ii] = (float)data.obj["inputs"].arr[pi].f;
+			else if (v->nodeType == NodeType::Int)
+				idata[ii] = (int)data.obj["inputs"].arr[pi].i;
+			else if (v->nodeType == NodeType::Bool)
+				idata[ii] = data.obj["inputs"].arr[pi].b;
+			else
+				pi--;
+			ii++;
+		}
 }
 
 JSONType NodeNetworkNode::Save()
 {
-    return JSONType(title);
+	std::vector<JSONType> inputValues;
+	int ii = 0;
+	for (NodeNetworkVariable* v : network->ioVariables)
+		if (!v->isOutput)
+		{
+			if (v->nodeType == NodeType::Float)
+				inputValues.push_back((double)std::get<float>(idata[ii]));
+			else if (v->nodeType == NodeType::Int)
+				inputValues.push_back((long)std::get<int>(idata[ii]));
+			else if (v->nodeType == NodeType::Bool)
+				inputValues.push_back(std::get<bool>(idata[ii]));
+			ii++;
+		}
+
+	return JSONType({
+		{ "title", title },
+		{ "inputs", inputValues }
+	});
 }

@@ -1,7 +1,6 @@
 #include <cmath>
 #include "Vector.h"
 
-v4::v4(const v3& wtobe1) : x(wtobe1.x), y(wtobe1.y), z(wtobe1.z), w(1.0f) { }
 v4::v4(const v4i& i) : x((float)i.x), y((float)i.y), z((float)i.z), w((float)i.w) { }
 
 float v4::dot(const v4& a) const
