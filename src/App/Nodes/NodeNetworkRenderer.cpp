@@ -5,6 +5,8 @@
 
 void NodeNetworkRenderer::Draw(DrawList* drawList, std::vector<Node*>& selected, const bbox2& screen)
 {
+	if (canvas->nodes != network)
+		network = canvas->nodes;
 	if (network->nodes.size() == 0)
 		return;
 	drawList->dl->ChannelsSplit(2 * (int)network->nodes.size());

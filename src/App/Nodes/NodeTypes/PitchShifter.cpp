@@ -35,7 +35,7 @@ void PitchShifter::Load(JSONType& data)
 JSONType PitchShifter::Save()
 {
 	return JSONType({
-		"pitch", (double)pitchShift,
-		"octave", (long)octaveShift
+		{"pitch", (double)pitchShift },
+		{"octave", (long)octaveShift}
 	});
 }

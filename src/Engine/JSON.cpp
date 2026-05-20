@@ -15,7 +15,7 @@ std::string JSONType::ToString(bool compress, int indents) const
     case Float:
     {
         std::stringstream ss;
-        ss << std::setprecision(16) << f;
+        ss << std::fixed << std::setprecision(10) << f;
         return ss.str();
     }
     case String:

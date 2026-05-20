@@ -34,6 +34,18 @@ static int patestCallback(const void* inputBuffer, void* outputBuffer,
     }
 
     auto audioData = data->GetData();
+    if (audioData.size() == 0)
+    {
+        Console::LogWarn("NO DATA!!! second type");
+        // wipe clean
+        for (i = 0; i < framesPerBuffer; i++)
+        {
+            out[i * 2] = 0.0f;
+            out[i * 2 + 1] = 0.0f;
+        }
+        return 0;
+    }
+
     for (i = 0; i < framesPerBuffer; i++)
     {
         out[i * 2] = audioData[i].x;  /* left */

@@ -14,7 +14,7 @@ void SequencerNode::IO()
 {
 	SequencerOutput("sequence", &seq);
 	IntInput("length", &width, 4, 32, true, false);
-	IntInput("height", &height, 12, 24, true, true);
+	IntInput("height", &height, 12, 24, true, false);
 	IntInput("octave", &octaveShift, -3, 3);
 	BoolInput("tempo sync", &tempoSync);
 	if (tempoSync)
