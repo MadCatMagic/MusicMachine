@@ -39,7 +39,7 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 			dl->Rect(
 				topLeft + v2((float)i, (float)j) * cellSize, 
 				topLeft + v2(i + 1.0f, j + 1.0f) * cellSize, 
-				keyboard[(height - 1 - j) % 12] ? ImColor(1.0f, (float)i / width, (float)j / height, 1.0f) : ImColor(0.0f, (float)i / width, (float)j / height, 1.0f)
+				keyboard[(height - 1 - j) % 12] ? v4(1.0f, (float)i / width, (float)j / height, 1.0f) : v4(0.0f, (float)i / width, (float)j / height, 1.0f)
 			);
 		}
 	
@@ -47,7 +47,7 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	for (int i = 0; i < width; i++)
 	{
 		if (data[i].first != -1)
-			dl->RectFilled(topLeft + v2((float)i, (float)(height - 1 - data[i].first)) * cellSize, topLeft + v2((float)i, (float)(height - 1 - data[i].first)) * cellSize + cellSize, ImColor(0.7f, data[i].second, 0.2f, 1.0f));
+			dl->RectFilled(topLeft + v2((float)i, (float)(height - 1 - data[i].first)) * cellSize, topLeft + v2((float)i, (float)(height - 1 - data[i].first)) * cellSize + cellSize, v4(0.7f, data[i].second, 0.2f, 1.0f));
 	}
 
 	// render velocities
@@ -57,12 +57,12 @@ void SequencerNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 			dl->RectFilled(
 				topLeft + v2((float)i, (float)height) * cellSize + v2(cellSize * 0.2f, 20.0f * (1.0f - data[i].second)),
 				topLeft + v2((float)(i + 1), (float)height) * cellSize + v2(-cellSize * 0.2f, 20.0f),
-				ImColor(0.7f, data[i].second, 0.2f, 1.0f)
+				v4(0.7f, data[i].second, 0.2f, 1.0f)
 			);
 	}
 
 	// render play cursor
-	dl->RectFilled(topLeft + v2(currentBeatIndex * cellSize, 0.0f), topLeft + v2(currentBeatIndex * cellSize + cellSize, cellSize * height), ImColor(1.0f, 0.2f, 0.1f, 0.4f));
+	dl->RectFilled(topLeft + v2(currentBeatIndex * cellSize, 0.0f), topLeft + v2(currentBeatIndex * cellSize + cellSize, cellSize * height), v4(1.0f, 0.2f, 0.1f, 0.4f));
 }
 
 bool SequencerNode::OnClick(const NodeClickInfo& info)
@@ -102,7 +102,7 @@ void SequencerNode::Work(int id)
 
 	float pitchLength;
 	if (tempoSync)
-		pitchLength = (float)AudioChannel::sampleRate / (Arranger::instance->getTempo() / 60.0f);
+		pitchLength = (float)AudioChannel::sampleRate / (Arranger::instance->getTempo() / 60.0f / tempoSyncToFloat(tempoSyncV));
 	else
 		pitchLength = (float)AudioChannel::sampleRate / (bpm / 60.0f);
 
@@ -121,7 +121,7 @@ void SequencerNode::Work(int id)
 		float pitch = GetPitch((currentBeatIndex + beatOffset) % width);
 
 		// number of samples the sound should play for *THIS* buffer
-		float beatFraction = timeInBeats - (float)(int)timeInBeats;
+		float beatFraction = timeInBeats - floorf(timeInBeats);
 		if (beatOffset > 0)
 			beatFraction = 0.0f;
 		float timeLeft = (1.0f - beatFraction) * pitchLength;
@@ -134,8 +134,9 @@ void SequencerNode::Work(int id)
 		seq.velocity.push_back(data[(currentBeatIndex + beatOffset) % width].second);
 		// dont think this actually works :)
 		seq.cumulativeSamples.push_back((int)(beatFraction * pitchLength));
-		cumulativeSamplesSet += samplesToPlayFor;
 
+		cumulativeSamplesSet += samplesToPlayFor;
+		timeInBeats += (float)samplesToPlayFor / pitchLength;
 		beatOffset++;
 	}
 

@@ -278,7 +278,7 @@ void NodeNetwork::Update()
 
 void NodeNetwork::SaveNetworkToFile(const std::string& nnFilePath)
 {
-	name = nnFilePath;
+	name = nnFilePath.substr(9);
 
 	JSONConverter conv;
 	JSONType nodeData = JSONType(JSONType::Array);

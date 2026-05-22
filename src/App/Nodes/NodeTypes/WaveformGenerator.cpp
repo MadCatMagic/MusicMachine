@@ -41,7 +41,7 @@ void WaveformGenerator::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 				(i + (float)skip) / 32.0f * 100.0f,
 				25.0f - 25.0f * Bilinear((i + (float)skip) / 32.0f)
 			),
-			ImColor(0.0f, 1.0f, 1.0f)
+			v4(0.0f, 1.0f, 1.0f)
 		);
 }
 
@@ -53,9 +53,8 @@ void WaveformGenerator::Work(int id)
 	int frequencyIndex = 0;
 	size_t sampleCounter = 0;
 
-	if (seq.cumulativeSamples[0] < AudioChannel::bufferSize || ( seq.pitch[0] != freq[id] && seq.pitch[0] != 0.0f))
+	if (seq.cumulativeSamples[0] == 0 && ( seq.pitch[0] != freq[id] && seq.pitch[0] != 0.0f))
 	{
-		kv[id] = 0.0f;
 		freq[id] = seq.pitch[0];
 		vel[id] = seq.velocity[0];
 	}
@@ -72,9 +71,8 @@ void WaveformGenerator::Work(int id)
 			if (frequencyIndex >= seq.length.size())
 				return;
 
-			if (seq.cumulativeSamples[frequencyIndex] == 0 || ( seq.pitch[frequencyIndex] != freq[id] && seq.pitch[frequencyIndex] != 0.0f))
+			if (seq.cumulativeSamples[frequencyIndex] == 0 && ( seq.pitch[frequencyIndex] != freq[id] && seq.pitch[frequencyIndex] != 0.0f))
 			{
-				kv[id] = 0.0f;
 				freq[id] = seq.pitch[frequencyIndex];
 				vel[id] = seq.velocity[frequencyIndex];
 			}

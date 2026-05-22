@@ -20,9 +20,20 @@ void App::Initialize()
 
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
 
-    c.push_back(new Canvas());
-    c[0]->LoadState("networks/init.nn", this, true);
     Canvas::GenerateAllTextLODs();
+    c.push_back(new Canvas());
+    if (std::filesystem::exists("networks/init.nn"))
+    {
+        c[0]->LoadState("networks/init.nn", this, true);
+    }
+    else
+    {
+        NodeNetwork* nodes = new NodeNetwork();
+        nodes->AddNodeFromName("AudioOutputNode", v2(100.0f, 0.0f));
+        nodes->SaveNetworkToFile("networks/init.nn");
+        ReplaceMainNetwork(nodes);
+        c[0]->nodes = nodes;
+    }
     c[0]->InitCanvas();
     RegisterJSONCommands();
 
@@ -206,7 +217,7 @@ void App::DebugWindow(ImGuiIO* io, double lastFrameTime, double averageFrameTime
     if (ImGui::BeginMenu("Colours"))
     {
         for (int i = 0; i < NUM_DRAW_COLOURS; i++)
-            ImGui::ColorEdit4(drawStyle.colours[i].name.c_str(), &drawStyle.colours[i].col.Value.x, ImGuiColorEditFlags_NoInputs);
+            ImGui::ColorEdit4(drawStyle.colours[i].name.c_str(), &drawStyle.colours[i].col.x, ImGuiColorEditFlags_NoInputs);
         ImGui::EndMenu();
     }
 
@@ -331,7 +342,7 @@ std::pair<NodeNetwork*, int> App::GetNetwork(const std::string& name)
     if (name == "new network")
         return { nullptr, 0 };
 
-    NodeNetwork* network = new NodeNetwork(name);
+    NodeNetwork* network = new NodeNetwork("networks/" + name);
     AddNetwork(network);
     return { network, 0 };
 }

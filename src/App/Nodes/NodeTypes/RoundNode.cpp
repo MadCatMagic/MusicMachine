@@ -31,9 +31,9 @@ void RoundNode::Work(int id)
 void RoundNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 {
 	if (floatInput)
-		dl->RectFilled(topLeft, topLeft + v2(100.0f, 10.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
+		dl->RectFilled(topLeft, topLeft + v2(100.0f, 10.0f), v4(0.2f, 0.3f, 0.7f, 0.8f));
 	else
-		dl->RectFilled(topLeft, topLeft + v2(100.0f, 10.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
+		dl->RectFilled(topLeft, topLeft + v2(100.0f, 10.0f), v4(0.1f, 0.2f, 0.5f, 0.3f));
 }
 
 bool RoundNode::OnClick(const NodeClickInfo& info)

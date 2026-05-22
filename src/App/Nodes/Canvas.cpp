@@ -27,6 +27,8 @@ Canvas::~Canvas()
 void Canvas::InitCanvas()
 {
     drawList.SetConversionCallback([this](const v2& p) -> v2 { return this->ptcts(p); });
+    if (nodeRenderer != nullptr)
+        delete nodeRenderer;
     nodeRenderer = new NodeNetworkRenderer(nodes, this);
 }
 
@@ -311,7 +313,7 @@ nodeInteractionsEscape:
         if (ImGui::MenuItem("Save"))
         {
             if (nodes->name != "new network")
-                SaveState(nodes->name);
+                SaveState("networks/" + nodes->name);
             else
                 beginSaveAs = true;
         }
@@ -679,7 +681,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
 
 void Canvas::SaveState(const std::string& filepath)
 {
-    nodes->SaveNetworkToFile(std::string(filepath));
+    nodes->SaveNetworkToFile(filepath);
 }
 
 void Canvas::LoadState(const std::string& filepath, App* appPointer, bool forceRoot)
@@ -710,6 +712,7 @@ void Canvas::LoadState(const std::string& filepath, App* appPointer, bool forceR
         else
         {
             // add new canvas for nodes
+            appPointer->AddNetwork(newNodes);
             appPointer->AddCanvas(newNodes);
         }
     }

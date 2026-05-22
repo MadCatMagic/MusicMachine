@@ -28,16 +28,16 @@ void DelayNode::Render(const v2& topLeft, DrawList* dl, bool lodOn)
 	{
 		v2 va = queueLerp((float)i / 128.0f * queueSize[0], 0);
 		v2 vb = queueLerp((float)(i + skip) / 128.0f * queueSize[0], 0);
-		dl->Line(topLeft + v2((float)i, 50.0f + va.x * 10.0f), topLeft + v2((float)(i + skip), 50.0f + vb.x * 10.0f), ImColor(1.0f, 0.0f, 0.0f, 0.5f));
-		dl->Line(topLeft + v2((float)i, 50.0f + va.y * 10.0f), topLeft + v2((float)(i + skip), 50.0f + vb.y * 10.0f), ImColor(0.0f, 1.0f, 0.0f, 0.5f));
+		dl->Line(topLeft + v2((float)i, 50.0f + va.x * 10.0f), topLeft + v2((float)(i + skip), 50.0f + vb.x * 10.0f), v4(1.0f, 0.0f, 0.0f, 0.5f));
+		dl->Line(topLeft + v2((float)i, 50.0f + va.y * 10.0f), topLeft + v2((float)(i + skip), 50.0f + vb.y * 10.0f), v4(0.0f, 1.0f, 0.0f, 0.5f));
 	}
 
 	for (int i = 0; i < 2; i++)
 	{
 		if ((int)delayType == i)
-			dl->RectFilled(topLeft + v2(i * 64.0f, 0.0f), topLeft + v2(i * 64.0f + 64.0f, 20.0f), ImColor(0.2f, 0.3f, 0.7f, 0.8f));
+			dl->RectFilled(topLeft + v2(i * 64.0f, 0.0f), topLeft + v2(i * 64.0f + 64.0f, 20.0f), v4(0.2f, 0.3f, 0.7f, 0.8f));
 		else
-			dl->RectFilled(topLeft + v2(i * 64.0f, 0.0f), topLeft + v2(i * 64.0f + 64.0f, 20.0f), ImColor(0.1f, 0.2f, 0.5f, 0.3f));
+			dl->RectFilled(topLeft + v2(i * 64.0f, 0.0f), topLeft + v2(i * 64.0f + 64.0f, 20.0f), v4(0.1f, 0.2f, 0.5f, 0.3f));
 	}
 }
 
