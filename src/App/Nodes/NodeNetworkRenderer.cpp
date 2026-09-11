@@ -403,5 +403,7 @@ DrawColour NodeNetworkRenderer::GetCol(Node::NodeType type)
 		return DrawColour::Node_IOAudio;
 	else if (type == Node::NodeType::Sequencer)
 		return DrawColour::Node_IOSequencer;
+	else if (type == Node::NodeType::FreqSpace)
+		return DrawColour::Node_IOFreqSpace;
 	return DrawColour::Canvas_BG;
 }

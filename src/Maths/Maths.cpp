@@ -120,6 +120,10 @@ float Complex::modulus() const
     return sqrtf(re * re + im * im);
 }
 
+Complex Complex::fromModPhase(float mod, float ph) {
+    return Complex(cosf(ph), sinf(ph)) * mod;
+}
+
 Complex Complex::exp() const
 {
     return Complex(cosf(im), sinf(im)) * expf(re);

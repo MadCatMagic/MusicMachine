@@ -25,6 +25,8 @@ NodeNetworkNode::TypeUnion NodeNetworkNode::GetDefault(NodeType t) const
 		return 0;
 	else if (t == NodeType::Audio)
 		return AudioChannel();
+	else if (t == NodeType::FreqSpace)
+		return FreqSpaceChannel();
 	else
 		return PitchSequencer();
 }
@@ -98,6 +100,7 @@ void NodeNetworkNode::IO()
 				std::get_if<float>(&odata[oi]), 
 				std::get_if<AudioChannel>(&odata[oi]), 
 				std::get_if<PitchSequencer>(&odata[oi]), 
+				std::get_if<FreqSpaceChannel>(&odata[oi]),
 				v->nodeType
 			);
 			oi++;
@@ -111,6 +114,7 @@ void NodeNetworkNode::IO()
 				std::get_if<float>(&idata[ii]),
 				std::get_if<AudioChannel>(&idata[ii]),
 				std::get_if<PitchSequencer>(&idata[ii]),
+				std::get_if<FreqSpaceChannel>(&idata[ii]),
 				v->nodeType
 			);
 			ii++;
@@ -128,6 +132,10 @@ void NodeNetworkNode::Work(int id)
 		{
 			if (v->nodeType == NodeType::Audio)
 				v->c.data = std::get<AudioChannel>(idata[ii]).data;
+			else if (v->nodeType == NodeType::FreqSpace) {
+				v->fs.left = std::get<FreqSpaceChannel>(idata[ii]).left;
+				v->fs.right = std::get<FreqSpaceChannel>(idata[ii]).right;
+			}
 			else if (v->nodeType == NodeType::Sequencer)
 				std::get<PitchSequencer>(idata[ii]).CopyTo(&v->s);
 			else if (v->nodeType == NodeType::Float)
@@ -154,6 +162,10 @@ void NodeNetworkNode::Work(int id)
 				odata[oi] = v->i;
 			else if (v->nodeType == NodeType::Bool)
 				odata[oi] = v->b;
+			else if (v->nodeType == NodeType::FreqSpace) {
+				std::get<FreqSpaceChannel>(odata[oi]).left = v->fs.left;
+				std::get<FreqSpaceChannel>(odata[oi]).right = v->fs.right;
+			}
 			oi++;
 		}
 }

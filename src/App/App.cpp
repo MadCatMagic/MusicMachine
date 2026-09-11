@@ -19,6 +19,7 @@ void App::Initialize()
     drawStyle.InitColours();
 
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
+    FreqSpaceChannel::Init(SAMPLE_RATE, BUFFER_SIZE * 2, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
 
     Canvas::GenerateAllTextLODs();
     c.push_back(new Canvas());
@@ -274,6 +275,7 @@ bool App::GetAudio()
 {
     // execute networks, send sound data off
     AudioChannel::Init(SAMPLE_RATE, BUFFER_SIZE, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
+    FreqSpaceChannel::Init(SAMPLE_RATE, BUFFER_SIZE * 2, Arranger::instance->getTime() / Arranger::instance->getTempo() * 60.0f, (float)BUFFER_SIZE / (float)SAMPLE_RATE);
     if (n.size() == 0)
     {
         Console::LogWarn("NETWORK EXECUTING SKIPPED");

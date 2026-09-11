@@ -11,6 +11,7 @@
 #include "App/Nodes/NodeTypes/DelayNode.h"
 #include "App/Nodes/NodeTypes/Distortion.h"
 #include "App/Nodes/NodeTypes/ExampleNode.h" // testing
+#include "App/Nodes/NodeTypes/FFTNodes.h"
 #include "App/Nodes/NodeTypes/MathsNode.h"
 #include "App/Nodes/NodeTypes/NoiseNode.h"
 #include "App/Nodes/NodeTypes/Panner.h"
@@ -27,6 +28,7 @@ void RegisterNodes()
     // - Synthesis
     // - Maths
     // - Sequencing
+    // - FFT
     // - <none>
     GetNodeFactory().Register("ADSRNode", "Synthesis", "ADSR", NodeBuilder<ADSRNode>);
     GetNodeFactory().Register("AnalysisNode", "", "Analysis Node", NodeBuilder<AnalysisNode>);
@@ -37,6 +39,9 @@ void RegisterNodes()
     GetNodeFactory().Register("DelayNode", "Synthesis", "Delay", NodeBuilder<DelayNode>);
     GetNodeFactory().Register("Distortion", "Synthesis", "Distortion", NodeBuilder<Distortion>);
     GetNodeFactory().Register("ExampleNode", "", "Example Node", NodeBuilder<ExampleNode>);
+    GetNodeFactory().Register("FFTNode", "FFT", "FFT", NodeBuilder<FFTNode>);
+    GetNodeFactory().Register("IFFTNode", "FFT", "IFFT", NodeBuilder<IFFTNode>);
+    GetNodeFactory().Register("SpectralFilter", "FFT", "Spectral Filter", NodeBuilder<SpectralFilter>);
     GetNodeFactory().Register("MathsNode", "Maths", "Maths", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("NoiseNode", "Synthesis", "Noise", NodeBuilder<NoiseNode>);
     GetNodeFactory().Register("Panner", "Synthesis", "Panner", NodeBuilder<Panner>);

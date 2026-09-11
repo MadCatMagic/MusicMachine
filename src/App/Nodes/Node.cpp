@@ -282,6 +282,24 @@ void Node::AudioOutput(const std::string& name, AudioChannel* target)
 	TransferOutput(o);
 }
 
+void Node::FreqSpaceInput(const std::string& name, FreqSpaceChannel* target)
+{
+	NodeInput o;
+	o.name = name;
+	o.target = target;
+	o.type = NodeType::FreqSpace;
+	TransferInput(o);
+}
+
+void Node::FreqSpaceOutput(const std::string& name, FreqSpaceChannel* target)
+{
+	NodeOutput o;
+	o.name = name;
+	o.data = target;
+	o.type = NodeType::FreqSpace;
+	TransferOutput(o);
+}
+
 void Node::SequencerInput(const std::string& name, PitchSequencer* target)
 {
 	NodeInput o;
@@ -300,7 +318,7 @@ void Node::SequencerOutput(const std::string& name, PitchSequencer* target)
 	TransferOutput(o);
 }
 
-void Node::DefaultInput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type)
+void Node::DefaultInput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, FreqSpaceChannel* fs, NodeType type)
 {
 	NodeInput o;
 	o.name = name;
@@ -316,13 +334,15 @@ void Node::DefaultInput(const std::string& name, bool* b, int* i, float* f, Audi
 		o.target = f;
 	else if (type == NodeType::Audio)
 		o.target = c;
+	else if (type == NodeType::FreqSpace)
+		o.target = fs;
 	else
 		o.target = s;
 	o.type = type;
 	TransferInput(o);
 }
 
-void Node::DefaultOutput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type)
+void Node::DefaultOutput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, FreqSpaceChannel* fs, NodeType type)
 {
 	NodeOutput o;
 	o.name = name;
@@ -334,6 +354,8 @@ void Node::DefaultOutput(const std::string& name, bool* b, int* i, float* f, Aud
 		o.data = f;
 	else if (type == NodeType::Audio)
 		o.data = c;
+	else if (type == NodeType::FreqSpace)
+		o.data = fs;
 	else
 		o.data = s;
 	o.type = type;
@@ -377,6 +399,15 @@ void Node::Execute(int ownedID)
 				//for (v2& pair : testingData)
 				//	assert(!isnan(pair.x) && !isnan(pair.y));
 				((AudioChannel*)input.target)->data = testingData;
+			}
+			else if (input.type == NodeType::FreqSpace)
+			{
+				auto& leftData = ((FreqSpaceChannel*)input.source->outputs[index].data)->left;
+				auto& rightData = ((FreqSpaceChannel*)input.source->outputs[index].data)->right;
+				//for (v2& pair : testingData)
+				//	assert(!isnan(pair.x) && !isnan(pair.y));
+				((FreqSpaceChannel*)input.target)->left = leftData;
+				((FreqSpaceChannel*)input.target)->right = rightData;
 			}
 			else if (input.type == NodeType::Sequencer)
 			{

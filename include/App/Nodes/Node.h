@@ -91,7 +91,7 @@ struct Node
 	inline virtual ~Node() { }
 
 	enum NodeType {
-		Bool, Float, Int, Audio, Sequencer
+		Bool, Float, Int, Audio, Sequencer, FreqSpace
 	};
 
 	enum FloatDisplayType { None, Db, Hz, TempoSync };
@@ -152,8 +152,11 @@ protected:
 	void SequencerInput(const std::string& name, PitchSequencer* target);
 	void SequencerOutput(const std::string& name, PitchSequencer* target);
 
-	void DefaultInput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type);
-	void DefaultOutput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, NodeType type);
+	void FreqSpaceInput(const std::string& name, FreqSpaceChannel* target);
+	void FreqSpaceOutput(const std::string& name, FreqSpaceChannel* target);
+
+	void DefaultInput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, FreqSpaceChannel* fs, NodeType type);
+	void DefaultOutput(const std::string& name, bool* b, int* i, float* f, AudioChannel* c, PitchSequencer* s, FreqSpaceChannel* fs, NodeType type);
 
 	// returns in terms of beats
 	float tempoSyncToFloat(int v) const;

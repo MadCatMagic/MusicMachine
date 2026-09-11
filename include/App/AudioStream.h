@@ -4,7 +4,7 @@
 #include "portaudio.h"
 
 #define SAMPLE_RATE (44100)
-#define BUFFER_SIZE (256)
+#define BUFFER_SIZE (512)
 #define MAX_QUEUE_LENGTH (10)
 
 #include "Engine/CircularQueue.h"

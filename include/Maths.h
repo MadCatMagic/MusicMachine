@@ -43,6 +43,8 @@ struct Complex {
 	float phase() const;
 	float modulus() const;
 
+	static Complex fromModPhase(float mod, float ph);
+
 	Complex exp() const;
 
 	std::string str() const;

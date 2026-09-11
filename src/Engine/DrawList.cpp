@@ -47,6 +47,7 @@ void DrawStyle::InitColours()
 			DrawColourSwitchThing(Node_IOInt, v4(0.2f, 0.7f, 0.6f));
 			DrawColourSwitchThing(Node_IOAudio, v4(1.0f, 0.7f, 0.1f));
 			DrawColourSwitchThing(Node_IOSequencer, v4(0.3f, 1.0f, 0.2f));
+			DrawColourSwitchThing(Node_IOFreqSpace, v4(0.6f, 0.2f, 1.0f));
 			DrawColourSwitchThing(Node_IO, v4(0.1f, 0.1f, 0.1f));
 			DrawColourSwitchThing(Node_IOSelected, v4(0.6f, 0.6f, 0.6f));
 

@@ -19,9 +19,9 @@ void NodeNetworkVariable::Init()
 void NodeNetworkVariable::IO()
 {
 	if (isOutput)
-		DefaultInput("out", &b, &i, &f, &c, &s, nodeType);
+		DefaultInput("out", &b, &i, &f, &c, &s, &fs, nodeType);
 	else
-		DefaultOutput("in", &b, &i, &f, &c, &s, nodeType);
+		DefaultOutput("in", &b, &i, &f, &c, &s, &fs, nodeType);
 }
 
 void NodeNetworkVariable::Render(const v2& topLeft, DrawList* dl, bool lodOn)

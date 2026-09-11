@@ -7,6 +7,8 @@
 struct AnalysisNode : public Node
 {
 protected:
+	inline virtual ~AnalysisNode() {};
+
 	virtual void Init() override;
 	virtual void IO() override;
 

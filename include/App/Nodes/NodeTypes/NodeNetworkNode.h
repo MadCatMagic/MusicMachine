@@ -8,7 +8,7 @@ public:
 	void AssignNetwork(std::pair<NodeNetwork*, int> nid);
 
 protected:
-	typedef std::variant<bool, float, int, AudioChannel, PitchSequencer> TypeUnion;
+	typedef std::variant<bool, float, int, AudioChannel, PitchSequencer, FreqSpaceChannel> TypeUnion;
 	TypeUnion GetDefault(NodeType t) const;
 	void EnsureDataCorrect();
 

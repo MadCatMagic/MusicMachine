@@ -28,4 +28,5 @@ private:
 	float f = 0.0f;
 	AudioChannel c;
 	PitchSequencer s;
+	FreqSpaceChannel fs;
 };
