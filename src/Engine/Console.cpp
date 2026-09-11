@@ -1,6 +1,7 @@
 #include "Engine/Console.h"
 #include "imgui.h"
 #include <iostream>
+//#include <string.h>
 
 Console* Console::instance = nullptr;
 
@@ -127,7 +128,7 @@ void Console::GUI()
     {
         if (inputBuffer[0] != '\0')
             ExecuteCommand(std::string(inputBuffer));
-        strcpy_s(inputBuffer, "");
+        strcpy(inputBuffer, "");
         reclaimFocus = true;
     }
 
@@ -180,7 +181,7 @@ int Console::TextEditEvent(ImGuiInputTextCallbackData* data)
         // create list of possible completions
         std::vector<Command> possibilities;
         for (size_t i = 0; i < commands.size(); i++)
-            if (_strnicmp(commands[i].name.c_str(), wordStart, (int)(wordEnd - wordStart)) == 0)
+            if (strncmp(commands[i].name.c_str(), wordStart, (int)(wordEnd - wordStart)) == 0)
                 possibilities.push_back(commands[i]);
 
         if (possibilities.size() == 0)

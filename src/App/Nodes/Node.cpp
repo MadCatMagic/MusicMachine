@@ -535,8 +535,9 @@ size_t Node::DataSize(NodeType type)
 		return sizeof(float);
 	case NodeType::Int:
 		return sizeof(int);
+	default:
+		return 0;
 	}
-	return 0;
 }
 
 size_t Node::GetInputIndex(const std::string& name) const

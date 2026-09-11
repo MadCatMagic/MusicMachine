@@ -60,7 +60,7 @@ void Arranger::UI(DrawStyle* drawStyle)
 
             // name editing
             char buf[32]{ };
-            strcpy_s<32>(buf, node->id.c_str());
+            strcpy(buf, node->id.c_str());
             ImGui::InputText("id", buf, 32);
             node->id = std::string(buf);
             ImGui::DragFloatRange2("range", &node->minV, &node->maxV, 0.01f, 0.0f, 100.0f);

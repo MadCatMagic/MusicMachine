@@ -651,7 +651,7 @@ void Canvas::PopupWindows(bool beginSaveAs, bool beginLoad, bool beginNodeNetwor
     {
         ImGui::OpenPopup("New Network Variable");
         memset(buf, 0, 64);
-        memcpy_s(buf, 64, "new variable", 13);
+        memcpy(buf, "new variable", 13);
     }
 
     if (ImGui::BeginPopupModal("New Network Variable", NULL, ImGuiWindowFlags_AlwaysAutoResize))
@@ -765,7 +765,7 @@ void Canvas::GenerateAllTextLODs()
 {
     static ImVector<ImWchar> ranges;
     ImFontGlyphRangesBuilder builder;
-    builder.AddText("abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.<>/?;:'@#~[]{}()-_=+\\|*&^%$£\"!1234567890 ");
+    builder.AddText("abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.<>/?;:'@#~[]{}()-_=+\\|*&^%$\"!1234567890 ");
     builder.BuildRanges(&ranges);
 
     ImGuiIO& io = ImGui::GetIO();

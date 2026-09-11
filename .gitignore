@@ -5,6 +5,8 @@
 
 # all the vcpkg files
 vcpkg_installed/
+lib/
+.zig-cache/
 
 # User-specific files
 *.rsuser

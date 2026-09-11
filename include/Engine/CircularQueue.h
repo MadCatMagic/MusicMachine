@@ -100,13 +100,13 @@ public:
 		size_t popv = head;
 		head = (head + 1) % _size;
 		_length--;
-		return move(data[popv]);
+		return std::move(data[popv]);
 	}
 
 	// peek at front
 	inline T& peek()
 	{
-		assert(length > 0);
+		assert(_length > 0);
 		return &data[head];
 	}
 
