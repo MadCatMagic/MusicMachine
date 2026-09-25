@@ -19,7 +19,6 @@ pub fn buildImGUI(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std
     for (imguiIncludes) |inclDir| {
         imguiLibModule.addIncludePath(b.path(inclDir));
     }
-
     imguiLibModule.addCSourceFiles(.{
         .root = b.path("lib/imgui-docking/"),
         .language = .cpp,
@@ -89,11 +88,11 @@ pub fn build(b: *std.Build) void {
         .root = b.path("src/"),
         .language = .cpp,
         .files = sourceFiles[0..sourceFileNum],
-        .flags = &.{"-std=c++17"},
+        .flags = &.{ "-std=c++17", "-ffast-math" },
     });
 
     // now add extra header files for libraries
-    exeModule.addIncludePath(b.path("lib/glew-2.3.1/include"));
+    //exeModule.addIncludePath(b.path("lib/glew-2.3.1/include"));
     for (imguiIncludes) |inclDir| {
         exeModule.addIncludePath(b.path(inclDir));
     }
@@ -108,6 +107,7 @@ pub fn build(b: *std.Build) void {
     exeModule.addObjectFile(b.path("bin/glfw/src/libglfw3.a"));
     exeModule.linkSystemLibrary("GLEW", .{ .needed = true });
     exeModule.linkSystemLibrary("portaudio", .{ .needed = true });
+    //exeModule.linkSystemLibrary("glfw3", .{ .needed = true });
     const exe = b.addExecutable(.{
         .name = "MusicMachine",
         .root_module = exeModule,

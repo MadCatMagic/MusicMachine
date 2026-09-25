@@ -110,7 +110,7 @@ void SpectralFilter::Init()
 {
 	name = "SpectralFilter";
 	title = "Spectral Filter";
-	minSpace = v2(100.0f, 100.0f);
+	minSpace = v2(0.0f, 0.0f);
 }
 
 void SpectralFilter::IO()
@@ -130,10 +130,8 @@ bool SpectralFilter::OnClick(const NodeClickInfo& info)
 	return false;
 }
 
-#include "Engine/Console.h"
 void SpectralFilter::Work(int id)
 {
-    //Console::Log("ochannel.left[5]: " + ochannel.left[5].str() + " ; modulus: " + std::to_string(ochannel.left[5].modulus()));
 	for (int i = 0; i < ichannel.bufferSize; i++) {
         float leftMod = 0.0;
         float rightMod = 0.0;
@@ -166,5 +164,81 @@ JSONType SpectralFilter::Save()
 {
 	return JSONType((std::unordered_map<std::string, JSONType>){
 		{ "cutoff", (double)cutoff }
+	});
+}
+
+void SpectralSmear::Init()
+{
+	name = "SpectralSmear";
+	title = "Spectral Smear";
+	minSpace = v2(0.0f, 0.0f);
+
+    feedbackLeft = std::vector<Complex>(fftSize);
+    feedbackRight = std::vector<Complex>(fftSize);
+}
+
+void SpectralSmear::IO()
+{
+	FreqSpaceInput("inp", &ichannel);
+	FreqSpaceOutput("out", &ochannel);
+	FloatInput("feedback", &feedback, 0.0f, 1.0f, true, false);
+    IntInput("diffusion width", &diffusionWidth, 0, 8, true, false);
+    FloatInput("diffusion amount", &diffusionAmount, 0.0f, 1.0f, true, true);
+}
+
+void SpectralSmear::Render(const v2& topLeft, DrawList* dl, bool lodOn)
+{
+	
+}
+
+bool SpectralSmear::OnClick(const NodeClickInfo& info)
+{
+	return false;
+}
+
+void SpectralSmear::Work(int id)
+{
+    //Console::Log("ochannel.left[5]: " + ochannel.left[5].str() + " ; modulus: " + std::to_string(ochannel.left[5].modulus()));
+	for (int i = 0; i < ichannel.bufferSize; i++) {
+        feedbackLeft[i] *= feedback;
+        feedbackRight[i] *= feedback;
+
+        feedbackLeft[i] += ichannel.left[i];
+        feedbackRight[i] += ichannel.right[i];
+        
+        ochannel.left[i] = feedbackLeft[i];
+        ochannel.right[i] = feedbackRight[i];
+        // diffuse
+        float accumLeft = 0.0f;
+        float accumRight = 0.0f;
+        for (int j = -diffusionWidth; j <= diffusionWidth; j++) {
+            if (i + j < 0 || i + j >= fftSize) {
+                continue;
+            }
+            accumLeft += ochannel.left[i + j].modulus();
+            accumRight += ochannel.right[i + j].modulus();
+        }
+        const float newModLeft = feedbackLeft[i].modulus() * (1.0f - diffusionAmount) + accumLeft * diffusionAmount / (float)(diffusionWidth * 2 + 1);
+        const float newModRight = feedbackRight[i].modulus() * (1.0f - diffusionAmount) + accumRight * diffusionAmount / (float)(diffusionWidth * 2 + 1);
+        if (feedbackLeft[i].modulus() >= 1e-8)
+            feedbackLeft[i] *= newModLeft / feedbackLeft[i].modulus();
+        if (feedbackRight[i].modulus() >= 1e-8)
+            feedbackRight[i] *= newModRight / feedbackRight[i].modulus();
+    }
+}
+
+void SpectralSmear::Load(JSONType& data)
+{
+	feedback = (float)data.obj["feedback"].f;
+    diffusionAmount = (float)data.obj["diffAm"].f;
+    diffusionWidth = (int)data.obj["diffWi"].i;
+}
+
+JSONType SpectralSmear::Save()
+{
+	return JSONType((std::unordered_map<std::string, JSONType>){
+		{ "feedback", (double)feedback },
+        { "diffAm", (double)diffusionAmount },
+        { "diffWi", (long)diffusionWidth },
 	});
 }

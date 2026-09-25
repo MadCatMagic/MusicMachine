@@ -42,6 +42,7 @@ void RegisterNodes()
     GetNodeFactory().Register("FFTNode", "FFT", "FFT", NodeBuilder<FFTNode>);
     GetNodeFactory().Register("IFFTNode", "FFT", "IFFT", NodeBuilder<IFFTNode>);
     GetNodeFactory().Register("SpectralFilter", "FFT", "Spectral Filter", NodeBuilder<SpectralFilter>);
+    GetNodeFactory().Register("SpectralSmear", "FFT", "Spectral Smear", NodeBuilder<SpectralSmear>);
     GetNodeFactory().Register("MathsNode", "Maths", "Maths", NodeBuilder<MathsNode>);
     GetNodeFactory().Register("NoiseNode", "Synthesis", "Noise", NodeBuilder<NoiseNode>);
     GetNodeFactory().Register("Panner", "Synthesis", "Panner", NodeBuilder<Panner>);
